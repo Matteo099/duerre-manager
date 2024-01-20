@@ -57,8 +57,8 @@ nb-configuration.xml
 
 # Node
 /src/main/webui/node_modules
-/src/main/webuinpm-debug.log
-/src/main/webuiyarn-error.log
+/src/main/webui/npm-debug.log
+/src/main/webui/yarn-error.log
 
 # IDEs and editors
 /src/main/webui/.idea/
@@ -71,10 +71,10 @@ nb-configuration.xml
 
 # Visual Studio Code
 /src/main/webui/.vscode/*
-/src/main/webui/!.vscode/settings.json
-/src/main/webui/!.vscode/tasks.json
-/src/main/webui/!.vscode/launch.json
-/src/main/webui/!.vscode/extensions.json
+!/src/main/webui/.vscode/settings.json
+!/src/main/webui/.vscode/tasks.json
+!/src/main/webui/.vscode/launch.json
+!/src/main/webui/.vscode/extensions.json
 /src/main/webui/.history/*
 
 # Miscellaneous
