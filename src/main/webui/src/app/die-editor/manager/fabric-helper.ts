@@ -54,4 +54,15 @@ export class FabricHelper {
     
         return 360 - angleDeg;
     }
+
+    public calculateLength(line: fabric.Line) : number {
+        const coords = line.getCoords();
+        
+        return this.calculateDistance({
+            x1: coords[0].x,
+            y1: coords[0].y,
+            x2: coords[1].x,
+            y2: coords[1].y,
+        });
+    }
 }

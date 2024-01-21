@@ -10,6 +10,9 @@ export class DrawToolHandler extends ToolHandler {
     private isPolygonCreated: boolean = false;
     private measurementText?: fabric.Text;
 
+    private startVertexGizmos?: fabric.Circle;
+    private endVertexGizmos?: fabric.Circle;
+
     private unit: string = "mm";
 
     constructor(editor: IDieEditor) {
@@ -23,6 +26,22 @@ export class DrawToolHandler extends ToolHandler {
 
             const pointer = this.helper.snapToGrid(this.editor.fabricCanvas!.getPointer(event.e));
 
+            const vertexGizmos = [this.startVertexGizmos, this.endVertexGizmos];
+            const clickedGizmo = vertexGizmos.filter(g => g).find(g => {
+                const gizmo = g!;
+                const gizmoCenter = {
+                    x: gizmo.left! + gizmo.radius!,
+                    y: gizmo.top! + gizmo.radius!,
+                };
+
+                // Calculate the distance between the gizmo center and the pointer
+                const distance = this.helper.calculateDistance({ x1: gizmoCenter.x, y1: gizmoCenter.y, x2: pointer.x, y2: pointer.y });
+
+                // Check if the pointer is within the gizmo radius
+                return distance <= gizmo.radius!;
+            });
+            console.log(clickedGizmo);
+
             // Create a new line and add it to the canvas
             this.currentLine = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
                 stroke: '#000',
@@ -30,8 +49,7 @@ export class DrawToolHandler extends ToolHandler {
                 selectable: true,
                 evented: false,
             });
-
-            this.editor.fabricCanvas!.add(this.currentLine);
+            this.editor.fabricCanvas.add(this.currentLine);
 
             // Create a text element for displaying the measurement above the line
             this.measurementText = new fabric.Text('0', {
@@ -41,8 +59,46 @@ export class DrawToolHandler extends ToolHandler {
                 selectable: false,
                 evented: false,
             });
+            this.editor.fabricCanvas.add(this.measurementText);
 
-            this.editor.fabricCanvas!.add(this.measurementText);
+            // // Check if a vertex gizmo was clicked
+            // const clickedGizmo = this.editor.fabricCanvas!.getObjects().find(obj => obj instanceof fabric.Circle && obj !== this.startVertexGizmos && obj.containsPoint(pointer));
+            // if (clickedGizmo) {
+            //     // Create a new line starting from the clicked vertex
+            //     const clickedIndex = this.vertexGizmos.indexOf(clickedGizmo);
+            //     const clickedLine = this.lines[clickedIndex];
+
+            //     const newLine = new fabric.Line([clickedLine.x2, clickedLine.y2, clickedLine.x2, clickedLine.y2], {
+            //         stroke: '#000',
+            //         strokeWidth: 2,
+            //         selectable: true,
+            //         evented: false,
+            //     });
+
+            //     this.editor.fabricCanvas!.add(newLine);
+
+            //     // Update the currentLine and lines array
+            //     this.currentLine = newLine;
+            //     this.lines.push(newLine);
+            //     this.isDrawing = true; // Enable drawing mode for the new line
+            // }
+
+            // Create a circle gizmo at the end point of the current line
+            if (this.endVertexGizmos) {
+                this.editor.fabricCanvas.remove(this.endVertexGizmos);
+                this.endVertexGizmos = undefined;
+            }
+            if (this.startVertexGizmos) this.editor.fabricCanvas.remove(this.startVertexGizmos);
+
+            this.startVertexGizmos = new fabric.Circle({
+                left: pointer.x - 5, // Adjust the positioning as needed
+                top: pointer.y - 5, // Adjust the positioning as needed
+                radius: 5,
+                fill: 'red', // Adjust the color as needed
+                selectable: false,
+                evented: false,
+            });
+            this.editor.fabricCanvas.add(this.startVertexGizmos);
         }
     }
 
@@ -70,7 +126,21 @@ export class DrawToolHandler extends ToolHandler {
                 top: pointer.y + (angle > 180 && angle < 270 ? 5 : -30)
             });
 
-            this.editor.fabricCanvas!.renderAll();
+            // Update the position of the vertex gizmo
+            if (!this.endVertexGizmos) {
+                this.endVertexGizmos = new fabric.Circle({
+                    left: pointer.x - 5, // Adjust the positioning as needed
+                    top: pointer.y - 5, // Adjust the positioning as needed
+                    radius: 5,
+                    borderColor: 'red', // Adjust the color as needed
+                    selectable: false,
+                    evented: false,
+                });
+                this.editor.fabricCanvas.add(this.endVertexGizmos);
+            }
+            this.endVertexGizmos.set({ left: pointer.x - 5, top: pointer.y - 5 }); // Adjust the positioning as needed
+
+            this.editor.fabricCanvas.renderAll();
         }
     }
 
@@ -79,13 +149,19 @@ export class DrawToolHandler extends ToolHandler {
             // Stop drawing when the touch is released
             this.isDrawing = false;
 
+            // Clean up the measurement text
+            this.editor.fabricCanvas.remove(this.measurementText!);
+            this.measurementText = undefined;
+
             // Save the drawn line to the array
             this.currentLine!.setCoords();
-            this.lines.push(this.currentLine!);
 
-            // Clean up the measurement text
-            this.editor.fabricCanvas!.remove(this.measurementText!);
-            this.measurementText = undefined;
+            // Do not save points (line with length = 0)
+            if (this.helper.calculateLength(this.currentLine!) <= 0) {
+                return;
+            }
+
+            this.lines.push(this.currentLine!);
 
             // Check if the drawn lines form a closed loop (polygon)
             if (this.helper.isClosedLoop(this.lines)) {
@@ -99,7 +175,7 @@ export class DrawToolHandler extends ToolHandler {
                     evented: false,
                 });
 
-                this.editor.fabricCanvas!.add(polygon);
+                this.editor.fabricCanvas.add(polygon);
 
                 // Clear the array for the next set of lines
                 this.lines = [];
