@@ -1,10 +1,17 @@
 import { ElementRef } from "@angular/core";
-import fabric from "fabric/fabric-impl";
+import { DrawToolHandler } from "./draw-tool-handler";
+import { EraserToolHandler } from "./eraser-tool-handler";
+import { IDieEditor } from "./idie-editor";
+import { MoveToolHandler } from "./move-tool-handler";
+import { SelectToolHandler } from "./select-tool-handler";
+import { Tool } from "./tool";
+import { ToolHandler } from "./tool-handler";
+import { fabric } from 'fabric';
 
-class DieEditorManager implements IDieEditor {
+export class DieEditorManager implements IDieEditor {
 
     private canvas: fabric.Canvas;
-    private selectedTool?: Tool;
+    private _selectedTool?: Tool;
 
     private selectHandler: SelectToolHandler;
     private drawHandler: DrawToolHandler;
@@ -13,6 +20,8 @@ class DieEditorManager implements IDieEditor {
 
     get fabricCanvas(): fabric.Canvas { return this.canvas; }
     get gridSize(): number { return 10; }
+    get zoomStep(): number { return 1; }
+    get selectedTool(): Tool | undefined { return this._selectedTool; }
 
     constructor(canvasElement: ElementRef) {
         this.canvas = this.createCanvas(canvasElement);
@@ -21,6 +30,7 @@ class DieEditorManager implements IDieEditor {
         this.eraserHandler = new EraserToolHandler(this);
         this.moveHandler = new MoveToolHandler(this);
         this.setupListeners();
+        this.drawGrid();
     }
 
     private createCanvas(canvasElement: ElementRef): fabric.Canvas {
@@ -49,7 +59,7 @@ class DieEditorManager implements IDieEditor {
     }
 
     private getToolHandler(): ToolHandler | undefined {
-        switch (this.selectedTool) {
+        switch (this._selectedTool) {
             case Tool.SELECT:
                 return this.selectHandler;
             case Tool.DRAW:
@@ -63,8 +73,53 @@ class DieEditorManager implements IDieEditor {
         }
     }
 
+    private clearGrid() {
+        // Remove all existing grid lines from the canvas
+        this.canvas.getObjects().forEach(obj => {
+            if (obj.data?.group === 'gridLine') {
+                this.canvas.remove(obj);
+            }
+        });
+    }
+
+    private drawGrid() {
+        this.clearGrid();
+        const width = this.canvas.getWidth();
+        const height = this.canvas.getHeight();
+        const zoom = this.canvas.getZoom();
+
+
+        // Calculate the effective grid size based on the current zoom level
+        const effectiveGridSize = this.gridSize * zoom;
+        console.log(width, height, zoom, effectiveGridSize);
+        const lineOptions: fabric.ILineOptions = {
+            stroke: '#ddd',
+            strokeWidth: 1,
+            selectable: false,
+            evented: false,
+            data: {
+                group: 'gridLine',
+            }
+        };
+        // Draw horizontal grid lines
+        for (let y = 0; y <= height / zoom; y += effectiveGridSize) {
+            const line = new fabric.Line([0, y, width / zoom, y], lineOptions);
+            this.canvas.add(line);
+            this.canvas.sendToBack(line);
+        }
+
+        // Draw vertical grid lines
+        for (let x = 0; x <= width / zoom; x += effectiveGridSize) {
+            const line = new fabric.Line([x, 0, x, height / zoom], lineOptions);
+            this.canvas.add(line);
+            this.canvas.sendToBack(line);
+        }
+    }
+
     public useTool(tool: Tool) {
-        this.selectedTool = tool;
+        this.getToolHandler()?.onToolDeselected();
+        this._selectedTool = tool;
+        this.getToolHandler()?.onToolSelected();
     }
 
     public resize(canvasParent: ElementRef) {
@@ -76,5 +131,31 @@ class DieEditorManager implements IDieEditor {
             width: fullWidth,
             height: fullHeight
         });
+
+        this.drawGrid();
+    }
+
+    public zoomIn() {
+        // Zoom in by multiplying the current zoom level by (1 + zoomStep)
+        const newZoom = this.canvas!.getZoom() * (1 + this.zoomStep);
+        this.canvas!.setZoom(newZoom);
+
+        // Redraw the grid with updated positions
+        this.clearGrid();
+        this.drawGrid();
+
+        this.canvas!.renderAll();
+    }
+
+    public zoomOut() {
+        // Zoom out by dividing the current zoom level by (1 + zoomStep)
+        const newZoom = this.canvas!.getZoom() / (1 + this.zoomStep);
+        this.canvas!.setZoom(newZoom);
+
+        // Redraw the grid with updated positions
+        this.clearGrid();
+        this.drawGrid();
+
+        this.canvas!.renderAll();
     }
 }

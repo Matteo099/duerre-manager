@@ -1,4 +1,7 @@
-class MoveToolHandler extends ToolHandler {
+import { IDieEditor } from "./idie-editor";
+import { ToolHandler } from "./tool-handler";
+
+export class MoveToolHandler extends ToolHandler {
 
     constructor(editor: IDieEditor) {
         super(editor);

@@ -1,9 +1,16 @@
-class DrawToolHandler extends ToolHandler {
+import { IDieEditor } from "./idie-editor";
+import { ToolHandler } from "./tool-handler";
+import { fabric } from 'fabric';
+
+export class DrawToolHandler extends ToolHandler {
 
     private isDrawing: boolean = false;
     private currentLine?: fabric.Line;
-    private lines: fabric.Line[] = []; 
+    private lines: fabric.Line[] = [];
     private isPolygonCreated: boolean = false;
+    private measurementText?: fabric.Text;
+
+    private unit: string = "mm";
 
     constructor(editor: IDieEditor) {
         super(editor);
@@ -25,6 +32,17 @@ class DrawToolHandler extends ToolHandler {
             });
 
             this.editor.fabricCanvas!.add(this.currentLine);
+
+            // Create a text element for displaying the measurement above the line
+            this.measurementText = new fabric.Text('0', {
+                left: pointer.x,
+                top: pointer.y - 30, // Adjust the vertical position as needed
+                fontSize: 24,
+                selectable: false,
+                evented: false,
+            });
+
+            this.editor.fabricCanvas!.add(this.measurementText);
         }
     }
 
@@ -34,6 +52,24 @@ class DrawToolHandler extends ToolHandler {
 
             // Continue drawing the line
             this.currentLine?.set({ x2: pointer.x, y2: pointer.y });
+
+            const coords = {
+                x1: this.currentLine!.get('x1')!,
+                y1: this.currentLine!.get('y1')!,
+                x2: pointer.x,
+                y2: pointer.y
+            }
+            // Calculate the length of the line
+            const length = this.helper.calculateDistance(coords);
+            const angle = this.helper.calculateAngle(coords);
+            console.log(angle);
+            // Update the measurement text
+            this.measurementText?.set({
+                text: `${length.toFixed(2)} ${this.unit}`,
+                left: pointer.x,
+                top: pointer.y + (angle > 180 && angle < 270 ? 5 : -30)
+            });
+
             this.editor.fabricCanvas!.renderAll();
         }
     }
@@ -46,6 +82,10 @@ class DrawToolHandler extends ToolHandler {
             // Save the drawn line to the array
             this.currentLine!.setCoords();
             this.lines.push(this.currentLine!);
+
+            // Clean up the measurement text
+            this.editor.fabricCanvas!.remove(this.measurementText!);
+            this.measurementText = undefined;
 
             // Check if the drawn lines form a closed loop (polygon)
             if (this.helper.isClosedLoop(this.lines)) {

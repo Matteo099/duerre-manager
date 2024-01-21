@@ -1,4 +1,7 @@
-class EraserToolHandler extends ToolHandler {
+import { IDieEditor } from "./idie-editor";
+import { ToolHandler } from "./tool-handler";
+
+export class EraserToolHandler extends ToolHandler {
 
     constructor(editor: IDieEditor) {
         super(editor);
