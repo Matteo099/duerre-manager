@@ -3,7 +3,7 @@ import { DrawToolHandler } from "./draw-tool-handler";
 import { EraserToolHandler } from "./eraser-tool-handler";
 import { IDieEditor } from "./idie-editor";
 import { MoveToolHandler } from "./move-tool-handler";
-import { SelectToolHandler } from "./select-tool-handler";
+import { EditToolHandler } from "./edit-tool-handler";
 import { Tool } from "./tool";
 import { ToolHandler } from "./tool-handler";
 import { fabric } from 'fabric';
@@ -13,7 +13,7 @@ export class DieEditorManager implements IDieEditor {
     private canvas: fabric.Canvas;
     private _selectedTool?: Tool;
 
-    private selectHandler: SelectToolHandler;
+    private selectHandler: EditToolHandler;
     private drawHandler: DrawToolHandler;
     private eraserHandler: EraserToolHandler;
     private moveHandler: MoveToolHandler;
@@ -25,7 +25,7 @@ export class DieEditorManager implements IDieEditor {
 
     constructor(canvasElement: ElementRef) {
         this.canvas = this.createCanvas(canvasElement);
-        this.selectHandler = new SelectToolHandler(this);
+        this.selectHandler = new EditToolHandler(this);
         this.drawHandler = new DrawToolHandler(this);
         this.eraserHandler = new EraserToolHandler(this);
         this.moveHandler = new MoveToolHandler(this);
@@ -37,6 +37,7 @@ export class DieEditorManager implements IDieEditor {
         return new fabric.Canvas(canvasElement.nativeElement, {
             isDrawingMode: false, // Set to true if you want free drawing mode
             selection: false, // Disable object selection
+            hoverCursor: 'pointer'
         });
     }
 
@@ -44,6 +45,7 @@ export class DieEditorManager implements IDieEditor {
         this.canvas.on('mouse:down', (event) => this.handleMouseDown(event));
         this.canvas.on('mouse:move', (event) => this.handleMouseMove(event));
         this.canvas.on('mouse:up', (event) => this.handleMouseUp(event));
+        this.canvas.on('object:moving', (event) => this.handleObjectMove(event));
     }
 
     private handleMouseDown(event: fabric.IEvent) {
@@ -58,9 +60,13 @@ export class DieEditorManager implements IDieEditor {
         this.getToolHandler()?.onMouseUp(event);
     }
 
+    private handleObjectMove(event: fabric.IEvent) {
+        this.getToolHandler()?.onObjectMove(event);
+    }
+
     private getToolHandler(): ToolHandler | undefined {
         switch (this._selectedTool) {
-            case Tool.SELECT:
+            case Tool.EDIT:
                 return this.selectHandler;
             case Tool.DRAW:
                 return this.drawHandler;

@@ -39,7 +39,7 @@ export class DieEditorComponent implements AfterViewInit {
   }
 
   useSelectTool() {
-    this.dieEditor?.useTool(Tool.SELECT);
+    this.dieEditor?.useTool(Tool.EDIT);
   }
   useDrawTool() {
     this.dieEditor?.useTool(Tool.DRAW);

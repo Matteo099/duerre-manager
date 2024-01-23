@@ -10,8 +10,7 @@ export class DrawToolHandler extends ToolHandler {
     private isPolygonCreated: boolean = false;
     private measurementText?: fabric.Text;
 
-    private startVertexGizmos?: fabric.Circle;
-    private endVertexGizmos?: fabric.Circle;
+    private vertexGizmos: { id: string, shape: fabric.Circle }[] = [];
 
     private unit: string = "mm";
 
@@ -25,22 +24,7 @@ export class DrawToolHandler extends ToolHandler {
             this.isDrawing = true;
 
             const pointer = this.helper.snapToGrid(this.editor.fabricCanvas!.getPointer(event.e));
-
-            const vertexGizmos = [this.startVertexGizmos, this.endVertexGizmos];
-            const clickedGizmo = vertexGizmos.filter(g => g).find(g => {
-                const gizmo = g!;
-                const gizmoCenter = {
-                    x: gizmo.left! + gizmo.radius!,
-                    y: gizmo.top! + gizmo.radius!,
-                };
-
-                // Calculate the distance between the gizmo center and the pointer
-                const distance = this.helper.calculateDistance({ x1: gizmoCenter.x, y1: gizmoCenter.y, x2: pointer.x, y2: pointer.y });
-
-                // Check if the pointer is within the gizmo radius
-                return distance <= gizmo.radius!;
-            });
-            console.log(clickedGizmo);
+            this.createGizmosIfOverVertex(pointer, "down");
 
             // Create a new line and add it to the canvas
             this.currentLine = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
@@ -60,45 +44,6 @@ export class DrawToolHandler extends ToolHandler {
                 evented: false,
             });
             this.editor.fabricCanvas.add(this.measurementText);
-
-            // // Check if a vertex gizmo was clicked
-            // const clickedGizmo = this.editor.fabricCanvas!.getObjects().find(obj => obj instanceof fabric.Circle && obj !== this.startVertexGizmos && obj.containsPoint(pointer));
-            // if (clickedGizmo) {
-            //     // Create a new line starting from the clicked vertex
-            //     const clickedIndex = this.vertexGizmos.indexOf(clickedGizmo);
-            //     const clickedLine = this.lines[clickedIndex];
-
-            //     const newLine = new fabric.Line([clickedLine.x2, clickedLine.y2, clickedLine.x2, clickedLine.y2], {
-            //         stroke: '#000',
-            //         strokeWidth: 2,
-            //         selectable: true,
-            //         evented: false,
-            //     });
-
-            //     this.editor.fabricCanvas!.add(newLine);
-
-            //     // Update the currentLine and lines array
-            //     this.currentLine = newLine;
-            //     this.lines.push(newLine);
-            //     this.isDrawing = true; // Enable drawing mode for the new line
-            // }
-
-            // Create a circle gizmo at the end point of the current line
-            if (this.endVertexGizmos) {
-                this.editor.fabricCanvas.remove(this.endVertexGizmos);
-                this.endVertexGizmos = undefined;
-            }
-            if (this.startVertexGizmos) this.editor.fabricCanvas.remove(this.startVertexGizmos);
-
-            this.startVertexGizmos = new fabric.Circle({
-                left: pointer.x - 5, // Adjust the positioning as needed
-                top: pointer.y - 5, // Adjust the positioning as needed
-                radius: 5,
-                fill: 'red', // Adjust the color as needed
-                selectable: false,
-                evented: false,
-            });
-            this.editor.fabricCanvas.add(this.startVertexGizmos);
         }
     }
 
@@ -109,6 +54,9 @@ export class DrawToolHandler extends ToolHandler {
             // Continue drawing the line
             this.currentLine?.set({ x2: pointer.x, y2: pointer.y });
 
+            // check if hover another vertex add gizmos
+            this.createGizmosIfOverVertex(pointer, "move");
+
             const coords = {
                 x1: this.currentLine!.get('x1')!,
                 y1: this.currentLine!.get('y1')!,
@@ -118,27 +66,13 @@ export class DrawToolHandler extends ToolHandler {
             // Calculate the length of the line
             const length = this.helper.calculateDistance(coords);
             const angle = this.helper.calculateAngle(coords);
-            console.log(angle);
+
             // Update the measurement text
             this.measurementText?.set({
                 text: `${length.toFixed(2)} ${this.unit}`,
                 left: pointer.x,
                 top: pointer.y + (angle > 180 && angle < 270 ? 5 : -30)
             });
-
-            // Update the position of the vertex gizmo
-            if (!this.endVertexGizmos) {
-                this.endVertexGizmos = new fabric.Circle({
-                    left: pointer.x - 5, // Adjust the positioning as needed
-                    top: pointer.y - 5, // Adjust the positioning as needed
-                    radius: 5,
-                    borderColor: 'red', // Adjust the color as needed
-                    selectable: false,
-                    evented: false,
-                });
-                this.editor.fabricCanvas.add(this.endVertexGizmos);
-            }
-            this.endVertexGizmos.set({ left: pointer.x - 5, top: pointer.y - 5 }); // Adjust the positioning as needed
 
             this.editor.fabricCanvas.renderAll();
         }
@@ -156,6 +90,8 @@ export class DrawToolHandler extends ToolHandler {
             // Save the drawn line to the array
             this.currentLine!.setCoords();
 
+            this.gizmos.removeGizmos();
+
             // Do not save points (line with length = 0)
             if (this.helper.calculateLength(this.currentLine!) <= 0) {
                 return;
@@ -171,18 +107,29 @@ export class DrawToolHandler extends ToolHandler {
                     fill: 'rgba(0, 0, 0, 0.2)',
                     stroke: '#000',
                     strokeWidth: 2,
-                    selectable: false,
+                    selectable: true,
                     evented: false,
                 });
 
                 this.editor.fabricCanvas.add(polygon);
 
                 // Clear the array for the next set of lines
+                this.lines.forEach(l => this.editor.fabricCanvas.remove(l));
                 this.lines = [];
 
                 // Set the flag to indicate that a polygon is created
                 this.isPolygonCreated = true;
             }
         }
+    }
+
+    private createGizmosIfOverVertex(pointer: fabric.Point, id: string) {
+        const clickedPoint = this.lines
+            .flatMap(line => [
+                { x: line.x1!, y: line.y1! },
+                { x: line.x2!, y: line.y2! },
+            ])
+            .find(vertex => this.helper.calculateDistance({ x1: vertex.x, y1: vertex.y, x2: pointer.x, y2: pointer.y }) <= 1);
+        if(clickedPoint) this.gizmos.addVertexGizmos(clickedPoint, id);
     }
 }

@@ -12,13 +12,14 @@ export class FabricHelper {
     public snapToGrid(pointer: { x: number, y: number }): fabric.Point {
         const zoom = this.editor.fabricCanvas.getZoom();
         const gridSize = this.editor.gridSize * zoom;
-        console.log( gridSize, zoom);
 
         // Round the coordinates to the nearest grid point
         const x = Math.round(pointer.x / gridSize) * gridSize;
         const y = Math.round(pointer.y / gridSize) * gridSize;
 
-        return new fabric.Point(x, y);
+        const point = new fabric.Point(x, y);
+        console.log(point, pointer);
+        return point;
     }
 
     public isClosedLoop(lines: fabric.Line[]): boolean {
@@ -56,13 +57,15 @@ export class FabricHelper {
     }
 
     public calculateLength(line: fabric.Line) : number {
+        // the getCoords method to obtain the coordinates of the Line instance with different starting and ending coordinates. 
+        // We can see that the logged output is: (100, 40), (220, 40), (220,120), (100,120) which are the top-left, top-right, bottom-right and bottom-left coordinates of the line.
         const coords = line.getCoords();
         
         return this.calculateDistance({
-            x1: coords[0].x,
-            y1: coords[0].y,
-            x2: coords[1].x,
-            y2: coords[1].y,
+            x1: coords[0].x, // top-left.x
+            y1: coords[0].y, // top-left.y
+            x2: coords[2].x, // bottom-rigth.x
+            y2: coords[2].y, // bottom-rigth.y
         });
     }
 }
