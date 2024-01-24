@@ -10,12 +10,18 @@ export class DrawToolHandler extends ToolHandler {
     private isPolygonCreated: boolean = false;
     private measurementText?: fabric.Text;
 
-    private vertexGizmos: { id: string, shape: fabric.Circle }[] = [];
-
     private unit: string = "mm";
 
     constructor(editor: IDieEditor) {
         super(editor);
+    }
+
+    override reset(): void {
+        this.isDrawing = false;
+        this.currentLine = undefined;
+        this.lines = [];
+        this.isPolygonCreated = false;
+        this.measurementText = undefined;
     }
 
     override onMouseDown(event: fabric.IEvent<Event>): void {
@@ -32,6 +38,9 @@ export class DrawToolHandler extends ToolHandler {
                 strokeWidth: 2,
                 selectable: true,
                 evented: false,
+                data: {
+                    group: "save"
+                }
             });
             this.editor.fabricCanvas.add(this.currentLine);
 
@@ -109,6 +118,9 @@ export class DrawToolHandler extends ToolHandler {
                     strokeWidth: 2,
                     selectable: true,
                     evented: false,
+                    data: {
+                        group: "save"
+                    }
                 });
 
                 this.editor.fabricCanvas.add(polygon);
@@ -130,6 +142,6 @@ export class DrawToolHandler extends ToolHandler {
                 { x: line.x2!, y: line.y2! },
             ])
             .find(vertex => this.helper.calculateDistance({ x1: vertex.x, y1: vertex.y, x2: pointer.x, y2: pointer.y }) <= 1);
-        if(clickedPoint) this.gizmos.addVertexGizmos(clickedPoint, id);
+        if (clickedPoint) this.gizmos.addVertexGizmos(clickedPoint, id);
     }
 }

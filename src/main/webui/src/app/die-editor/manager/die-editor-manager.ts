@@ -18,6 +18,8 @@ export class DieEditorManager implements IDieEditor {
     private eraserHandler: EraserToolHandler;
     private moveHandler: MoveToolHandler;
 
+    private tools: ToolHandler[] = [];
+
     get fabricCanvas(): fabric.Canvas { return this.canvas; }
     get gridSize(): number { return 10; }
     get zoomStep(): number { return 1; }
@@ -29,6 +31,7 @@ export class DieEditorManager implements IDieEditor {
         this.drawHandler = new DrawToolHandler(this);
         this.eraserHandler = new EraserToolHandler(this);
         this.moveHandler = new MoveToolHandler(this);
+        this.tools = [this.selectHandler, this.drawHandler, this.eraserHandler, this.moveHandler];
         this.setupListeners();
         this.drawGrid();
     }
@@ -163,5 +166,128 @@ export class DieEditorManager implements IDieEditor {
         this.drawGrid();
 
         this.canvas!.renderAll();
+    }
+
+    public resetZoom() {
+        this.canvas.setZoom(1);
+        // Redraw the grid with updated positions
+        this.clearGrid();
+        this.drawGrid();
+
+        this.canvas!.renderAll();
+    }
+
+    public clear() {
+        this.canvas.clear();
+        this.tools.forEach(t => {
+            t.reset();
+        });
+        this.resetZoom();
+    }
+
+    public getResult(): {
+        jsonData: {
+            version: string;
+            objects: fabric.Object[];
+        }, dataURL: string
+    } {
+        // Filter out objects based on the data.group property
+        const objectsToSave = this.canvas.getObjects().filter(obj => !obj.data || obj.data.group === 'save');
+
+        // Create a new canvas to clone and save only the required objects
+        const saveCanvas = new fabric.Canvas(null, {
+            width: this.fabricCanvas.getWidth(),
+            height: this.fabricCanvas.getHeight(),
+        });
+        saveCanvas.setZoom(this.fabricCanvas.getZoom());
+
+        // Clone and add the filtered objects to the new canvas
+        objectsToSave.forEach(obj => {
+            const clonedObj = fabric.util.object.clone(obj);
+            saveCanvas.add(clonedObj);
+        });
+
+        const jsonData = saveCanvas.toJSON();
+        const dataURL = saveCanvas.toDataURL({ format: 'png', multiplier: 2 });
+
+        return { jsonData, dataURL };
+    }
+
+    public getCroppedResult(): {
+        jsonData: {
+            version: string;
+            objects: fabric.Object[];
+        };
+        dataURL: string;
+    } {
+        // Filter out objects based on the data.group property
+        const objectsToSave = this.canvas.getObjects().filter(obj => !obj.data || obj.data.group === 'save');
+
+        // Get the bounding box of the non-empty objects
+        const boundingBox = this.getBoundingBox(objectsToSave);
+
+        // Set the desired size for the resulting image (in mm)
+        const targetWidth = 300;
+        const targetHeight = 300;
+
+        // Calculate the offset to adjust object positions based on the bounding box
+        const offsetX = Math.abs(boundingBox.left!);
+        const offsetY = Math.abs(boundingBox.top!);
+
+        // Create a new canvas with the target size
+        const croppedCanvas = new fabric.Canvas(null, {
+            width: targetWidth,
+            height: targetHeight,
+            backgroundColor: "black"
+        });
+
+        // Clone and add the filtered objects to the new canvas
+        objectsToSave.forEach(obj => {
+            const clonedObj: fabric.Object = fabric.util.object.clone(obj);
+
+            clonedObj.set({
+                left: clonedObj.left! - offsetX,
+                top: clonedObj.top! - offsetY,
+                fill: "white"
+            });
+            clonedObj.setCoords();
+            // Adjust object positions based on the offset
+            // clonedObj.left! -= offsetX;
+            // clonedObj.top! -= offsetY;
+            // clonedObj.calcCoords();
+
+            // if ('points' in clonedObj)
+            //     (clonedObj as any).points.forEach((point: fabric.Point) => {
+            //         point.x -= offsetX;
+            //         point.y -= offsetY;
+            //     });
+            // clonedObj.fill = "white";
+
+            croppedCanvas.add(clonedObj);
+        });
+        croppedCanvas.renderAll();
+
+        const jsonData = croppedCanvas.toJSON();
+        const dataURL = croppedCanvas.toDataURL({ format: 'png', multiplier: 2 });
+
+        return { jsonData, dataURL };
+    }
+
+    private getBoundingBox(objects: fabric.Object[]): fabric.Rect {
+        // Calculate the bounding box of the non-empty objects
+        let minX = Infinity;
+        let minY = Infinity;
+        let maxX = -Infinity;
+        let maxY = -Infinity;
+
+        objects.forEach(obj => {
+            const objectBoundingBox = obj.getBoundingRect();
+            minX = Math.min(minX, objectBoundingBox.left);
+            minY = Math.min(minY, objectBoundingBox.top);
+            maxX = Math.max(maxX, objectBoundingBox.left + objectBoundingBox.width);
+            maxY = Math.max(maxY, objectBoundingBox.top + objectBoundingBox.height);
+        });
+
+        return new fabric.Rect({ left: minX, top: minY, width: maxX - minX, height: maxY - minY });
     }
 }

@@ -6,4 +6,12 @@
     - https://maker.js.org/
     - https://github.com/benardt/JScad2d
 
-- http://fabricjs.com/custom-controls-polygon
+- Editor:
+    - http://fabricjs.com/custom-controls-polygon
+
+- Shape matching:
+    - https://stackoverflow.com/questions/55529371/opencv-shape-matching-between-two-similar-shapes
+
+- OpenCV
+    - https://github.com/quarkiverse/quarkus-opencv
+    - -XX:MaxDirectMemorySize=128m

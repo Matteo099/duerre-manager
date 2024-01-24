@@ -48,5 +48,25 @@
                 <canvas #canvasElement class="w-100 h-100"></canvas>
             </div>
         </div>
+
+        <div class="col-auto m-2">
+            <div class="d-flex flex-column justify-content-center align-items-center h-100">
+                <button mat-mini-fab color="primary" (click)="undo()" class="mb-2">
+                    <mat-icon>undo</mat-icon>
+                </button>
+                <button mat-mini-fab color="primary" (click)="redo()" class="mb-2">
+                    <mat-icon>redo</mat-icon>
+                </button>
+                <button mat-mini-fab color="primary" (click)="save()" class="mb-2">
+                    <mat-icon>save</mat-icon>
+                </button>
+                <button mat-mini-fab color="primary" (click)="clear()" class="mb-2">
+                    <mat-icon>delete</mat-icon>
+                </button>
+                <button mat-mini-fab color="primary" (click)="cancel()">
+                    <mat-icon>cancel</mat-icon>
+                </button>
+            </div>
+        </div>
     </div>
 </div>

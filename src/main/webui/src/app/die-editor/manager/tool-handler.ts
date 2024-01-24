@@ -16,9 +16,12 @@ export abstract class ToolHandler {
 
     onToolSelected(): void { }
     onToolDeselected(): void { }
+    reset(): void { 
+        this.gizmos.removeGizmos();
+    }
 
     abstract onMouseDown(event: fabric.IEvent): void;
     abstract onMouseMove(event: fabric.IEvent): void;
     abstract onMouseUp(event: fabric.IEvent): void;
-    onObjectMove(event: fabric.IEvent): void {}
+    onObjectMove(event: fabric.IEvent): void { }
 } 

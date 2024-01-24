@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { ILineOptions, IObjectOptions } from 'fabric/fabric-impl';
 import { DieEditorManager } from './manager/die-editor-manager';
 import { Tool } from './manager/tool';
+import JSZip from 'jszip';
 
 @Component({
   selector: 'app-die-editor',
@@ -60,12 +61,60 @@ export class DieEditorComponent implements AfterViewInit {
 
   undo() { }
   redo() { }
-  save() { }
+  clear() {
+    this.dieEditor?.clear();
+  }
   cancel() { }
 
   getColor(tool: Tool) {
     if (this.dieEditor?.selectedTool == tool)
       return "warn";
     return "primary";
+  }
+
+  save() {
+    const result = this.dieEditor?.getResult();
+    const cropperResult = this.dieEditor?.getCroppedResult();
+    if (!result || !cropperResult) return;
+
+    const zip = new JSZip();
+
+    // Add JSON files to the zip
+    zip.file('canvas.json', JSON.stringify(result.jsonData));
+    zip.file('cropped_canvas.json', JSON.stringify(cropperResult.jsonData));
+
+    // Add PNG files to the zip
+    zip.file('canvas.png', this.dataURLtoBlob(result.dataURL), { binary: true });
+    zip.file('cropped_canvas.png', this.dataURLtoBlob(cropperResult.dataURL), { binary: true });
+
+    // Generate the zip and trigger download
+    zip.generateAsync({ type: 'blob' }).then((blob) => {
+      const url = URL.createObjectURL(blob);
+
+      // Create an anchor element for downloading the zip
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'canvas.zip';
+
+      // Trigger a click event to start the download
+      a.click();
+
+      // Release the URL object
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  private dataURLtoBlob(dataURL: string): Blob {
+    const arr = dataURL.split(',');
+    const mime = arr[0].match(/:(.*?);/)?.[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+
+    return new Blob([u8arr], { type: mime });
   }
 }
