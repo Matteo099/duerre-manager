@@ -2,45 +2,103 @@ package com.github.matteo099.opencv;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import org.jboss.logging.Logger;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.imgproc.Imgproc;
 
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
+import com.github.matteo099.model.DieDraw;
+import com.github.matteo099.model.ShapeObject;
+import com.github.matteo099.model.ShapePoint;
+import com.indvd00m.ascii.render.Region;
+import com.indvd00m.ascii.render.Render;
+import com.indvd00m.ascii.render.api.ICanvas;
+import com.indvd00m.ascii.render.api.IContextBuilder;
+import com.indvd00m.ascii.render.api.IRender;
+import com.indvd00m.ascii.render.elements.Line;
+import com.indvd00m.ascii.render.elements.Rectangle;
+import com.indvd00m.ascii.render.elements.plot.Axis;
+import com.indvd00m.ascii.render.elements.plot.AxisLabels;
+import com.indvd00m.ascii.render.elements.plot.Plot;
+import com.indvd00m.ascii.render.elements.plot.api.IPlotPoint;
+import com.indvd00m.ascii.render.elements.plot.misc.PlotPoint;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import nu.pattern.OpenCV;
 
+@ApplicationScoped
 public class ShapeMatcher {
 
-    protected static Jsonb jsonb = JsonbBuilder.create();
+    @Inject
+    Logger logger;
 
     static {
-        OpenCV.loadLocally(); 
+        OpenCV.loadLocally();
     }
 
-    public static void main(String[] args) {
-        // Replace these paths with your actual paths
-        String jsonRepresentation = "path/to/your/shape.json";
-        String imageSetDirectory = "path/to/your/image/set";
+    private List<DieDraw> getSavedDies() {
+        return IntStream.range(0, 5000)
+                .mapToObj(i -> generateRandomDie())
+                .collect(Collectors.toList());
+    }
 
-        // Load the JSON representation of the shape
-        String jsonShape = loadJsonShape(jsonRepresentation, new ShapePoint(120,122), new ShapePoint(312,212), new ShapePoint(224, 431));
-
-        // Extract contours from the JSON representation
-        List<MatOfPoint> shapeContours = extractContoursFromJson(jsonShape);
-
-        // Match the shape with others in the set
-        List<String> similarShapes = findSimilarShapes(shapeContours, imageSetDirectory);
-
-        // Print or use the results
-        System.out.println("Similar shapes found:");
-        for (String similarShape : similarShapes) {
-            System.out.println(similarShape);
+    private DieDraw generateRandomDie() {
+        var points = new ArrayList<ShapePoint>();
+        var rnd = new Random();
+        for (int i = 0; i < rnd.nextInt(20) + 3; i++) {
+            points.add(new ShapePoint(rnd.nextInt(300), rnd.nextInt(300)));
         }
+
+        var die = new DieDraw();
+        die.getObjects().add(new ShapeObject(points));
+        return die;
     }
 
-    private static String loadJsonShape(String path, ShapePoint a, ShapePoint b, ShapePoint c) {
+    public MatOfPoint extractContourn(DieDraw dieDraw) {
+        List<Point> points = new ArrayList<>();
+        for (ShapeObject object : dieDraw.getObjects()) {
+            object.normalizePoints();
+            for (ShapePoint point : object.getPoints()) {
+                points.add(new Point(point.getX(), point.getY()));
+            }
+        }
+        MatOfPoint contour = new MatOfPoint();
+        contour.fromList(points);
+        return contour;
+    }
+
+    public List<DieDraw> findSimilarShapes(DieDraw dieDraw, float threshold) {
+        var dieDrawContour = extractContourn(dieDraw);
+        var similarDies = new ArrayList<DieDraw>();
+        var dies = getSavedDies();
+
+        for (DieDraw savedDie : dies) {
+            MatOfPoint savedDieContourn = extractContourn(savedDie);
+
+            // Compare the shape with the set using matchShape
+            double matchScore = Imgproc.matchShapes(dieDrawContour, savedDieContourn,
+                    Imgproc.CV_CONTOURS_MATCH_I1, 0.0);
+
+            // logger.info(matchScore);
+            // You can adjust the threshold based on your requirements
+            if (matchScore < threshold) {
+                // Shapes are considered similar (you can adjust the threshold)
+                similarDies.add(savedDie);
+                this.drawDieAsPolygon(savedDieContourn);
+                this.drawDieAsPolygon(dieDrawContour);
+                //this.drawDieAsPoint(savedDieContourn);
+            }
+        }
+
+        return similarDies;
+    }
+
+    public static String getDie(ShapePoint a, ShapePoint b, ShapePoint c) {
         return String.format("""
                 {
                     "version": "5.3.0",
@@ -86,62 +144,55 @@ public class ShapeMatcher {
                     ],
                     "background": "black"
                 }
-                """, a.x, a.y, b.x, b.y, c.x, c.y);
+                """, a.getX(), a.getY(), b.getX(), b.getY(), c.getX(), c.getY());
     }
 
-    private static List<MatOfPoint> extractContoursFromJson(String jsonShape) {
-        // Parse the JSON string
-        DieDraw shapeJson = jsonb.fromJson(jsonShape, DieDraw.class);
+    private void drawDieAsPoint(MatOfPoint matOfPoints) {
+        List<IPlotPoint> points = matOfPoints.toList().stream().map(p -> {
+            IPlotPoint plotPoint = new PlotPoint(p.x, p.y);
+            return plotPoint;
+        }).toList();
+        IRender render = new Render();
+        IContextBuilder builder = render.newBuilder();
+        builder.width(80).height(20);
+        builder.element(new Rectangle(0, 0, 80, 20));
+        builder.layer(new Region(1, 1, 78, 18));
+        builder.element(new Axis(points, new Region(0, 0, 78, 18)));
+        builder.element(new AxisLabels(points, new Region(0, 0, 78, 18)));
+        builder.element(new Plot(points, new Region(0, 0, 78, 18)));
+        ICanvas canvas = render.render(builder.build());
+        String s = canvas.getText();
+        System.out.println(s);
+    }
 
-        // Extract contours from the points in the JSON representation
-        List<MatOfPoint> contours = new ArrayList<>();
-        for (ShapeObject object : shapeJson.objects) {
-            object.normalizePoints();
-            for (ShapePoint point : object.points) {
-                contours.add(new MatOfPoint(new Point(point.x, point.y)));
-            }
+    private void drawDieAsPolygon(MatOfPoint matOfPoints) {
+        var points = matOfPoints.toList();
+        var maxX = points.stream().mapToDouble(p -> p.x).max().orElse(1) + 50;
+        var maxY = points.stream().mapToDouble(p -> p.y).max().orElse(1) + 50;
+        int w = 80;
+        int h = 20;
+        IRender render = new Render();
+        IContextBuilder builder = render.newBuilder();
+        builder.width(w).height(h);
+        builder.element(new Rectangle());
+        for (int i = 1; i < points.size(); i++) {
+            var aCV = points.get(i - 1);
+            var bCV = points.get(i);
+            builder.element(
+                    new Line(new com.indvd00m.ascii.render.Point((int) (aCV.x / maxX * w), (int) (aCV.y / maxY * h)),
+                            new com.indvd00m.ascii.render.Point((int) (bCV.x / maxX * w), (int) (bCV.y / maxY * h))));
         }
 
-        return contours;
+        var aCV = points.get(points.size() - 1);
+        var bCV = points.get(0);
+        builder.element(
+                new Line(new com.indvd00m.ascii.render.Point((int) (aCV.x / maxX * w), (int) (aCV.y / maxY * h)),
+                        new com.indvd00m.ascii.render.Point((int) (bCV.x / maxX * w), (int) (bCV.y / maxY * h))));
+
+        ICanvas canvas = render.render(builder.build());
+        String s = canvas.getText();
+        System.out.println(s);
+
     }
 
-    private static List<String> findSimilarShapes(List<MatOfPoint> shapeContours, String imageSetDirectory) {
-        List<String> similarShapes = new ArrayList<>();
-
-        // Iterate through each image in the set
-        for (String imagePath : getImagesInDirectory(imageSetDirectory)) {
-            // Load the image from the set
-            // Mat setImg = Imgcodecs.imread(imagePath, Imgcodecs.IMREAD_GRAYSCALE);
-
-            // Extract contours from the set image
-            // List<MatOfPoint> setContours = extractContours(setImg);
-
-            // Load the JSON representation of the shape
-            String savedShape = loadJsonShape("", new ShapePoint(1,1), new ShapePoint(1,2), new ShapePoint(2, 2));
-
-            // Extract contours from the JSON representation
-            List<MatOfPoint> setContours = extractContoursFromJson(savedShape);
-
-            // Compare the shape with the set using matchShape
-            double matchScore = Imgproc.matchShapes(shapeContours.get(0), setContours.get(0),
-                    Imgproc.CV_CONTOURS_MATCH_I1, 0.0);
-
-            // You can adjust the threshold based on your requirements
-            if (matchScore < 0.1) {
-                // Shapes are considered similar (you can adjust the threshold)
-                similarShapes.add(imagePath);
-            }
-        }
-
-        return similarShapes;
-    }
-
-    private static List<String> getImagesInDirectory(String directoryPath) {
-        // Implement logic to get a list of image paths in the specified directory
-        // Replace this with your actual implementation
-        List<String> imagePaths = new ArrayList<>();
-        imagePaths.add("directoryPath");
-        // ...
-        return imagePaths;
-    }
 }
