@@ -15,7 +15,7 @@
                 <button mat-mini-fab [color]="getColor(Tool.MOVE)" (click)="useMoveTool()" class="mb-2">
                     <mat-icon>open_with</mat-icon>
                 </button>
-                
+
                 <button mat-mini-fab color="primary" (click)="zoomIn()" class="mb-2">
                     <mat-icon>zoom_in</mat-icon>
                 </button>
@@ -44,8 +44,7 @@
 
         <!-- Central column -->
         <div class="col m-2 p-0">
-            <div class="full-screen" #canvasParent>
-                <canvas #canvasElement class="w-100 h-100"></canvas>
+            <div class="w-100 h-100" #stageContainer>
             </div>
         </div>
 

@@ -1,11 +1,11 @@
-import { AfterContentInit, AfterViewInit, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
-import { fabric } from 'fabric';
+import { AfterViewInit, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { ILineOptions, IObjectOptions } from 'fabric/fabric-impl';
-import { DieEditorManager } from './manager/die-editor-manager';
-import { Tool } from './manager/tool';
-import JSZip from 'jszip';
+import Konva from 'konva';
+
+enum Tool {
+  ERASER, MOVE, EDIT, DRAW
+}
 
 @Component({
   selector: 'app-die-editor',
@@ -16,105 +16,185 @@ import JSZip from 'jszip';
 })
 export class DieEditorComponent implements AfterViewInit {
 
-  @ViewChild('canvasParent', { static: true }) canvasParent?: ElementRef;
-  @ViewChild('canvasElement', { static: true }) canvasElement?: ElementRef;
+  @ViewChild('stageContainer', { static: false }) stageContainer?: ElementRef;
 
-  private dieEditor?: DieEditorManager;
   Tool = Tool;
 
 
-  ngAfterViewInit() {
-    console.log("ngAfterViewInit");
-    if (!this.canvasElement || !this.canvasParent) return;
+  stage!: Konva.Stage;
+  layer!: Konva.Layer;
+  circles: Konva.Circle[] = [];
+  polygon!: Konva.Line;
+  GUIDELINE_OFFSET = 5;
 
-    this.dieEditor = new DieEditorManager(this.canvasElement);
-    this.dieEditor.resize(this.canvasParent);
-    const _dieEditor = this.dieEditor;
-    setTimeout(() => _dieEditor.useTool(Tool.DRAW), 10);
+
+  ngAfterViewInit() {
+    this.initializeStage();
+    this.addEventListeners();
+  }
+
+  initializeStage() {
+    this.stage = new Konva.Stage({
+      container: this.stageContainer!.nativeElement,
+      width: this.stageContainer!.nativeElement.offsetWidth,
+      height: this.stageContainer!.nativeElement.offsetHeight,
+    });
+
+    this.layer = new Konva.Layer();
+
+    this.addCircles();
+    this.addPolygon();
+
+    this.stage.add(this.layer);
+  }
+
+  addCircles() {
+    const circleData = [
+      { x: 10, y: 10, radius: 5 },
+      { x: 50, y: 50, radius: 3 },
+      { x: 50, y: 100, radius: 3 },
+      { x: 20, y: 40, radius: 3 },
+    ];
+
+    this.circles = circleData.map(data => new Konva.Circle({
+      x: data.x,
+      y: data.y,
+      radius: data.radius,
+      stroke: '#ff0000',
+      strokeWidth: 1,
+      draggable: true,
+    }));
+
+    this.circles.forEach(circle => this.layer.add(circle));
+  }
+
+  addPolygon() {
+    const points = this.circles.map(circle => [circle.x(), circle.y()]).flat();
+
+    this.polygon = new Konva.Line({
+      points: points,
+      fill: '#ff000088',
+      stroke: '#ff0000',
+      strokeWidth: 1,
+      draggable: false,
+      closed: true,
+      dash: [],
+    });
+
+    this.layer.add(this.polygon);
+  }
+
+  addEventListeners() {
+    this.circles.forEach(circle => this.addEventToCircle(circle));
+
+    this.polygon.on('click', (e) => {
+      this.handlePolygonClick();
+    });
+
+    this.layer.draw();
+  }
+
+  addEventToCircle(circle: Konva.Circle) {
+    circle.on('dragmove', (e) => {
+      console.log(e);
+      this.handleCircleDragMove(circle);
+    });
+
+    circle.on('mouseover', (e) => {
+      circle.radius(10);
+      this.layer.draw();
+    });
+
+    circle.on('mouseout', (e) => {
+      circle.radius(5);
+      this.layer.draw();
+    });
+  }
+
+  handleCircleDragMove(circle: Konva.Circle) {
+    const coords = this.snapToGrid({x: circle.x(), y: circle.y()});
+    circle.x(coords.x);
+    circle.y(coords.y);
+    this.polygon.points(this.circles.map(c => [c.x(), c.y()]).flat());
+    this.layer.batchDraw();
+  }
+
+  handlePolygonClick() {
+    const mousePos = this.snapToGrid(this.stage.getPointerPosition()!);
+    const x = mousePos.x;
+    const y = mousePos.y;
+    const points = this.polygon.points();
+
+    for (let i = 0; i < points.length / 2; i++) {
+      const s_x = points[i * 2];
+      const s_y = points[i * 2 + 1];
+      const e_x = points[(i * 2 + 2) % points.length];
+      const e_y = points[(i * 2 + 3) % points.length];
+
+      if (((s_x <= x && x <= e_x) || (e_x <= x && x <= s_x)) &&
+        ((s_y <= y && y <= e_y) || (e_y <= y && y <= s_y))) {
+        const newPoint = new Konva.Circle({
+          x: x,
+          y: y,
+          radius: 3,
+          stroke: '#ff0000',
+          strokeWidth: 1,
+          draggable: true,
+        });
+
+        this.addEventToCircle(newPoint);
+        this.circles.splice(i + 1, 0, newPoint);
+        this.polygon.points(this.circles.map(c => [c.x(), c.y()]).flat());
+        this.layer.add(newPoint);
+        this.layer.draw();
+        break;
+      }
+    }
+  }
+
+  public snapToGrid(pointer: Konva.Vector2d): Konva.Vector2d {
+    const gridSizeDef = 10;
+    const zoom = this.stage.scale()!;
+    const gridSizeX = gridSizeDef * zoom.x;
+    const gridSizeY = gridSizeDef * zoom.y;
+
+    // Round the coordinates to the nearest grid point
+    const x = Math.round(pointer.x / gridSizeX) * gridSizeY;
+    const y = Math.round(pointer.y / gridSizeY) * gridSizeX;
+
+    const point: Konva.Vector2d = { x, y };
+    console.log(point, pointer);
+    return point;
   }
 
   @HostListener("window:resize")
   updateCanvasSize() {
-    if (!this.canvasParent) return;
-    this.dieEditor?.resize(this.canvasParent);
   }
 
   useSelectTool() {
-    this.dieEditor?.useTool(Tool.EDIT);
   }
   useDrawTool() {
-    this.dieEditor?.useTool(Tool.DRAW);
   }
   useEraserTool() {
-    this.dieEditor?.useTool(Tool.ERASER);
   }
   useMoveTool() {
-    this.dieEditor?.useTool(Tool.MOVE);
   }
   zoomIn() {
-    this.dieEditor?.zoomIn();
   }
   restoreZoom() { }
   zoomOut() {
-    this.dieEditor?.zoomOut();
   }
 
   undo() { }
   redo() { }
   clear() {
-    this.dieEditor?.clear();
   }
   cancel() { }
 
   getColor(tool: Tool) {
-    if (this.dieEditor?.selectedTool == tool)
-      return "warn";
     return "primary";
   }
 
   save() {
-    const result = this.dieEditor?.getResult();
-    const cropperResult = this.dieEditor?.getCroppedResult();
-    if (!result || !cropperResult) return;
-
-    const zip = new JSZip();
-
-    // Add JSON files to the zip
-    zip.file('canvas.json', JSON.stringify(result.jsonData));
-    zip.file('cropped_canvas.json', JSON.stringify(cropperResult.jsonData));
-
-    // Add PNG files to the zip
-    zip.file('canvas.png', this.dataURLtoBlob(result.dataURL), { binary: true });
-    zip.file('cropped_canvas.png', this.dataURLtoBlob(cropperResult.dataURL), { binary: true });
-
-    // Generate the zip and trigger download
-    zip.generateAsync({ type: 'blob' }).then((blob) => {
-      const url = URL.createObjectURL(blob);
-
-      // Create an anchor element for downloading the zip
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'canvas.zip';
-
-      // Trigger a click event to start the download
-      a.click();
-
-      // Release the URL object
-      URL.revokeObjectURL(url);
-    });
-  }
-
-  private dataURLtoBlob(dataURL: string): Blob {
-    const arr = dataURL.split(',');
-    const mime = arr[0].match(/:(.*?);/)?.[1];
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-
-    while (n--) {
-      u8arr[n] = bstr.charCodeAt(n);
-    }
-
-    return new Blob([u8arr], { type: mime });
   }
 }
