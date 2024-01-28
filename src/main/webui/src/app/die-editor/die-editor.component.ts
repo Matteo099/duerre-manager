@@ -1,11 +1,8 @@
-import { AfterViewInit, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
+import { AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import Konva from 'konva';
-
-enum Tool {
-  ERASER, MOVE, EDIT, DRAW
-}
+import { MatIconModule } from '@angular/material/icon';
+import { DieEditorManager } from './manager/die-editor-manager';
+import { Tool } from './manager/tool';
 
 @Component({
   selector: 'app-die-editor',
@@ -21,168 +18,128 @@ export class DieEditorComponent implements AfterViewInit {
   Tool = Tool;
 
 
-  stage!: Konva.Stage;
-  layer!: Konva.Layer;
-  circles: Konva.Circle[] = [];
-  polygon!: Konva.Line;
-  GUIDELINE_OFFSET = 5;
+  // stage!: Konva.Stage;
+  // layer!: Konva.Layer;
+  // circles: Konva.Circle[] = [];
+  // polygon!: Konva.Line;
+  // GUIDELINE_OFFSET = 5;
+
+  editor?: DieEditorManager;
 
 
   ngAfterViewInit() {
-    this.initializeStage();
-    this.addEventListeners();
+    this.editor = new DieEditorManager(this.stageContainer!);
+    setTimeout(() => this.editor!.useTool(Tool.DRAW), 100);
   }
 
-  initializeStage() {
-    this.stage = new Konva.Stage({
-      container: this.stageContainer!.nativeElement,
-      width: this.stageContainer!.nativeElement.offsetWidth,
-      height: this.stageContainer!.nativeElement.offsetHeight,
-    });
 
-    this.layer = new Konva.Layer();
+  // addPolygon() {
+  //   const points = this.circles.map(circle => [circle.x(), circle.y()]).flat();
 
-    this.addCircles();
-    this.addPolygon();
+  //   this.polygon = new Konva.Line({
+  //     points: points,
+  //     fill: '#ff000088',
+  //     stroke: '#ff0000',
+  //     strokeWidth: 1,
+  //     draggable: false,
+  //     closed: true,
+  //     dash: [],
+  //   });
 
-    this.stage.add(this.layer);
-  }
+  //   this.layer.add(this.polygon);
+  // }
 
-  addCircles() {
-    const circleData = [
-      { x: 10, y: 10, radius: 5 },
-      { x: 50, y: 50, radius: 3 },
-      { x: 50, y: 100, radius: 3 },
-      { x: 20, y: 40, radius: 3 },
-    ];
+  // addEventListeners() {
+  //   this.circles.forEach(circle => this.addEventToCircle(circle));
 
-    this.circles = circleData.map(data => new Konva.Circle({
-      x: data.x,
-      y: data.y,
-      radius: data.radius,
-      stroke: '#ff0000',
-      strokeWidth: 1,
-      draggable: true,
-    }));
+  //   this.polygon.on('click', (e) => {
+  //     this.handlePolygonClick();
+  //   });
 
-    this.circles.forEach(circle => this.layer.add(circle));
-  }
+  //   this.layer.draw();
+  // }
 
-  addPolygon() {
-    const points = this.circles.map(circle => [circle.x(), circle.y()]).flat();
+  // addEventToCircle(circle: Konva.Circle) {
+  //   circle.on('dragmove', (e) => {
+  //     console.log(e);
+  //     this.handleCircleDragMove(circle);
+  //   });
 
-    this.polygon = new Konva.Line({
-      points: points,
-      fill: '#ff000088',
-      stroke: '#ff0000',
-      strokeWidth: 1,
-      draggable: false,
-      closed: true,
-      dash: [],
-    });
+  //   circle.on('mouseover', (e) => {
+  //     circle.radius(10);
+  //     this.layer.draw();
+  //   });
 
-    this.layer.add(this.polygon);
-  }
+  //   circle.on('mouseout', (e) => {
+  //     circle.radius(5);
+  //     this.layer.draw();
+  //   });
+  // }
 
-  addEventListeners() {
-    this.circles.forEach(circle => this.addEventToCircle(circle));
+  // handleCircleDragMove(circle: Konva.Circle) {
+  //   const coords = this.snapToGrid({ x: circle.x(), y: circle.y() });
+  //   circle.x(coords.x);
+  //   circle.y(coords.y);
+  //   this.polygon.points(this.circles.map(c => [c.x(), c.y()]).flat());
+  //   this.layer.batchDraw();
+  // }
 
-    this.polygon.on('click', (e) => {
-      this.handlePolygonClick();
-    });
+  // handlePolygonClick() {
+  //   const mousePos = this.snapToGrid(this.stage.getPointerPosition()!);
+  //   const x = mousePos.x;
+  //   const y = mousePos.y;
+  //   const points = this.polygon.points();
 
-    this.layer.draw();
-  }
+  //   for (let i = 0; i < points.length / 2; i++) {
+  //     const s_x = points[i * 2];
+  //     const s_y = points[i * 2 + 1];
+  //     const e_x = points[(i * 2 + 2) % points.length];
+  //     const e_y = points[(i * 2 + 3) % points.length];
 
-  addEventToCircle(circle: Konva.Circle) {
-    circle.on('dragmove', (e) => {
-      console.log(e);
-      this.handleCircleDragMove(circle);
-    });
+  //     if (((s_x <= x && x <= e_x) || (e_x <= x && x <= s_x)) &&
+  //       ((s_y <= y && y <= e_y) || (e_y <= y && y <= s_y))) {
+  //       const newPoint = new Konva.Circle({
+  //         x: x,
+  //         y: y,
+  //         radius: 3,
+  //         stroke: '#ff0000',
+  //         strokeWidth: 1,
+  //         draggable: true,
+  //       });
 
-    circle.on('mouseover', (e) => {
-      circle.radius(10);
-      this.layer.draw();
-    });
-
-    circle.on('mouseout', (e) => {
-      circle.radius(5);
-      this.layer.draw();
-    });
-  }
-
-  handleCircleDragMove(circle: Konva.Circle) {
-    const coords = this.snapToGrid({x: circle.x(), y: circle.y()});
-    circle.x(coords.x);
-    circle.y(coords.y);
-    this.polygon.points(this.circles.map(c => [c.x(), c.y()]).flat());
-    this.layer.batchDraw();
-  }
-
-  handlePolygonClick() {
-    const mousePos = this.snapToGrid(this.stage.getPointerPosition()!);
-    const x = mousePos.x;
-    const y = mousePos.y;
-    const points = this.polygon.points();
-
-    for (let i = 0; i < points.length / 2; i++) {
-      const s_x = points[i * 2];
-      const s_y = points[i * 2 + 1];
-      const e_x = points[(i * 2 + 2) % points.length];
-      const e_y = points[(i * 2 + 3) % points.length];
-
-      if (((s_x <= x && x <= e_x) || (e_x <= x && x <= s_x)) &&
-        ((s_y <= y && y <= e_y) || (e_y <= y && y <= s_y))) {
-        const newPoint = new Konva.Circle({
-          x: x,
-          y: y,
-          radius: 3,
-          stroke: '#ff0000',
-          strokeWidth: 1,
-          draggable: true,
-        });
-
-        this.addEventToCircle(newPoint);
-        this.circles.splice(i + 1, 0, newPoint);
-        this.polygon.points(this.circles.map(c => [c.x(), c.y()]).flat());
-        this.layer.add(newPoint);
-        this.layer.draw();
-        break;
-      }
-    }
-  }
-
-  public snapToGrid(pointer: Konva.Vector2d): Konva.Vector2d {
-    const gridSizeDef = 10;
-    const zoom = this.stage.scale()!;
-    const gridSizeX = gridSizeDef * zoom.x;
-    const gridSizeY = gridSizeDef * zoom.y;
-
-    // Round the coordinates to the nearest grid point
-    const x = Math.round(pointer.x / gridSizeX) * gridSizeY;
-    const y = Math.round(pointer.y / gridSizeY) * gridSizeX;
-
-    const point: Konva.Vector2d = { x, y };
-    console.log(point, pointer);
-    return point;
-  }
+  //       this.addEventToCircle(newPoint);
+  //       this.circles.splice(i + 1, 0, newPoint);
+  //       this.polygon.points(this.circles.map(c => [c.x(), c.y()]).flat());
+  //       this.layer.add(newPoint);
+  //       this.layer.draw();
+  //       break;
+  //     }
+  //   }
+  // }
 
   @HostListener("window:resize")
   updateCanvasSize() {
+    if (this.stageContainer) this.editor?.resize(this.stageContainer);
   }
 
   useSelectTool() {
+    this.editor?.useTool(Tool.SELECT);
   }
   useDrawTool() {
+    this.editor?.useTool(Tool.DRAW);
   }
   useEraserTool() {
+    this.editor?.useTool(Tool.ERASER);
   }
   useMoveTool() {
+    this.editor?.useTool(Tool.MOVE);
   }
   zoomIn() {
+    this.editor?.zoomIn();
   }
   restoreZoom() { }
   zoomOut() {
+    this.editor?.zoomOut();
   }
 
   undo() { }
@@ -192,6 +149,8 @@ export class DieEditorComponent implements AfterViewInit {
   cancel() { }
 
   getColor(tool: Tool) {
+    if (this.editor?.selectedTool == tool)
+      return "warn";
     return "primary";
   }
 

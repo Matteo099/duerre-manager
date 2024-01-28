@@ -33,3 +33,6 @@
     - undo/redo: https://konvajs.org/docs/react/Undo-Redo.html#sidebar
     - text measurement over lines/segments: https://konvajs.org/docs/sandbox/Simple_Window_Frame.html 
     - edit text measurement inline (& update points): https://konvajs.org/docs/sandbox/Editable_Text.html (complex demo...)
+
+- mentre tracci la line scrivere la misura (solo testo, senza info freccia etc)
+- zoom: in centimetri quadrati enormi, man mano che zoommi quadrati più piccoli
