@@ -6,5 +6,5 @@ export interface IDieEditor {
     get gridSize(): number;
     get zoomStep(): number;
     
-    getSnappedToGridPointer(): Konva.Vector2d;
+    getSnappedToNearObject(points?: Konva.Vector2d[]): Konva.Vector2d;
 }

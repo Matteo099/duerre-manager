@@ -230,8 +230,24 @@ export class DieEditorManager implements IDieEditor {
         }
     }
 
-    public getSnappedToGridPointer(): Konva.Vector2d {
-        return this._konvaHelper.snapToGrid(this.stage.getRelativePointerPosition()!);
+    public getSnappedToNearObject(points?: Konva.Vector2d[]): Konva.Vector2d {
+        const pointer = this.stage.getRelativePointerPosition()!;
+
+        // find nearest grid point
+        const gridPoint = this._konvaHelper.snapToGrid(pointer);
+        let nearestPoint = gridPoint;
+
+        if (points) {
+            // find nearest point
+            points.push(gridPoint)
+            nearestPoint = points.reduce((nearest: Konva.Vector2d, current: Konva.Vector2d) => {
+                const distanceToCurrent = this._konvaHelper.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: current.x, y2: current.y });
+                const distanceToNearest = nearest ? this._konvaHelper.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: nearest.x, y2: nearest.y }) : Infinity;
+
+                return distanceToCurrent < distanceToNearest ? current : nearest;
+            });
+        }
+        return nearestPoint;
     }
 
     public useTool(tool: Tool) {

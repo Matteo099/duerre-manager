@@ -97,12 +97,7 @@ export class LineMeasurement {
             const point = this.helper.findPoint(this.line, length);
             const points = this.line.points();
             const pointToUpdate = { x: points[points.length - 2], y: points[points.length - 1] };
-            console.log(this.drawTool.findLinesWithEndpoint(pointToUpdate), this.drawTool.findLinesWithEndpoint(pointToUpdate).filter(l => l.line.id() != this.line.id()));
-            const attachedLine = this.drawTool.findLinesWithEndpoint(pointToUpdate).filter(l => {
-                console.log(l.line._id, this.line._id);
-                return l.line._id != this.line._id;
-            })[0];
-            console.log(attachedLine, this.line);
+            const attachedLine = this.drawTool.findLinesWithEndpoint(pointToUpdate).filter(l => l.line._id != this.line._id)[0];
             const newX = points[points.length - 2] = point.x;
             const newY = points[points.length - 1] = point.y;
             this.line.points(points);

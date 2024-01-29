@@ -30,7 +30,7 @@ export class DrawToolHandler extends ToolHandler {
 
     override onMouseDown(event: KonvaEventObject<any>): void {
         if (event.target.getAttr(EDITABLE_TEXT)) return;
-        const pos = this.startingPoint = this.editor.getSnappedToGridPointer();
+        const pos = this.startingPoint = this.editor.getSnappedToNearObject(this.getVertices());
         if (this.lines.length > 0) {
             const vertex = this.getEndPoints().find(v => v.x == pos.x && v.y == pos.y);
             if (!vertex) return;
@@ -48,7 +48,7 @@ export class DrawToolHandler extends ToolHandler {
 
         // prevent scrolling on touch devices
         event.evt.preventDefault();
-        const pos = this.editor.getSnappedToGridPointer();
+        const pos = this.editor.getSnappedToNearObject(this.getVertices());
         const newPoints = [this.startingPoint!.x, this.startingPoint!.y, pos.x, pos.y];
         this.lineMeasure!.updatePoints(newPoints); // update points and text
     }
@@ -58,7 +58,7 @@ export class DrawToolHandler extends ToolHandler {
 
         if (!this.lineMeasure) return;
 
-        const pos = this.editor.getSnappedToGridPointer();
+        const pos = this.editor.getSnappedToNearObject(this.getVertices());
         const newPoints = [this.startingPoint!.x, this.startingPoint!.y, pos.x, pos.y];
         this.lineMeasure.updatePoints(newPoints);
 
