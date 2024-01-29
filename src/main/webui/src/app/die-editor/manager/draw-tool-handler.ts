@@ -1,48 +1,41 @@
+import Konva from "konva";
 import { KonvaEventObject } from "konva/lib/Node";
 import { IDieEditor } from "./idie-editor";
+import { LineMeasurement } from "./line-measurement";
 import { ToolHandler } from "./tool-handler";
-import Konva from "konva";
+import { EDITABLE_TEXT } from "./constants";
 
 export class DrawToolHandler extends ToolHandler {
 
     private isDrawing: boolean = false;
     private startingPoint?: Konva.Vector2d;
-    private currentLine?: Konva.Line;
-    private currentText?: Konva.Text;
-    private lines: { object: Konva.Line, text: Konva.Text }[] = [];
+    private lineMeasure?: LineMeasurement;
+    private lines: LineMeasurement[] = [];
+    private readonly polygon: Konva.Line = new Konva.Line({
+        points: [],
+        fill: '#00D2FF',
+        stroke: 'black',
+        strokeWidth: 5,
+        closed: true,
+        visible: false
+    });
 
     private unit: string = "mm";
 
     constructor(editor: IDieEditor) {
         super(editor);
+
+        this.editor.layer.add(this.polygon);
     }
 
     override onMouseDown(event: KonvaEventObject<any>): void {
+        if (event.target.getAttr(EDITABLE_TEXT)) return;
+
         this.isDrawing = true;
         const pos = this.startingPoint = this.editor.getSnappedToGridPointer();
-        this.currentLine = new Konva.Line({
-            stroke: '#df4b26',
-            strokeWidth: 5,
-            globalCompositeOperation: 'source-over',
-            // round cap for smoother lines
-            lineCap: 'round',
-            lineJoin: 'round',
-            hitStrokeWidth: 20,
-            // add point twice, so we have some drawings even on a simple click
-            points: [pos.x, pos.y, pos.x, pos.y],
-        });
-        this.currentLine.setAttr("ERASABLE", true);
-        this.currentText = new Konva.Text({
-            x: pos.x,
-            y: pos.y,
-            text: "0 mm",
-            fill: '#333',
-            fontSize: 25,
-            fontFamily: 'Arial',
-            align: 'center'
-        });
-        this.editor.layer.add(this.currentLine);
-        this.editor.layer.add(this.currentText);
+
+        this.lineMeasure = new LineMeasurement(this.editor, pos);
+        this.lineMeasure.addToLayer();
     }
 
     override onMouseMove(event: KonvaEventObject<any>): void {
@@ -54,31 +47,183 @@ export class DrawToolHandler extends ToolHandler {
         event.evt.preventDefault();
         const pos = this.editor.getSnappedToGridPointer();
         const newPoints = [this.startingPoint!.x, this.startingPoint!.y, pos.x, pos.y];
-        this.currentLine!.points(newPoints);
-
-        const width = this.currentText?.width() || 0;
-        const height = this.currentText?.height() || 0;
-        const middlePoint = this.helper.calculateMiddlePoint(this.currentLine!);
-        const length = this.helper.calculateLength(this.currentLine!).toFixed(2);
-        this.currentText?.x(middlePoint.x - width / 2);
-        this.currentText?.y(middlePoint.y - height / 2);
-        this.currentText?.text(length + " mm");
+        this.lineMeasure!.updatePoints(newPoints); // update points and text
     }
 
     override onMouseUp(event: KonvaEventObject<any>): void {
         this.isDrawing = false;
 
-        if (this.currentLine) {
-            if (this.helper.calculateLength(this.currentLine) > 0) {
-                const pos = this.editor.getSnappedToGridPointer();
-                const newPoints = [this.startingPoint!.x, this.startingPoint!.y, pos.x, pos.y];
-                this.currentLine.points(newPoints);
-                this.lines.push({ object: this.currentLine, text: this.currentText! });
-                // this.editor.layer.add(this.helper.createHorizontalInfo(this.currentLine));
-            } else {
-                this.currentLine.destroy();
-                this.currentText?.destroy();
-            }
+        if (!this.lineMeasure) return;
+
+        const pos = this.editor.getSnappedToGridPointer();
+        const newPoints = [this.startingPoint!.x, this.startingPoint!.y, pos.x, pos.y];
+        this.lineMeasure.updatePoints(newPoints);
+
+        if (this.lineMeasure.getLength() > 0) {
+            // add to lines array
+            this.lines.push(this.lineMeasure);
+            this.polygon.points(this.lines.flatMap(l => l.line.points()));
+        } else {
+            this.lineMeasure.destroy();
         }
+
+        this.lineMeasure = undefined;
     }
+
+    /*private createEditableText(line: Konva.Line, pos: Konva.Vector2d) {
+        const textNode = this.currentText = new Konva.Text({
+            x: pos.x,
+            y: pos.y,
+            text: "0 mm",
+            fill: '#333',
+            fontSize: 25,
+            fontFamily: 'Arial',
+            align: 'center'
+        });
+        textNode.setAttr("MEASUREMENT", true);
+        const stage = this.editor.stage;
+        textNode.on('dblclick dbltap', () => {
+            // hide text node and transformer:
+            textNode.hide();
+
+            // create textarea over canvas with absolute position
+            // first we need to find position for textarea
+            // how to find it?
+
+            // at first lets find position of text node relative to the stage:
+            var textPosition = textNode.absolutePosition();
+
+            // so position of textarea will be the sum of positions above:
+            var areaPosition = {
+                x: stage.container().offsetLeft + textPosition.x,
+                y: stage.container().offsetTop + textPosition.y,
+            };
+
+            // create textarea and style it
+            var textarea = document.createElement('textarea');
+            document.body.appendChild(textarea);
+
+            // apply many styles to match text on canvas as close as possible
+            // remember that text rendering on canvas and on the textarea can be different
+            // and sometimes it is hard to make it 100% the same. But we will try...
+            textarea.value = this.helper.calculateLength(line).toFixed(2).toString();
+            textarea.style.position = 'absolute';
+            textarea.style.top = areaPosition.y + 'px';
+            textarea.style.left = areaPosition.x + 'px';
+            textarea.style.width = textNode.width() - textNode.padding() * 2 + 'px';
+            textarea.style.height =
+                textNode.height() - textNode.padding() * 2 + 5 + 'px';
+            textarea.style.fontSize = textNode.fontSize() + 'px';
+            textarea.style.border = 'none';
+            textarea.style.padding = '0px';
+            textarea.style.margin = '0px';
+            textarea.style.overflow = 'hidden';
+            textarea.style.background = 'none';
+            textarea.style.outline = 'none';
+            textarea.style.resize = 'none';
+            textarea.style.lineHeight = textNode.lineHeight().toString();
+            textarea.style.fontFamily = textNode.fontFamily();
+            textarea.style.transformOrigin = 'left top';
+            textarea.style.textAlign = textNode.align();
+            textarea.style.color = textNode.fill();
+            let rotation = textNode.rotation();
+            let transform = '';
+            if (rotation) {
+                transform += 'rotateZ(' + rotation + 'deg)';
+            }
+
+            let px = 0;
+            // also we need to slightly move textarea on firefox
+            // because it jumps a bit
+            let isFirefox =
+                navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+            if (isFirefox) {
+                px += 2 + Math.round(textNode.fontSize() / 20);
+            }
+            transform += 'translateY(-' + px + 'px)';
+
+            textarea.style.transform = transform;
+
+            // reset height
+            textarea.style.height = 'auto';
+            // after browsers resized it we can set actual value
+            textarea.style.height = textarea.scrollHeight + 3 + 'px';
+
+            textarea.focus();
+
+            function removeTextarea() {
+                textarea.parentNode?.removeChild(textarea);
+                window.removeEventListener('click', handleOutsideClick);
+                textNode.show();
+                //   tr.show();
+                //   tr.forceUpdate();
+            }
+
+            function setTextareaWidth(newWidth: number) {
+                if (!newWidth) {
+                    // set width for placeholder
+                    newWidth = textNode.width();//textNode.placeholder.length * textNode.fontSize();
+                }
+                // some extra fixes on different browsers
+                var isSafari = /^((?!chrome|android).)*safari/i.test(
+                    navigator.userAgent
+                );
+                var isFirefox =
+                    navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+                if (isSafari || isFirefox) {
+                    newWidth = Math.ceil(newWidth);
+                }
+
+                // @ts-ignore
+                const isEdge = document.documentMode || /Edge/.test(navigator.userAgent);
+                if (isEdge) {
+                    newWidth += 1;
+                }
+                textarea.style.width = newWidth + 'px';
+            }
+
+            textarea.addEventListener('keydown', (e) => {
+                // hide on enter
+                // but don't hide on shift + enter
+                if (e.keyCode === 13 && !e.shiftKey) {
+                    updateTextAndLine();
+                }
+                // on esc do not set value back to node
+                if (e.keyCode === 27) {
+                    removeTextarea();
+                }
+            });
+
+            textarea.addEventListener('keydown', function (e) {
+                let scale = textNode.getAbsoluteScale().x;
+                setTextareaWidth(textNode.width() * scale);
+                textarea.style.height = 'auto';
+                textarea.style.height =
+                    textarea.scrollHeight + textNode.fontSize() + 'px';
+            });
+
+            function handleOutsideClick(e: any) {
+                if (e.target !== textarea) {
+                    textNode.text(textarea.value);
+                    updateTextAndLine();
+                }
+            }
+
+            const _this = this;
+            function updateTextAndLine() {
+                const length = parseFloat(textarea.value);
+                //textNode.text(length.toFixed(2) + " mm");
+                const point = _this.helper.findPoint(line, length);
+                const points = line.points();
+                points[points.length - 2] = point.x;
+                points[points.length - 1] = point.y;
+                line.points(points);
+                removeTextarea();
+                _this.updateText(textNode, line);
+            }
+            setTimeout(() => {
+                window.addEventListener('click', handleOutsideClick);
+            });
+        });
+    }*/
 }
