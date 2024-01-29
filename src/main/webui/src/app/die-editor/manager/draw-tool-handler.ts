@@ -30,11 +30,14 @@ export class DrawToolHandler extends ToolHandler {
 
     override onMouseDown(event: KonvaEventObject<any>): void {
         if (event.target.getAttr(EDITABLE_TEXT)) return;
+        const pos = this.startingPoint = this.editor.getSnappedToGridPointer();
+        if (this.lines.length > 0) {
+            const vertex = this.getEndPoints().find(v => v.x == pos.x && v.y == pos.y);
+            if (!vertex) return;
+        }
 
         this.isDrawing = true;
-        const pos = this.startingPoint = this.editor.getSnappedToGridPointer();
-
-        this.lineMeasure = new LineMeasurement(this.editor, pos);
+        this.lineMeasure = new LineMeasurement(this, pos);
         this.lineMeasure.addToLayer();
     }
 
@@ -68,6 +71,59 @@ export class DrawToolHandler extends ToolHandler {
         }
 
         this.lineMeasure = undefined;
+    }
+
+    private getVertices(): Konva.Vector2d[] {
+        return this.lines.flatMap(l => {
+            const points = l.line.points();
+            const vertices: Konva.Vector2d[] = [];
+            for (let i = 0; i < points.length - 1; i += 2) {
+                vertices.push({ x: points[i], y: points[i + 1] });
+            }
+            return vertices;
+        });
+    }
+
+    private getEndPoints(): Konva.Vector2d[] {
+        const vectors = this.getVertices();
+        const vectorCountMap: Record<string, number> = {};
+
+        // Count the occurrences of each vector
+        for (const vector of vectors) {
+            const key = `${vector.x}-${vector.y}`;
+            vectorCountMap[key] = (vectorCountMap[key] || 0) + 1;
+        }
+
+        // Filter out vectors that occur only once
+        const uniqueVectors = vectors.filter(vector => {
+            const key = `${vector.x}-${vector.y}`;
+            return vectorCountMap[key] === 1;
+        });
+
+        return uniqueVectors;
+    }
+
+    private findAttachedLines(line: Konva.Line): Konva.Line[] {
+        const attachedLines: Konva.Line[] = [];
+        const coords = this.helper.lineToCoords(line);
+        for (const mLine of this.lines) {
+            const points = this.helper.lineToCoords(mLine.line);
+            if (points.x1 == coords.x1 && points.x2 == coords.x2 && points.y1 == coords.y1 && points.y2 == coords.y2) {
+                attachedLines.push(mLine.line);
+            }
+        }
+        return attachedLines;
+    }
+
+    public findLinesWithEndpoint(endpoint: Konva.Vector2d): LineMeasurement[] {
+        const attachedLines: LineMeasurement[] = [];
+        for (const mLine of this.lines) {
+            const points = this.helper.lineToCoords(mLine.line);
+            if ((points.x1 == endpoint.x && points.y1 == endpoint.y) || (points.x2 == endpoint.x && points.y2 == endpoint.y)) {
+                attachedLines.push(mLine);
+            }
+        }
+        return attachedLines;
     }
 
     /*private createEditableText(line: Konva.Line, pos: Konva.Vector2d) {

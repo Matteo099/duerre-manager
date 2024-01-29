@@ -3,18 +3,24 @@ import { KonvaEditableText } from "./konva-editable-text";
 import { IDieEditor } from "./idie-editor";
 import { KonvaHelper } from "./konva-helper";
 import { ERASABLE } from "./constants";
+import { DrawToolHandler } from "./draw-tool-handler";
 
 export class LineMeasurement {
 
-    private readonly editor: IDieEditor;
+    private readonly drawTool: DrawToolHandler;
     private readonly group: Konva.Group;
     public readonly line: Konva.Line;
     private readonly text: KonvaEditableText;
     private readonly helper: KonvaHelper;
 
-    constructor(editor: IDieEditor, position: Konva.Vector2d) {
-        this.editor = editor;
-        this.helper = new KonvaHelper(editor);
+    public get editor(): IDieEditor {
+        return this.drawTool.editor;
+    }
+
+
+    constructor(drawTool: DrawToolHandler, position: Konva.Vector2d) {
+        this.drawTool = drawTool;
+        this.helper = new KonvaHelper(drawTool.editor);
         this.line = this.createLine(position);
         this.text = this.createText(position);
         this.group = new Konva.Group();
@@ -34,7 +40,7 @@ export class LineMeasurement {
             // add point twice, so we have some drawings even on a simple click
             points: [position.x, position.y, position.x, position.y],
         });
-        line.setAttr("ERASABLE", true);
+        //line.setAttr(ERASABLE, true);
         return line;
     }
 
@@ -90,11 +96,32 @@ export class LineMeasurement {
             const length = parseFloat(value);
             const point = this.helper.findPoint(this.line, length);
             const points = this.line.points();
-            points[points.length - 2] = point.x;
-            points[points.length - 1] = point.y;
+            const pointToUpdate = { x: points[points.length - 2], y: points[points.length - 1] };
+            console.log(this.drawTool.findLinesWithEndpoint(pointToUpdate), this.drawTool.findLinesWithEndpoint(pointToUpdate).filter(l => l.line.id() != this.line.id()));
+            const attachedLine = this.drawTool.findLinesWithEndpoint(pointToUpdate).filter(l => {
+                console.log(l.line._id, this.line._id);
+                return l.line._id != this.line._id;
+            })[0];
+            console.log(attachedLine, this.line);
+            const newX = points[points.length - 2] = point.x;
+            const newY = points[points.length - 1] = point.y;
             this.line.points(points);
+            attachedLine?.updateEndPoint(pointToUpdate, { x: newX, y: newY });
 
             this.updateText();
         } catch (error) { }
+    }
+
+    public updateEndPoint(oldPoint: Konva.Vector2d, newValue: Konva.Vector2d) {
+        const coords = this.helper.lineToCoords(this.line);
+        if (coords.x1 == oldPoint.x && coords.y1 == oldPoint.y) {
+            this.updatePoints([
+                newValue.x, newValue.y, coords.x2, coords.y2
+            ]);
+        } else if (coords.x2 == oldPoint.x && coords.y2 == oldPoint.y) {
+            this.updatePoints([
+                coords.x1, coords.y1, newValue.x, newValue.y
+            ]);
+        }
     }
 }

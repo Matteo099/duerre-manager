@@ -4,8 +4,8 @@ import { IDieEditor } from "./idie-editor";
 
 export abstract class ToolHandler {
 
-    protected editor: IDieEditor;
-    protected helper: KonvaHelper;
+    public readonly editor: IDieEditor;
+    public readonly helper: KonvaHelper;
 
     constructor(editor: IDieEditor) {
         this.editor = editor;
