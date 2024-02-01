@@ -3,6 +3,9 @@ import { KonvaEventObject } from "konva/lib/Node";
 import { IFrame } from "konva/lib/types";
 import { LineMeasurement } from "./line-measurement";
 import { ToolHandler } from "./tool-handler";
+import { KonvaEditableText } from "./konva-editable-text";
+import { IDieEditor } from "./idie-editor";
+import { Subscription } from "rxjs";
 
 export class DrawToolHandler extends ToolHandler {
 
@@ -22,6 +25,14 @@ export class DrawToolHandler extends ToolHandler {
 
     private unit: string = "mm";
 
+    constructor(editor: IDieEditor) {
+        super(editor);
+        this.subscriptions.push(KonvaEditableText.onEdit.subscribe(() => {
+            this.stopAnimationAvailablePoints();
+            this.clearGitzmos();
+        }));
+    }
+
     protected override createLayers(): void {
         this.animationLayer = new Konva.Layer({
             name: DrawToolHandler.ANIMATION_LAYER_NAME
@@ -34,8 +45,8 @@ export class DrawToolHandler extends ToolHandler {
     }
 
     override onMouseDown(event: KonvaEventObject<any>): void {
-        //if (event.target.getAttr(EDITABLE_TEXT)) return;
-
+        if(KonvaEditableText.editing) return;
+        
         const pos = this.startingPoint = this.getSnappingPoint().v;
         const hoverEndpoints = this.editor.state.canDrawNewLine(pos);
         if (!hoverEndpoints) {

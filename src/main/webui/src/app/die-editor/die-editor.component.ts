@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { DieEditorManager } from './manager/die-editor-manager';
@@ -11,7 +11,8 @@ import { Tool } from './manager/tool';
   templateUrl: './die-editor.component.html',
   styleUrl: './die-editor.component.scss'
 })
-export class DieEditorComponent implements AfterViewInit {
+export class DieEditorComponent implements AfterViewInit, OnDestroy {
+
 
   @ViewChild('stageContainer', { static: false }) stageContainer?: ElementRef;
 
@@ -32,6 +33,9 @@ export class DieEditorComponent implements AfterViewInit {
     setTimeout(() => this.editor!.useTool(Tool.DRAW), 100);
   }
 
+  ngOnDestroy(): void {
+    this.editor?.destroy();
+  }
 
   // addPolygon() {
   //   const points = this.circles.map(circle => [circle.x(), circle.y()]).flat();

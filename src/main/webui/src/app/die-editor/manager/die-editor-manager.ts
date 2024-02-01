@@ -234,4 +234,14 @@ export class DieEditorManager implements IDieEditor {
         this._stage.draw();
         this.gridManager.draw();
     }
+
+    public destroy(): void {
+        this.selectHandler.destroy(); 
+        this.drawHandler.destroy(); 
+        this.eraserHandler.destroy(); 
+        this.moveHandler.destroy();
+        this.gridManager.destroy();
+        this.layer.destroy();
+        this.stage.destroy();
+    }
 }

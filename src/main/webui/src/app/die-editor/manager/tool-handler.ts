@@ -2,6 +2,7 @@ import { KonvaEventObject } from "konva/lib/Node";
 import { KonvaHelper } from "./konva-helper";
 import { IDieEditor } from "./idie-editor";
 import Konva from "konva";
+import { Subscription } from "rxjs";
 
 export type LayerFn = (layer?: Konva.Layer) => boolean | void;
 
@@ -9,6 +10,7 @@ export abstract class ToolHandler {
 
     public readonly editor: IDieEditor;
     protected readonly layers: Konva.Layer[] = [];
+    protected subscriptions: Subscription[] = [];
 
     constructor(editor: IDieEditor) {
         this.editor = editor;
@@ -28,6 +30,11 @@ export abstract class ToolHandler {
 
     onToolDeselected(): void {
         this.layers.forEach(l => l.visible(false));
+    }
+
+    destroy() {
+        this.subscriptions.forEach(s => s.unsubscribe());
+        this.layers.forEach(l => l.destroy());
     }
 
     abstract onMouseDown(event: KonvaEventObject<any>): void;

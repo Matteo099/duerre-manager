@@ -14,6 +14,10 @@ export class GridManager {
         this.editor.stage.add(this.layer);
     }
 
+    public destroy() {
+        this.layer.destroy();
+    }
+
     public draw() {
         this.layer.clear();
         this.layer.destroyChildren();

@@ -2,8 +2,16 @@ import Konva from "konva";
 import { IDieEditor } from "./idie-editor";
 import { KonvaEventObject } from "konva/lib/Node";
 import { EDITABLE_TEXT } from "./constants";
+import { EventEmitter } from "@angular/core";
 
 export class KonvaEditableText {
+
+    private static _editing: boolean = false;
+    public static get editing(): boolean { return this._editing; }
+    public static onEdit: EventEmitter<boolean> = new EventEmitter<boolean>(false);
+    static {
+        this.onEdit.subscribe((v) => { KonvaEditableText._editing = v; });
+    }
 
     protected readonly editor: IDieEditor;
     public readonly text: Konva.Text;
@@ -29,6 +37,8 @@ export class KonvaEditableText {
     private handleDoubleTap(event: KonvaEventObject<any>) {
         console.log("handle dbl tap", this.textarea);
 
+        KonvaEditableText.onEdit.emit(true);
+
         // hide text node and transformer:
         this.text.hide();
         this.textarea = this.createTextarea();
@@ -48,7 +58,7 @@ export class KonvaEditableText {
         this.textarea.addEventListener('keydown', (e) => {
             const scale = this.text.getAbsoluteScale().x;
             if (!this.textarea) return;
-            
+
             this.setTextareaWidth(this.text.width() * scale);
             this.textarea.style.height = 'auto';
             this.textarea.style.height = this.textarea.scrollHeight + this.text.fontSize() + 'px';
@@ -68,6 +78,7 @@ export class KonvaEditableText {
     private removeTextarea(save: boolean) {
         if (save) this.onDeleteTextarea?.(this.textarea?.value);
 
+        KonvaEditableText.onEdit.emit(false);
         this.textarea?.parentNode?.removeChild(this.textarea);
         this.textarea = undefined;
         window.removeEventListener('click', this.handleOutsideClick);
@@ -75,7 +86,7 @@ export class KonvaEditableText {
     }
 
     private setTextareaWidth(newWidth: number) {
-        if(!this.textarea) return;
+        if (!this.textarea) return;
 
         if (!newWidth) {
             // set width for placeholder
