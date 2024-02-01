@@ -10,60 +10,67 @@ import Konva from "konva";
 import { KonvaHelper } from "./konva-helper";
 import { KonvaEventObject } from "konva/lib/Node";
 import { Vector2d } from "konva/lib/types";
+import { KonvaUtils } from "./konva-utils";
+import { DieState } from "./die-state";
+import { GridManager } from "./grid-manager";
 
 export class DieEditorManager implements IDieEditor {
 
+    public static readonly SCALES = [5, 4, 3, 2.5, 2, 1.5, 1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3]
+
     private _stage!: Konva.Stage;
     private _layer!: Konva.Layer;
-    private _gridLayer!: Konva.Layer;
     private _konvaHelper!: KonvaHelper;
     private _selectedTool?: Tool;
+    private _state!: DieState;
 
     private selectHandler!: SelectToolHandler;
     private drawHandler!: DrawToolHandler;
     private eraserHandler!: EraserToolHandler;
     private moveHandler!: MoveToolHandler;
-
-    get stage(): Konva.Stage { return this._stage; }
-    get layer(): Konva.Layer { return this._layer; }
-    get gridSize(): number { return 10; }
-    get zoomStep(): number { return 1; }
-    get selectedTool(): Tool | undefined { return this._selectedTool; }
+    private gridManager!: GridManager;
 
     private currentScale = 6;
-    private scales = [5, 4, 3, 2.5, 2, 1.5, 1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3]
+
+    public get stage(): Konva.Stage { return this._stage; }
+    public get layer(): Konva.Layer { return this._layer; }
+    public get gridSize(): number { return 10; }
+    public get zoomStep(): number { return 1; }
+    public get selectedTool(): Tool | undefined { return this._selectedTool; }
+    public get state(): DieState { return this._state; }
+    public get helper(): KonvaHelper { return this._konvaHelper; }
+
 
     constructor(stageContainer: ElementRef) {
         this.createCanvas(stageContainer);
+        this.createState();
         this.createTools();
         this.setupListeners();
-        this.drawGrid();
+        this.createGrid();
 
-        this.addCircles();
-
-        this.stage.add(this._gridLayer);
+        this._state = new DieState();
         this.stage.add(this.layer);
     }
 
-    addCircles() {
-        const circleData = [
-            { x: 10, y: 10, radius: 5 },
-            { x: 50, y: 50, radius: 3 },
-            { x: 50, y: 100, radius: 3 },
-            { x: 20, y: 40, radius: 3 },
-        ];
+    // addCircles() {
+    //     const circleData = [
+    //         { x: 10, y: 10, radius: 5 },
+    //         { x: 50, y: 50, radius: 3 },
+    //         { x: 50, y: 100, radius: 3 },
+    //         { x: 20, y: 40, radius: 3 },
+    //     ];
 
-        const circles = circleData.map(data => new Konva.Circle({
-            x: data.x,
-            y: data.y,
-            radius: data.radius,
-            stroke: '#ff0000',
-            strokeWidth: 1,
-            //draggable: true,
-        }));
+    //     const circles = circleData.map(data => new Konva.Circle({
+    //         x: data.x,
+    //         y: data.y,
+    //         radius: data.radius,
+    //         stroke: '#ff0000',
+    //         strokeWidth: 1,
+    //         //draggable: true,
+    //     }));
 
-        circles.forEach(circle => this.layer.add(circle));
-    }
+    //     circles.forEach(circle => this.layer.add(circle));
+    // }
 
     private createCanvas(stageContainer: ElementRef) {
         this._stage = new Konva.Stage({
@@ -74,7 +81,11 @@ export class DieEditorManager implements IDieEditor {
         });
 
         this._layer = new Konva.Layer();
-        this._gridLayer = new Konva.Layer({ x: 0, y: 0, draggable: false });
+    }
+
+    private createState() {
+        this._state = new DieState();
+        this._layer.add(this._state.polygon);
     }
 
     private createTools() {
@@ -85,106 +96,9 @@ export class DieEditorManager implements IDieEditor {
         this.moveHandler = new MoveToolHandler(this);
     }
 
-    private drawGrid() {
-        this._gridLayer.clear();
-        this._gridLayer.destroyChildren();
-        this._gridLayer.clipWidth(); // clear any clipping
-
-        const width = this._stage.width();
-        const height = this._stage.height();
-        const stepSize = 40;
-
-        const stageRect = {
-            x1: 0,
-            y1: 0,
-            x2: this._stage.width(),
-            y2: this._stage.height(),
-            offset: {
-                x: this._konvaHelper.unScale(this._stage.position().x),
-                y: this._konvaHelper.unScale(this._stage.position().y),
-            }
-        };
-        // make a rect to describe the viewport
-        const viewRect = {
-            x1: -stageRect.offset.x,
-            y1: -stageRect.offset.y,
-            x2: this._konvaHelper.unScale(width) - stageRect.offset.x,
-            y2: this._konvaHelper.unScale(height) - stageRect.offset.y
-        };
-
-        const gridOffset = {
-            x: Math.ceil(this._konvaHelper.unScale(this.stage.position().x) / stepSize) * stepSize,
-            y: Math.ceil(this._konvaHelper.unScale(this.stage.position().y) / stepSize) * stepSize,
-        };
-        const gridRect = {
-            x1: -gridOffset.x,
-            y1: -gridOffset.y,
-            x2: this._konvaHelper.unScale(width) - gridOffset.x + stepSize,
-            y2: this._konvaHelper.unScale(height) - gridOffset.y + stepSize
-        };
-        const gridFullRect = {
-            x1: Math.min(stageRect.x1, gridRect.x1),
-            y1: Math.min(stageRect.y1, gridRect.y1),
-            x2: Math.max(stageRect.x2, gridRect.x2),
-            y2: Math.max(stageRect.y2, gridRect.y2)
-        };
-
-
-
-        // set clip function to stop leaking lines into non-viewable space.
-        this._gridLayer.clip({
-            x: viewRect.x1,
-            y: viewRect.y1,
-            width: viewRect.x2 - viewRect.x1,
-            height: viewRect.y2 - viewRect.y1
-        });
-
-        const
-            // find the x & y size of the grid
-            xSize = (gridFullRect.x2 - gridFullRect.x1),
-            ySize = (gridFullRect.y2 - gridFullRect.y1),
-
-            // compute the number of steps required on each axis.
-            xSteps = Math.round(xSize / stepSize),
-            ySteps = Math.round(ySize / stepSize);
-
-        // draw vertical lines
-        for (let i = 0; i <= xSteps; i++) {
-            this._gridLayer.add(
-                new Konva.Line({
-                    x: gridFullRect.x1 + i * stepSize,
-                    y: gridFullRect.y1,
-                    points: [0, 0, 0, ySize],
-                    stroke: 'rgba(0, 0, 0, 0.2)',
-                    strokeWidth: 1,
-                })
-            );
-        }
-        //draw Horizontal lines
-        for (let i = 0; i <= ySteps; i++) {
-            this._gridLayer.add(
-                new Konva.Line({
-                    x: gridFullRect.x1,
-                    y: gridFullRect.y1 + i * stepSize,
-                    points: [0, 0, xSize, 0],
-                    stroke: 'rgba(0, 0, 0, 0.2)',
-                    strokeWidth: 1,
-                })
-            );
-        }
-
-        // Draw a border around the viewport
-        this._gridLayer.add(
-            new Konva.Rect({
-                x: viewRect.x1 + 2,
-                y: viewRect.y1 + 2,
-                width: viewRect.x2 - viewRect.x1 - 4,
-                height: viewRect.y2 - viewRect.y1 - 4,
-                strokeWidth: 4,
-                stroke: 'red'
-            }))
-
-        this._gridLayer.batchDraw();
+    private createGrid() {
+        this.gridManager = new GridManager(this);
+        this.gridManager.draw();
     }
 
     private setupListeners() {
@@ -200,7 +114,7 @@ export class DieEditorManager implements IDieEditor {
     }
 
     private handleDragend(event: KonvaEventObject<DragEvent>) {
-        this.drawGrid();
+        this.gridManager.draw();
     }
 
     private handleMouseDown(event: KonvaEventObject<any>) {
@@ -230,24 +144,28 @@ export class DieEditorManager implements IDieEditor {
         }
     }
 
-    public getSnappedToNearObject(points?: Konva.Vector2d[]): Konva.Vector2d {
+    public getSnappedToNearObject(points?: Konva.Vector2d[]): { v: Konva.Vector2d, obj: "grid" | "vertex" } {
         const pointer = this.stage.getRelativePointerPosition()!;
 
         // find nearest grid point
-        const gridPoint = this._konvaHelper.snapToGrid(pointer);
+        const gridPoint = KonvaUtils.snapToGrid(pointer);
         let nearestPoint = gridPoint;
 
         if (points) {
             // find nearest point
             points.push(gridPoint)
             nearestPoint = points.reduce((nearest: Konva.Vector2d, current: Konva.Vector2d) => {
-                const distanceToCurrent = this._konvaHelper.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: current.x, y2: current.y });
-                const distanceToNearest = nearest ? this._konvaHelper.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: nearest.x, y2: nearest.y }) : Infinity;
+                const distanceToCurrent = KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: current.x, y2: current.y });
+                const distanceToNearest = nearest ? KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: nearest.x, y2: nearest.y }) : Infinity;
 
                 return distanceToCurrent < distanceToNearest ? current : nearest;
             });
         }
-        return nearestPoint;
+
+        return {
+            v: nearestPoint,
+            obj: nearestPoint == gridPoint ? "grid" : "vertex"
+        };
     }
 
     public useTool(tool: Tool) {
@@ -264,7 +182,7 @@ export class DieEditorManager implements IDieEditor {
         this._stage.width(fullWidth);
         this._stage.height(fullHeight);
 
-        this.drawGrid();
+        this.gridManager.draw();
     }
 
     public zoomIn() {
@@ -300,10 +218,10 @@ export class DieEditorManager implements IDieEditor {
             this.currentScale = this.currentScale > 0 ? this.currentScale - 1 : this.currentScale;
         }
         else {
-            this.currentScale = this.currentScale < this.scales.length - 1 ? this.currentScale + 1 : this.currentScale;
+            this.currentScale = this.currentScale < DieEditorManager.SCALES.length - 1 ? this.currentScale + 1 : this.currentScale;
         }
 
-        const newScale = this.scales[this.currentScale];
+        const newScale = DieEditorManager.SCALES[this.currentScale];
 
         this._stage.scale({ x: newScale, y: newScale });
 
@@ -314,6 +232,6 @@ export class DieEditorManager implements IDieEditor {
 
         this._stage.position(newPos);
         this._stage.draw();
-        this.drawGrid();
+        this.gridManager.draw();
     }
 }

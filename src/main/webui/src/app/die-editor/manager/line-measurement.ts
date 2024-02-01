@@ -1,34 +1,26 @@
 import Konva from "konva";
-import { KonvaEditableText } from "./konva-editable-text";
-import { IDieEditor } from "./idie-editor";
-import { KonvaHelper } from "./konva-helper";
 import { ERASABLE } from "./constants";
-import { DrawToolHandler } from "./draw-tool-handler";
+import { IDieEditor } from "./idie-editor";
+import { KonvaEditableText } from "./konva-editable-text";
+import { KonvaUtils } from "./konva-utils";
 
 export class LineMeasurement {
 
-    private readonly drawTool: DrawToolHandler;
-    private readonly group: Konva.Group;
+    private readonly editor: IDieEditor;
+    public readonly group: Konva.Group;
     public readonly line: Konva.Line;
-    private readonly text: KonvaEditableText;
-    private readonly helper: KonvaHelper;
+    public readonly text: KonvaEditableText;
 
-    public get editor(): IDieEditor {
-        return this.drawTool.editor;
-    }
+    public onLengthChange?: Function;
 
-
-    constructor(drawTool: DrawToolHandler, position: Konva.Vector2d) {
-        this.drawTool = drawTool;
-        this.helper = new KonvaHelper(drawTool.editor);
+    constructor(editor: IDieEditor, position: Konva.Vector2d) {
+        this.editor = editor;
         this.line = this.createLine(position);
         this.text = this.createText(position);
-        this.group = new Konva.Group();
-        this.group.setAttr(ERASABLE, true);
-        this.group.add(this.line, this.text.text);
+        this.group = this.createGroup();
     }
 
-    private createLine(position: Konva.Vector2d) {
+    private createLine(position: Konva.Vector2d): Konva.Line {
         const line = new Konva.Line({
             stroke: '#df4b26',
             strokeWidth: 5,
@@ -40,7 +32,6 @@ export class LineMeasurement {
             // add point twice, so we have some drawings even on a simple click
             points: [position.x, position.y, position.x, position.y],
         });
-        //line.setAttr(ERASABLE, true);
         return line;
     }
 
@@ -56,12 +47,15 @@ export class LineMeasurement {
         });
         text.text.setAttr("MEASUREMENT", true);
         text.onDeleteTextarea = (v: string) => this.onDeleteTextarea(v);
-        text.beforeCreateTextarea = () => { this.text.text.text(this.helper.calculateLength(this.line).toFixed(2).toString()); }
+        text.beforeCreateTextarea = () => { this.text.text.text(KonvaUtils.calculateLength(this.line).toFixed(2).toString()); }
         return text;
     }
 
-    public addToLayer() {
-        this.editor.layer.add(this.group);
+    private createGroup() : Konva.Group {
+        const group = new Konva.Group();
+        group.setAttr(ERASABLE, true);
+        group.add(this.line, this.text.text);
+        return group;
     }
 
     public updatePoints(newPoints: number[]) {
@@ -72,43 +66,37 @@ export class LineMeasurement {
     public updateText() {
         const width = this.text.text.width() || 0;
         const height = this.text.text.height() || 0;
-        const middlePoint = this.helper.calculateMiddlePoint(this.line);
-        const length = this.helper.calculateLength(this.line).toFixed(2);
+        const middlePoint = KonvaUtils.calculateMiddlePoint(this.line);
+        const length = KonvaUtils.calculateLength(this.line).toFixed(2);
         this.text.text.x(middlePoint.x - width / 2);
         this.text.text.y(middlePoint.y - height / 2);
         this.text.text.text(length + " mm");
     }
 
     public getLength(): number {
-        return this.helper.calculateLength(this.line);
+        return KonvaUtils.calculateLength(this.line);
     }
 
     public destroy() {
-        // TODO: check if the children are removed
         this.group.destroy();
-        // this.line.destroy();
-        // this.text.text.destroy();
     }
 
     private onDeleteTextarea(value: string) {
         console.log(value);
         try {
             const length = parseFloat(value);
-            const point = this.helper.findPoint(this.line, length);
-            const points = this.line.points();
-            const pointToUpdate = { x: points[points.length - 2], y: points[points.length - 1] };
-            const attachedLine = this.drawTool.findLinesWithEndpoint(pointToUpdate).filter(l => l.line._id != this.line._id)[0];
-            const newX = points[points.length - 2] = point.x;
-            const newY = points[points.length - 1] = point.y;
-            this.line.points(points);
-            attachedLine?.updateEndPoint(pointToUpdate, { x: newX, y: newY });
-
-            this.updateText();
+            const point = KonvaUtils.findPoint(this.line, length);
+            const oldPoints = this.line.points();
+            const newPoints = [...oldPoints];
+            newPoints[newPoints.length - 2] = point.x;
+            newPoints[newPoints.length - 1] = point.y;
+            this.updatePoints(newPoints);
+            this.onLengthChange?.(KonvaUtils.pointsVector2d(oldPoints)[1], KonvaUtils.pointsVector2d(newPoints)[1]);
         } catch (error) { }
     }
 
     public updateEndPoint(oldPoint: Konva.Vector2d, newValue: Konva.Vector2d) {
-        const coords = this.helper.lineToCoords(this.line);
+        const coords = KonvaUtils.lineToCoords(this.line);
         if (coords.x1 == oldPoint.x && coords.y1 == oldPoint.y) {
             this.updatePoints([
                 newValue.x, newValue.y, coords.x2, coords.y2

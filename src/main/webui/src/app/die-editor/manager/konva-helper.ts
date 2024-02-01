@@ -10,22 +10,6 @@ export class KonvaHelper {
         this.editor = editor;
     }
 
-    public snapToGrid(pointer: Konva.Vector2d): Konva.Vector2d {
-        const stepSize = 40;
-
-        // Calculate the offset based on the grid step size
-        const gridOffset = {
-            x: Math.round(pointer.x / stepSize) * stepSize,
-            y: Math.round(pointer.y / stepSize) * stepSize,
-        };
-
-        return {
-            x: gridOffset.x,
-            y: gridOffset.y,
-        };
-    }
-
-
     public unScale(val: number) {
         return (val / this.editor.stage.scaleX());
     }
@@ -48,75 +32,6 @@ export class KonvaHelper {
     //     return false;
     // }
 
-    public lineToCoords(line: Konva.Line): { x1: number, y1: number, x2: number, y2: number } {
-        const coords = line.points();
-        return { x1: coords[0], y1: coords[1], x2: coords[2], y2: coords[3] };
-    }
-
-    public calculateDistance(coords: { x1: number, y1: number, x2: number, y2: number }): number {
-        return Math.sqrt(Math.pow(coords.x2 - coords.x1, 2) + Math.pow(coords.y2 - coords.y1, 2));
-    }
-
-    public calculateAngle(coords: { x1: number, y1: number, x2: number, y2: number } | number[], degree: boolean = true): number {
-        let points: { x1: number, y1: number, x2: number, y2: number };
-        if (!('x1' in coords)) {
-            points = { x1: coords[0], y1: coords[1], x2: coords[2], y2: coords[3] };
-        } else {
-            points = coords;
-        }
-
-        const angleRad = Math.atan2(points.y2 - points.y1, points.x2 - points.x1);
-        if (degree) {
-            let angleDeg = (angleRad * 180) / Math.PI;
-
-            // Ensure the angle is positive
-            if (angleDeg < 0) {
-                angleDeg += 360;
-            }
-
-            return 360 - angleDeg;
-        }
-        return angleRad;
-    }
-
-    public calculateLength(line: Konva.Line): number {
-        const points = line.points();
-        return this.calculateDistance({
-            x1: points[0],
-            y1: points[1],
-            x2: points[points.length - 2],
-            y2: points[points.length - 1]
-        });
-    }
-
-    public calculateMiddlePoint(line: Konva.Line): Konva.Vector2d {
-        const points = line.points();
-        return {
-            x: points[0] - (points[0] - points[points.length - 2]) / 2,
-            y: points[1] - (points[1] - points[points.length - 1]) / 2
-        };
-    }
-
-    public findPoint(line: Konva.Line, distance: number): { x: number, y: number } {
-        const points = this.lineToCoords(line);
-        
-        // Calculate the direction vector of the line
-        const dx = points.x2 - points.x1;
-        const dy = points.y2 - points.y1;
-
-        // Calculate the length of the line segment
-        const length = Math.sqrt(dx * dx + dy * dy);
-
-        // Normalize the direction vector
-        const normalizedDx = dx / length;
-        const normalizedDy = dy / length;
-
-        // Calculate the coordinates of the third point
-        const x3 = points.x1 + normalizedDx * distance;
-        const y3 = points.y1 + normalizedDy * distance;
-
-        return { x: x3, y: y3 };
-    }
 
     public createHorizontalInfo(line: Konva.Line) {
         const offset = 20;

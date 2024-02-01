@@ -1,19 +1,34 @@
 import { KonvaEventObject } from "konva/lib/Node";
 import { KonvaHelper } from "./konva-helper";
 import { IDieEditor } from "./idie-editor";
+import Konva from "konva";
+
+export type LayerFn = (layer?: Konva.Layer) => boolean | void;
 
 export abstract class ToolHandler {
 
     public readonly editor: IDieEditor;
-    public readonly helper: KonvaHelper;
+    protected readonly layers: Konva.Layer[] = [];
 
     constructor(editor: IDieEditor) {
         this.editor = editor;
-        this.helper = new KonvaHelper(editor);
+        this.createLayers();
+        this.layers.forEach(l => this.editor.stage.add(l));
     }
 
-    onToolSelected(): void { }
-    onToolDeselected(): void { }
+    protected createLayers(): void { }
+    
+    protected getLayer(selector: number | LayerFn): Konva.Layer | undefined {
+        return this.layers.find(l => l._id == selector || (selector instanceof Function ? selector(l) : false));
+    }
+
+    onToolSelected(): void {
+        this.layers.forEach(l => l.visible(true));
+    }
+
+    onToolDeselected(): void {
+        this.layers.forEach(l => l.visible(false));
+    }
 
     abstract onMouseDown(event: KonvaEventObject<any>): void;
     abstract onMouseMove(event: KonvaEventObject<any>): void;
