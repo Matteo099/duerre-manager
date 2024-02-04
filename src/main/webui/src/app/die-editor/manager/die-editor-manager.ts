@@ -1,18 +1,17 @@
 import { ElementRef } from "@angular/core";
-import { DrawToolHandler } from "./draw-tool-handler";
+import Konva from "konva";
+import { KonvaEventObject } from "konva/lib/Node";
+import { DieState } from "./die-state";
+import { DrawToolHandler2 } from "./draw-tool-handler2";
 import { EraserToolHandler } from "./eraser-tool-handler";
+import { GridManager } from "./grid-manager";
 import { IDieEditor } from "./idie-editor";
+import { KonvaHelper } from "./konva-helper";
+import { KonvaUtils } from "./konva-utils";
 import { MoveToolHandler } from "./move-tool-handler";
 import { SelectToolHandler } from "./select-tool-handler";
 import { Tool } from "./tool";
 import { ToolHandler } from "./tool-handler";
-import Konva from "konva";
-import { KonvaHelper } from "./konva-helper";
-import { KonvaEventObject } from "konva/lib/Node";
-import { Vector2d } from "konva/lib/types";
-import { KonvaUtils } from "./konva-utils";
-import { DieState } from "./die-state";
-import { GridManager } from "./grid-manager";
 
 export class DieEditorManager implements IDieEditor {
 
@@ -23,9 +22,10 @@ export class DieEditorManager implements IDieEditor {
     private _konvaHelper!: KonvaHelper;
     private _selectedTool?: Tool;
     private _state!: DieState;
+    private _selectedToolHandler?: ToolHandler;
 
     private selectHandler!: SelectToolHandler;
-    private drawHandler!: DrawToolHandler;
+    private drawHandler!: DrawToolHandler2;
     private eraserHandler!: EraserToolHandler;
     private moveHandler!: MoveToolHandler;
     private gridManager!: GridManager;
@@ -91,7 +91,7 @@ export class DieEditorManager implements IDieEditor {
     private createTools() {
         this._konvaHelper = new KonvaHelper(this);
         this.selectHandler = new SelectToolHandler(this);
-        this.drawHandler = new DrawToolHandler(this);
+        this.drawHandler = new DrawToolHandler2(this);
         this.eraserHandler = new EraserToolHandler(this);
         this.moveHandler = new MoveToolHandler(this);
     }
@@ -118,30 +118,16 @@ export class DieEditorManager implements IDieEditor {
     }
 
     private handleMouseDown(event: KonvaEventObject<any>) {
-        this.getToolHandler()?.onMouseDown(event);
+        console.log(this._selectedToolHandler);
+        this._selectedToolHandler?.onMouseDown(event);
     }
 
     private handleMouseMove(event: KonvaEventObject<any>) {
-        this.getToolHandler()?.onMouseMove(event);
+        this._selectedToolHandler?.onMouseMove(event);
     }
 
     private handleMouseUp(event: KonvaEventObject<any>) {
-        this.getToolHandler()?.onMouseUp(event);
-    }
-
-    private getToolHandler(): ToolHandler | undefined {
-        switch (this._selectedTool) {
-            case Tool.SELECT:
-                return this.selectHandler;
-            case Tool.DRAW:
-                return this.drawHandler;
-            case Tool.ERASER:
-                return this.eraserHandler;
-            case Tool.MOVE:
-                return this.moveHandler;
-            default:
-                return undefined;
-        }
+        this._selectedToolHandler?.onMouseUp(event);
     }
 
     public getSnappedToNearObject(points?: Konva.Vector2d[]): { v: Konva.Vector2d, obj: "grid" | "vertex" } {
@@ -169,9 +155,29 @@ export class DieEditorManager implements IDieEditor {
     }
 
     public useTool(tool: Tool) {
-        this.getToolHandler()?.onToolDeselected();
+        console.log(tool, tool === Tool.DRAW_LINE);
         this._selectedTool = tool;
-        this.getToolHandler()?.onToolSelected();
+
+        this._selectedToolHandler?.onToolDeselected();
+        switch (tool) {
+            case Tool.SELECT:
+                this._selectedToolHandler = this.selectHandler;
+                break;
+            case Tool.DRAW_LINE:
+            case Tool.DRAW_CURVE:
+                this._selectedToolHandler = this.drawHandler;
+                break;
+            case Tool.ERASER:
+                this._selectedToolHandler = this.eraserHandler;
+                break;
+            case Tool.MOVE:
+                this._selectedToolHandler = this.moveHandler;
+                break;
+            default:
+                this._selectedToolHandler = undefined;
+                break;
+        }
+        this._selectedToolHandler?.onToolSelected();
     }
 
     public resize(stageContainer: ElementRef) {

@@ -6,8 +6,11 @@
                 <button mat-mini-fab [color]="getColor(Tool.EDIT)" (click)="useSelectTool()" class="mb-2">
                     <mat-icon>touch_app</mat-icon>
                 </button>
-                <button mat-mini-fab [color]="getColor(Tool.DRAW)" (click)="useDrawTool()" class="mb-2">
-                    <mat-icon>draw</mat-icon>
+                <button mat-mini-fab [color]="getColor(Tool.DRAW_LINE)" (click)="useDrawTool(Tool.DRAW_LINE)" class="mb-2">
+                    <mat-icon>timeline</mat-icon>
+                </button>
+                <button mat-mini-fab [color]="getColor(Tool.DRAW_CURVE)" (click)="useDrawTool(Tool.DRAW_CURVE)" class="mb-2">
+                    <mat-icon>gesture</mat-icon>
                 </button>
                 <button mat-mini-fab [color]="getColor(Tool.ERASER)" (click)="useEraserTool()" class="mb-2">
                     <mat-icon>backspace</mat-icon>
