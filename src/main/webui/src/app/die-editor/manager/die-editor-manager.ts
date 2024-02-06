@@ -13,6 +13,7 @@ import { Vector2d } from "konva/lib/types";
 import { KonvaUtils } from "./konva-utils";
 import { DieState } from "./die-state";
 import { GridManager } from "./grid-manager";
+import { GuidelinesManager } from "./guidelines-manager";
 
 export class DieEditorManager implements IDieEditor {
 
@@ -29,6 +30,7 @@ export class DieEditorManager implements IDieEditor {
     private eraserHandler!: EraserToolHandler;
     private moveHandler!: MoveToolHandler;
     private gridManager!: GridManager;
+    private guidlinesManager!: GuidelinesManager;
 
     private currentScale = 6;
 
@@ -94,6 +96,7 @@ export class DieEditorManager implements IDieEditor {
         this.drawHandler = new DrawToolHandler(this);
         this.eraserHandler = new EraserToolHandler(this);
         this.moveHandler = new MoveToolHandler(this);
+        this.guidlinesManager = new GuidelinesManager(this);
     }
 
     private createGrid() {
@@ -127,6 +130,7 @@ export class DieEditorManager implements IDieEditor {
 
     private handleMouseUp(event: KonvaEventObject<any>) {
         this.getToolHandler()?.onMouseUp(event);
+        this.guidlinesManager.onDragEnd(event);
     }
 
     private getToolHandler(): ToolHandler | undefined {
