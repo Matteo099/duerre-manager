@@ -1,24 +1,23 @@
 import Konva from "konva";
 import { KonvaEventObject } from "konva/lib/Node";
 import { IFrame } from "konva/lib/types";
-import { LineMeasurement } from "./line-measurement";
-import { ToolHandler } from "./tool-handler";
-import { KonvaEditableText } from "./konva-editable-text";
 import { IDieEditor } from "./idie-editor";
+import { KonvaEditableText } from "./konva-editable-text";
+import { BezierLineExt, LineExt, MeasurableShape } from "./measurable-shape";
 import { Tool } from "./tool";
+import { ToolHandler } from "./tool-handler";
 
-export class DrawToolHandler extends ToolHandler {
+export class DrawToolHandler2 extends ToolHandler {
 
     public static readonly ANIMATION_LAYER_NAME = "ANIMATION_LAYER";
     public static readonly GIZMO_LAYER_NAME = "GIZMO_LAYER";
 
     private isDrawing: boolean = false;
     private startingPoint?: Konva.Vector2d;
-    private drawingLine?: LineMeasurement;
-    private drawType: 'LINE' | 'CURVE' = 'LINE';
+    private drawingLine?: MeasurableShape<LineExt | BezierLineExt>;
 
-    public get isDrawingLine(): boolean { return this.drawType == 'LINE'; }
-    public get isDrawingCurve(): boolean { return this.drawType == 'CURVE'; }
+    public get isDrawingLine(): boolean { return this.editor.selectedTool == Tool.DRAW_LINE; }
+    public get isDrawingCurve(): boolean { return this.editor.selectedTool == Tool.DRAW_CURVE; }
 
     // I memorize a reference only to optimize the animations
     private animationLayer?: Konva.Layer;
@@ -36,22 +35,19 @@ export class DrawToolHandler extends ToolHandler {
         }));
     }
 
-    override onToolSelected(): void {
-        this.drawType = this.editor.selectedTool == Tool.DRAW_LINE ? 'LINE' : 'CURVE';
-    }
-
     protected override createLayers(): void {
         this.animationLayer = new Konva.Layer({
-            name: DrawToolHandler.ANIMATION_LAYER_NAME
+            name: DrawToolHandler2.ANIMATION_LAYER_NAME
         });
         this.layers.push(this.animationLayer);
         this.gizmoLayer = new Konva.Layer({
-            name: DrawToolHandler.GIZMO_LAYER_NAME
+            name: DrawToolHandler2.GIZMO_LAYER_NAME
         });
         this.layers.push(this.gizmoLayer);
     }
 
     override onMouseDown(event: KonvaEventObject<any>): void {
+        debugger;
         if (KonvaEditableText.editing) return;
 
         const pos = this.startingPoint = this.getSnappingPoint().v;
@@ -64,7 +60,8 @@ export class DrawToolHandler extends ToolHandler {
         this.stopAnimationAvailablePoints();
         this.showGitzmoOnPointer(pos);
         this.isDrawing = true;
-        this.drawingLine = new LineMeasurement(this.editor, pos);
+        this.drawingLine = new MeasurableShape<any>(this.editor, pos, this.isDrawingLine ? LineExt : BezierLineExt);
+        console.log(this.drawingLine);
         this.editor.layer.add(this.drawingLine.group);
     }
 
@@ -87,8 +84,9 @@ export class DrawToolHandler extends ToolHandler {
 
         this.clearGitzmos();
         const pos = this.getSnappingPoint().v;
-        const newPoints = [this.startingPoint!.x, this.startingPoint!.y, pos.x, pos.y];
-        this.drawingLine.updatePoints(newPoints);
+        //const newPoints = [this.startingPoint!.x, this.startingPoint!.y, pos.x, pos.y];
+        //this.drawingLine.updatePoints(newPoints);
+        this.drawingLine.updateEndpoint('end', pos);
 
         if (this.drawingLine.getLength() > 0) {
             this.editor.state.addLine(this.drawingLine);

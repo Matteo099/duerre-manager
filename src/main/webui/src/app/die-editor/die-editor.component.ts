@@ -30,7 +30,7 @@ export class DieEditorComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     this.editor = new DieEditorManager(this.stageContainer!);
-    setTimeout(() => this.editor!.useTool(Tool.DRAW), 100);
+    setTimeout(() => this.editor!.useTool(Tool.DRAW_LINE), 100);
   }
 
   ngOnDestroy(): void {
@@ -129,8 +129,8 @@ export class DieEditorComponent implements AfterViewInit, OnDestroy {
   useSelectTool() {
     this.editor?.useTool(Tool.SELECT);
   }
-  useDrawTool() {
-    this.editor?.useTool(Tool.DRAW);
+  useDrawTool(drawingTool: Tool) {
+    this.editor?.useTool(drawingTool);
   }
   useEraserTool() {
     this.editor?.useTool(Tool.ERASER);

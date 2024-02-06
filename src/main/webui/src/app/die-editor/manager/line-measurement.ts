@@ -3,15 +3,20 @@ import { ERASABLE } from "./constants";
 import { IDieEditor } from "./idie-editor";
 import { KonvaEditableText } from "./konva-editable-text";
 import { KonvaUtils } from "./konva-utils";
+import { BezierLine, Quad } from "./benzier-line";
+import { IMeasurableShape, LengthChangeFn } from "./measurable-shape";
+import { Vector2d } from "konva/lib/types";
 
-export class LineMeasurement {
+export class LineMeasurement implements IMeasurableShape {
 
     private readonly editor: IDieEditor;
     public readonly group: Konva.Group;
     public readonly line: Konva.Line;
     public readonly text: KonvaEditableText;
 
-    public onLengthChange?: Function;
+    get extShape(): any { return this.line; };
+
+    public onLengthChange?: LengthChangeFn;
 
     constructor(editor: IDieEditor, position: Konva.Vector2d) {
         this.editor = editor;
@@ -35,6 +40,20 @@ export class LineMeasurement {
         return line;
     }
 
+    public createCurve() {
+        const quad: Quad = new Quad(
+            { x: 60, y: 30 },//buildAnchor(60, 30),
+            { x: 240, y: 110 },//buildAnchor(240, 110),
+            { x: 80, y: 160 },//buildAnchor(80, 160),
+        );
+        const curve = new BezierLine({
+            quad,
+            stroke: 'red',
+            strokeWidth: 4
+        });
+        return curve;
+    }
+
     private createText(position: Konva.Vector2d): KonvaEditableText {
         const text = new KonvaEditableText(this.editor, {
             x: position.x,
@@ -51,7 +70,7 @@ export class LineMeasurement {
         return text;
     }
 
-    private createGroup() : Konva.Group {
+    private createGroup(): Konva.Group {
         const group = new Konva.Group();
         group.setAttr(ERASABLE, true);
         group.add(this.line, this.text.text);
@@ -91,20 +110,24 @@ export class LineMeasurement {
             newPoints[newPoints.length - 2] = point.x;
             newPoints[newPoints.length - 1] = point.y;
             this.updatePoints(newPoints);
-            this.onLengthChange?.(KonvaUtils.pointsVector2d(oldPoints)[1], KonvaUtils.pointsVector2d(newPoints)[1]);
+
+            //this.onLengthChange?.(KonvaUtils.pointsVector2d(oldPoints)[1], KonvaUtils.pointsVector2d(newPoints)[1]);
         } catch (error) { }
     }
 
-    public updateEndPoint(oldPoint: Konva.Vector2d, newValue: Konva.Vector2d) {
-        const coords = KonvaUtils.lineToCoords(this.line);
-        if (coords.x1 == oldPoint.x && coords.y1 == oldPoint.y) {
-            this.updatePoints([
-                newValue.x, newValue.y, coords.x2, coords.y2
-            ]);
-        } else if (coords.x2 == oldPoint.x && coords.y2 == oldPoint.y) {
-            this.updatePoints([
-                coords.x1, coords.y1, newValue.x, newValue.y
-            ]);
+    public updateEndpoint(oldPoint: Vector2d | "start" | "end", newValue: Vector2d): void {
+        if (typeof oldPoint === 'object') {
+            const coords = KonvaUtils.lineToCoords(this.line);
+            if (coords.x1 == oldPoint.x && coords.y1 == oldPoint.y) {
+                this.updatePoints([
+                    newValue.x, newValue.y, coords.x2, coords.y2
+                ]);
+            } else if (coords.x2 == oldPoint.x && coords.y2 == oldPoint.y) {
+                this.updatePoints([
+                    coords.x1, coords.y1, newValue.x, newValue.y
+                ]);
+            }
         }
+        throw new Error("Method not implemented.");
     }
 }
