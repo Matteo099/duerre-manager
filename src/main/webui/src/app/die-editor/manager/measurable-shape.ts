@@ -4,6 +4,7 @@ import { KonvaEditableText } from "./konva-editable-text";
 import { ERASABLE } from "./constants";
 import { KonvaUtils } from "./konva-utils";
 import { Quad } from "./benzier-line";
+import { Vector2d } from "konva/lib/types";
 
 
 export interface IExtendedShape<S extends Konva.Shape> {
@@ -23,6 +24,7 @@ export abstract class ExtendedShape<S extends Konva.Shape> implements IExtendedS
     constructor(position: Konva.Vector2d) {
         this._shape = this.createShape(position);
     }
+    abstract getEndPoints(): Vector2d[]
     abstract getPoints(): number[];
     abstract setPoints(p: number[]): S;
     abstract calculateLength(): number;
@@ -48,6 +50,10 @@ export class LineExt extends ExtendedShape<Konva.Line> {
             points: [position.x, position.y, position.x, position.y],
         });
         return line;
+    }
+
+    override getEndPoints(): Vector2d[] {
+        return KonvaUtils.pointsVector2d(this.getPoints());
     }
 
     getPoints(): number[] {
@@ -90,11 +96,14 @@ export class LineExt extends ExtendedShape<Konva.Line> {
 }
 
 export class BezierLineExt extends ExtendedShape<Konva.Shape> {
-    private quad!: Quad;
+    public quad!: Quad;
     private readonly numberOfPoints: number = 100;
 
     protected override createShape(position: Konva.Vector2d): Konva.Shape {
-        this.quad = new Quad(position, { x: position.x, y: position.y + 10 }, position);
+        this.quad = new Quad(
+            { x: position.x, y: position.y },
+            { x: position.x, y: position.y + 50 },
+            { x: position.x, y: position.y });
 
         const bezierLine = new Konva.Shape({
             stroke: '#df4b26',
@@ -105,6 +114,7 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
             lineJoin: 'round',
             hitStrokeWidth: 20,
             sceneFunc: (ctx, shape) => {
+                console.log(JSON.stringify(this.quad));
                 ctx.beginPath();
                 ctx.moveTo(this.quad.start.x, this.quad.start.y);
                 ctx.quadraticCurveTo(
@@ -119,6 +129,10 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
         return bezierLine;
     }
 
+    getEndPoints(): Vector2d[] {
+        return [{ x: this.quad.start.x, y: this.quad.start.y }, { x: this.quad.end.x, y: this.quad.end.y }];
+    }
+
     getPoints(): number[] {
         const points: number[] = [];
         for (let t = 0; t <= 1; t += 1 / this.numberOfPoints) {
@@ -131,12 +145,24 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
 
     setPoints(p: number[] | Quad): Konva.Shape {
         if (p instanceof Array && p.length % 2 === 0) {
-            this.quad.start.x = p[0];
-            this.quad.start.y = p[1];
-            this.quad.control.x = p[2];
-            this.quad.control.y = p[3];
-            this.quad.end.x = p[4];
-            this.quad.end.y = p[5];
+            if (p.length == 2) {
+                this.quad.start.x = p[0];
+                this.quad.start.y = p[1];
+
+            } else if (p.length == 4) {
+                this.quad.start.x = p[0];
+                this.quad.start.y = p[1];
+                this.quad.end.x = p[2];
+                this.quad.end.y = p[3];
+
+            } else {
+                this.quad.start.x = p[0];
+                this.quad.start.y = p[1];
+                this.quad.control.x = p[2];
+                this.quad.control.y = p[3];
+                this.quad.end.x = p[4];
+                this.quad.end.y = p[5];
+            }
         } else {
             this.quad = p as Quad;
         }
@@ -247,6 +273,7 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
 export type LengthChangeFn = () => void;
 
 export interface IMeasurableShape {
+    getEndPoints(): Konva.Vector2d[];
     onLengthChange?: LengthChangeFn;
     group: Konva.Group;
     extShape: IExtendedShape<any> | Konva.Line;
@@ -322,6 +349,10 @@ export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurabl
 
     public destroy() {
         this.group.destroy();
+    }
+
+    public getEndPoints(): Vector2d[] {
+        return this.extShape.getEndPoints();
     }
 
     private onDeleteTextarea(value: string) {

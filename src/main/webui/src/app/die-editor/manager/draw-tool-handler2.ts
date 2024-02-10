@@ -47,21 +47,20 @@ export class DrawToolHandler2 extends ToolHandler {
     }
 
     override onMouseDown(event: KonvaEventObject<any>): void {
-        debugger;
         if (KonvaEditableText.editing) return;
 
-        const pos = this.startingPoint = this.getSnappingPoint().v;
+        const pos = this.getSnappingPoint().v;
         const hoverEndpoints = this.editor.state.canDrawNewLine(pos);
         if (!hoverEndpoints) {
             this.startAnimationAvailablePoints();
             return;
         }
 
+        this.startingPoint = pos;
         this.stopAnimationAvailablePoints();
         this.showGitzmoOnPointer(pos);
         this.isDrawing = true;
         this.drawingLine = new MeasurableShape<any>(this.editor, pos, this.isDrawingLine ? LineExt : BezierLineExt);
-        console.log(this.drawingLine);
         this.editor.layer.add(this.drawingLine.group);
     }
 
@@ -74,7 +73,7 @@ export class DrawToolHandler2 extends ToolHandler {
         event.evt.preventDefault();
         const pos = this.getSnappingPoint();
         const newPoints = [this.startingPoint!.x, this.startingPoint!.y, pos.v.x, pos.v.y];
-        this.drawingLine!.updatePoints(newPoints); // update points and text
+        this.drawingLine!.updatePoints(newPoints);
         pos.obj == "grid" ? this.clearGitzmos() : this.showGitzmoOnPointer(pos.v);
     }
 
@@ -98,7 +97,7 @@ export class DrawToolHandler2 extends ToolHandler {
     }
 
     private getSnappingPoint(): { v: Konva.Vector2d, obj: "grid" | "vertex" } {
-        return this.editor.getSnappedToNearObject(this.editor.state.getVertices());
+        return this.editor.getSnappedToNearObject(this.editor.state.getEndPoints());
     }
 
     private startAnimationAvailablePoints(): void {

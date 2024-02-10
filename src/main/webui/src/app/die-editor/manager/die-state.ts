@@ -40,12 +40,12 @@ export class DieState {
     public remove(node?: Konva.Shape | Konva.Stage | Konva.Node) {
         if (!node) return;
 
-        this.lines.find(l => l.group._id == node._id || l.extShape._id == node._id || l.text.text._id == node._id)?.destroy();
+        this.lines.find(l => l.group._id == node._id || (l.extShape instanceof Konva.Line ? l.extShape._id == node._id : l.extShape.shape._id) || l.text.text._id == node._id)?.destroy();
         this.updatePolygon();
     }
 
     private updatePolygon() {
-        this.polygon.points(this.lines.flatMap(l => l.extShape.points()));
+        this.polygon.points(this.lines.flatMap(l => (l.extShape instanceof Konva.Line ? l.extShape.points() : l.extShape.getPoints())));
 
         const endpoints = this.getEndPoints();
         if (endpoints.length == 0) {
@@ -55,13 +55,13 @@ export class DieState {
 
     private onLengthChange(lineMeasure: LineMeasurement, oldPoints: Konva.Vector2d, newPoints: Konva.Vector2d) {
         const line = lineMeasure.line;
-        const attachedLine = this.findLinesWithEndpoint(oldPoints).filter(l => l.extShape._id != line._id)[0];
+        const attachedLine = this.findLinesWithEndpoint(oldPoints).filter(l => (l.extShape instanceof Konva.Line ? l.extShape._id : l.extShape.shape._id) != line._id)[0];
         attachedLine?.updateEndpoint(oldPoints, newPoints);
     }
 
     public getVertices(): Konva.Vector2d[] {
         return this.lines.flatMap(l => {
-            const points = l.extShape.points();
+            const points = (l.extShape instanceof Konva.Line ? l.extShape.points() : l.extShape.getPoints());
             const vertices: Konva.Vector2d[] = [];
             for (let i = 0; i < points.length - 1; i += 2) {
                 vertices.push({ x: points[i], y: points[i + 1] });
@@ -71,7 +71,7 @@ export class DieState {
     }
 
     public getEndPoints(): Konva.Vector2d[] {
-        const vectors = this.getVertices();
+        const vectors = this.lines.flatMap(l => l.getEndPoints());
         const vectorCountMap: Record<string, number> = {};
 
         // Count the occurrences of each vector
@@ -93,6 +93,7 @@ export class DieState {
         const attachedLines: Konva.Line[] = [];
         const coords = KonvaUtils.lineToCoords(line);
         for (const mLine of this.lines) {
+            if (!(mLine.extShape instanceof Konva.Line)) continue;
             const points = KonvaUtils.lineToCoords(mLine.extShape);
             if (points.x1 == coords.x1 && points.x2 == coords.x2 && points.y1 == coords.y1 && points.y2 == coords.y2) {
                 attachedLines.push(mLine.extShape);
@@ -104,6 +105,7 @@ export class DieState {
     public findLinesWithEndpoint(endpoint: Konva.Vector2d): IMeasurableShape[] {
         const attachedLines: IMeasurableShape[] = [];
         for (const mLine of this.lines) {
+            if (!(mLine.extShape instanceof Konva.Line)) continue;
             const points = KonvaUtils.lineToCoords(mLine.extShape);
             if ((points.x1 == endpoint.x && points.y1 == endpoint.y) || (points.x2 == endpoint.x && points.y2 == endpoint.y)) {
                 attachedLines.push(mLine);

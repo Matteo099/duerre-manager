@@ -24,6 +24,9 @@ export class LineMeasurement implements IMeasurableShape {
         this.text = this.createText(position);
         this.group = this.createGroup();
     }
+    getEndPoints(): Vector2d[] {
+        throw new Error("Method not implemented.");
+    }
 
     private createLine(position: Konva.Vector2d): Konva.Line {
         const line = new Konva.Line({
