@@ -118,7 +118,6 @@ export class DieEditorManager implements IDieEditor {
     }
 
     private handleMouseDown(event: KonvaEventObject<any>) {
-        console.log(this._selectedToolHandler);
         this._selectedToolHandler?.onMouseDown(event);
     }
 
@@ -155,7 +154,6 @@ export class DieEditorManager implements IDieEditor {
     }
 
     public useTool(tool: Tool) {
-        console.log(tool, tool === Tool.DRAW_LINE);
         this._selectedTool = tool;
 
         this._selectedToolHandler?.onToolDeselected();

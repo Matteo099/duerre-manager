@@ -106,50 +106,8 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
     }
 
     calculatePointsGivenLength(length: number): { oldPoints: number[], newPoints: number[] } {
-        //const points: number[] = [];
-        const oldPoints = this.quad.toArray();
-
-        let totalLength = 0;
-        let prevX = this.quad.start.x;
-        let prevY = this.quad.start.y;
-
-        for (let t = 0; t <= 1; t += 1 / this.numberOfPoints) {
-            const x = Math.pow(1 - t, 2) * this.quad.start.x + 2 * (1 - t) * t * this.quad.control.x + t * t * this.quad.end.x;
-            const y = Math.pow(1 - t, 2) * this.quad.start.y + 2 * (1 - t) * t * this.quad.control.y + t * t * this.quad.end.y;
-
-            let segmentLength = 0;
-            if (t > 0) {
-                segmentLength = Math.sqrt(Math.pow(x - prevX, 2) + Math.pow(y - prevY, 2));
-                totalLength += segmentLength;
-            }
-
-            if (length <= totalLength || t === 1) {
-                // Calculate the adjusted t value to match the target length
-                const adjustedT = t - (totalLength - length) / (length - (totalLength - segmentLength));
-
-                const adjustedX =
-                    Math.pow(1 - adjustedT, 2) * this.quad.start.x +
-                    2 * (1 - adjustedT) * adjustedT * this.quad.control.x +
-                    adjustedT * adjustedT * this.quad.end.x;
-
-                const adjustedY =
-                    Math.pow(1 - adjustedT, 2) * this.quad.start.y +
-                    2 * (1 - adjustedT) * adjustedT * this.quad.control.y +
-                    adjustedT * adjustedT * this.quad.end.y;
-
-                // Update the quad points
-                this.quad.end.x = adjustedX;
-                this.quad.end.y = adjustedY;
-
-                break;
-            }
-
-            //points.push(x, y);
-            prevX = x;
-            prevY = y;
-        }
-
-        return { oldPoints, newPoints: this.quad.toArray() };
+        // No implemetation... => too expensive (moreover, maybe, this feature is not required) 
+        return { oldPoints: this.quad.toArray(), newPoints: this.quad.toArray() };
     }
 
     updateEndpoint(oldPoint: Konva.Vector2d | ('start' | 'end'), newValue: Konva.Vector2d): void {

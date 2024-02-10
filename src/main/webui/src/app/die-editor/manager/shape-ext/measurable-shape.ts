@@ -81,37 +81,16 @@ export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurabl
     }
 
     private onDeleteTextarea(value: string) {
-        console.log(value);
         try {
             const length = parseFloat(value);
             const points = this.extShape.calculatePointsGivenLength(length);
             this.updatePoints(points.newPoints);
-            // const point = KonvaUtils.findPoint(this.shape, length);
-            // const oldPoints = this.shape.points();
-            // const newPoints = [...oldPoints];
-            // newPoints[newPoints.length - 2] = point.x;
-            // newPoints[newPoints.length - 1] = point.y;
-            // this.updatePoints(newPoints);
-            // this.onLengthChange?.(KonvaUtils.pointsVector2d(oldPoints)[1], KonvaUtils.pointsVector2d(newPoints)[1]);
-
-            // TODO update onLengthChange method
             this.onLengthChange?.(KonvaUtils.pointsVector2d(points.oldPoints)[1], KonvaUtils.pointsVector2d(points.newPoints)[1]);
         } catch (error) { }
     }
 
     public updateEndpoint(oldPoint: Konva.Vector2d | ('start' | 'end'), newValue: Konva.Vector2d) {
-        console.log("updateEndpoints", oldPoint, newValue);
         this.extShape.updateEndpoint(oldPoint, newValue);
         this.updateText();
-        // const coords = KonvaUtils.lineToCoords(this.shape);
-        // if (coords.x1 == oldPoint.x && coords.y1 == oldPoint.y) {
-        //     this.updatePoints([
-        //         newValue.x, newValue.y, coords.x2, coords.y2
-        //     ]);
-        // } else if (coords.x2 == oldPoint.x && coords.y2 == oldPoint.y) {
-        //     this.updatePoints([
-        //         coords.x1, coords.y1, newValue.x, newValue.y
-        //     ]);
-        // }
     }
 }

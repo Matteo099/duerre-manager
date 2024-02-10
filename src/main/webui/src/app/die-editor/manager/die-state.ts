@@ -37,8 +37,12 @@ export class DieState {
     public remove(node?: Konva.Shape | Konva.Stage | Konva.Node) {
         if (!node) return;
 
-        this.lines.find(l => l.group._id == node._id || (l.extShape instanceof Konva.Line ? l.extShape._id == node._id : l.extShape.shape._id) || l.text.text._id == node._id)?.destroy();
-        this.updatePolygon();
+        const index = this.lines.findIndex(l => l.group._id == node._id || l.getId() == node._id || l.text.text._id == node._id);
+        if (index >= 0) {
+            this.lines[index].destroy();
+            this.lines.splice(index, 1);
+            this.updatePolygon();
+        }
     }
 
     private updatePolygon() {

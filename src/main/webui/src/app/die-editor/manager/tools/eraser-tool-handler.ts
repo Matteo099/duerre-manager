@@ -19,9 +19,9 @@ export class EraserToolHandler extends ToolHandler {
     }
 
     override onMouseDown(event: KonvaEventObject<any>): void {
-        console.log(event.target, event);
         const erasableParents = event.target?.findAncestors((n: Konva.Node) => n.getAttr(ERASABLE));
         const lastParent = erasableParents && erasableParents.length > 0 ? erasableParents[erasableParents.length - 1] : event.target;
+        console.log(event.target, lastParent);        
         this.editor.state.remove(lastParent);
     }
 
