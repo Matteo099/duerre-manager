@@ -1,11 +1,13 @@
 import Konva from "konva";
 import { KonvaEventObject } from "konva/lib/Node";
 import { IFrame } from "konva/lib/types";
-import { LineMeasurement } from "./line-measurement";
-import { ToolHandler } from "./tool-handler";
-import { KonvaEditableText } from "./konva-editable-text";
-import { IDieEditor } from "./idie-editor";
+import { IDieEditor } from "../idie-editor";
+import { KonvaEditableText } from "../shape-ext/konva-editable-text";
 import { Tool } from "./tool";
+import { ToolHandler } from "./tool-handler";
+import { LineExt } from "../shape-ext/line-ext";
+import { BezierLineExt } from "../shape-ext/bezier-line-ext";
+import { MeasurableShape } from "../shape-ext/measurable-shape";
 
 export class DrawToolHandler extends ToolHandler {
 
@@ -14,11 +16,10 @@ export class DrawToolHandler extends ToolHandler {
 
     private isDrawing: boolean = false;
     private startingPoint?: Konva.Vector2d;
-    private drawingLine?: LineMeasurement;
-    private drawType: 'LINE' | 'CURVE' = 'LINE';
+    private drawingLine?: MeasurableShape<LineExt | BezierLineExt>;
 
-    public get isDrawingLine(): boolean { return this.drawType == 'LINE'; }
-    public get isDrawingCurve(): boolean { return this.drawType == 'CURVE'; }
+    public get isDrawingLine(): boolean { return this.editor.selectedTool == Tool.DRAW_LINE; }
+    public get isDrawingCurve(): boolean { return this.editor.selectedTool == Tool.DRAW_CURVE; }
 
     // I memorize a reference only to optimize the animations
     private animationLayer?: Konva.Layer;
@@ -36,10 +37,6 @@ export class DrawToolHandler extends ToolHandler {
         }));
     }
 
-    override onToolSelected(): void {
-        this.drawType = this.editor.selectedTool == Tool.DRAW_LINE ? 'LINE' : 'CURVE';
-    }
-
     protected override createLayers(): void {
         this.animationLayer = new Konva.Layer({
             name: DrawToolHandler.ANIMATION_LAYER_NAME
@@ -54,17 +51,18 @@ export class DrawToolHandler extends ToolHandler {
     override onMouseDown(event: KonvaEventObject<any>): void {
         if (KonvaEditableText.editing) return;
 
-        const pos = this.startingPoint = this.getSnappingPoint().v;
+        const pos = this.getSnappingPoint().v;
         const hoverEndpoints = this.editor.state.canDrawNewLine(pos);
         if (!hoverEndpoints) {
             this.startAnimationAvailablePoints();
             return;
         }
 
+        this.startingPoint = pos;
         this.stopAnimationAvailablePoints();
         this.showGitzmoOnPointer(pos);
         this.isDrawing = true;
-        this.drawingLine = new LineMeasurement(this.editor, pos);
+        this.drawingLine = new MeasurableShape<any>(this.editor, pos, this.isDrawingLine ? LineExt : BezierLineExt);
         this.editor.layer.add(this.drawingLine.group);
     }
 
@@ -77,7 +75,7 @@ export class DrawToolHandler extends ToolHandler {
         event.evt.preventDefault();
         const pos = this.getSnappingPoint();
         const newPoints = [this.startingPoint!.x, this.startingPoint!.y, pos.v.x, pos.v.y];
-        this.drawingLine!.updatePoints(newPoints); // update points and text
+        this.drawingLine!.updatePoints(newPoints);
         pos.obj == "grid" ? this.clearGitzmos() : this.showGitzmoOnPointer(pos.v);
     }
 
@@ -87,8 +85,9 @@ export class DrawToolHandler extends ToolHandler {
 
         this.clearGitzmos();
         const pos = this.getSnappingPoint().v;
-        const newPoints = [this.startingPoint!.x, this.startingPoint!.y, pos.x, pos.y];
-        this.drawingLine.updatePoints(newPoints);
+        //const newPoints = [this.startingPoint!.x, this.startingPoint!.y, pos.x, pos.y];
+        //this.drawingLine.updatePoints(newPoints);
+        this.drawingLine.updateEndpoint('end', pos);
 
         if (this.drawingLine.getLength() > 0) {
             this.editor.state.addLine(this.drawingLine);
@@ -100,7 +99,7 @@ export class DrawToolHandler extends ToolHandler {
     }
 
     private getSnappingPoint(): { v: Konva.Vector2d, obj: "grid" | "vertex" } {
-        return this.editor.getSnappedToNearObject(this.editor.state.getVertices());
+        return this.editor.getSnappedToNearObject(this.editor.state.getEndPoints());
     }
 
     private startAnimationAvailablePoints(): void {

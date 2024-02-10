@@ -1,5 +1,5 @@
 import Konva from "konva";
-import { GridManager } from "./grid-manager";
+import { GridManager } from "./tools/grid-manager";
 
 export class KonvaUtils {
 

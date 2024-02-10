@@ -2,7 +2,7 @@ import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, ViewChil
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { DieEditorManager } from './manager/die-editor-manager';
-import { Tool } from './manager/tool';
+import { Tool } from './manager/tools/tool';
 
 @Component({
   selector: 'app-die-editor',

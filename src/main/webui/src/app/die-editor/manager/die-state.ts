@@ -1,7 +1,6 @@
 import Konva from "konva";
-import { LineMeasurement } from "./line-measurement";
 import { KonvaUtils } from "./konva-utils";
-import { IMeasurableShape } from "./measurable-shape";
+import { IMeasurableShape } from "./shape-ext/imeasurable-shape";
 
 export class DieState {
 
@@ -53,7 +52,7 @@ export class DieState {
         }
     }
 
-    private onLengthChange(lineMeasure: LineMeasurement, oldPoints: Konva.Vector2d, newPoints: Konva.Vector2d) {
+    private onLengthChange(lineMeasure: any/*LineMeasurement*/, oldPoints: Konva.Vector2d, newPoints: Konva.Vector2d) {
         const line = lineMeasure.line;
         const attachedLine = this.findLinesWithEndpoint(oldPoints).filter(l => (l.extShape instanceof Konva.Line ? l.extShape._id : l.extShape.shape._id) != line._id)[0];
         attachedLine?.updateEndpoint(oldPoints, newPoints);

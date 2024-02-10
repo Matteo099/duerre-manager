@@ -1,6 +1,6 @@
 import { KonvaEventObject } from "konva/lib/Node";
-import { KonvaHelper } from "./konva-helper";
-import { IDieEditor } from "./idie-editor";
+import { KonvaHelper } from "../konva-helper";
+import { IDieEditor } from "../idie-editor";
 import Konva from "konva";
 import { Subscription } from "rxjs";
 

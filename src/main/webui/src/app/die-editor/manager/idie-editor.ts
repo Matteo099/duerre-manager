@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { DieState } from './die-state';
 import { KonvaHelper } from './konva-helper';
-import { Tool } from './tool';
+import { Tool } from './tools/tool';
 
 export interface IDieEditor {
     get stage(): Konva.Stage;

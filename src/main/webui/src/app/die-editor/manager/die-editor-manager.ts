@@ -2,16 +2,16 @@ import { ElementRef } from "@angular/core";
 import Konva from "konva";
 import { KonvaEventObject } from "konva/lib/Node";
 import { DieState } from "./die-state";
-import { DrawToolHandler2 } from "./draw-tool-handler2";
-import { EraserToolHandler } from "./eraser-tool-handler";
-import { GridManager } from "./grid-manager";
+import { DrawToolHandler } from "./tools/draw-tool-handler";
+import { EraserToolHandler } from "./tools/eraser-tool-handler";
+import { GridManager } from "./tools/grid-manager";
 import { IDieEditor } from "./idie-editor";
 import { KonvaHelper } from "./konva-helper";
 import { KonvaUtils } from "./konva-utils";
-import { MoveToolHandler } from "./move-tool-handler";
-import { SelectToolHandler } from "./select-tool-handler";
-import { Tool } from "./tool";
-import { ToolHandler } from "./tool-handler";
+import { MoveToolHandler } from "./tools/move-tool-handler";
+import { SelectToolHandler } from "./tools/select-tool-handler";
+import { Tool } from "./tools/tool";
+import { ToolHandler } from "./tools/tool-handler";
 
 export class DieEditorManager implements IDieEditor {
 
@@ -25,7 +25,7 @@ export class DieEditorManager implements IDieEditor {
     private _selectedToolHandler?: ToolHandler;
 
     private selectHandler!: SelectToolHandler;
-    private drawHandler!: DrawToolHandler2;
+    private drawHandler!: DrawToolHandler;
     private eraserHandler!: EraserToolHandler;
     private moveHandler!: MoveToolHandler;
     private gridManager!: GridManager;
@@ -91,7 +91,7 @@ export class DieEditorManager implements IDieEditor {
     private createTools() {
         this._konvaHelper = new KonvaHelper(this);
         this.selectHandler = new SelectToolHandler(this);
-        this.drawHandler = new DrawToolHandler2(this);
+        this.drawHandler = new DrawToolHandler(this);
         this.eraserHandler = new EraserToolHandler(this);
         this.moveHandler = new MoveToolHandler(this);
     }
