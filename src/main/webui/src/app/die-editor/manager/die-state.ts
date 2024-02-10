@@ -28,12 +28,10 @@ export class DieState {
         return true;
     }
 
-    public addLine(lineMeasure: IMeasurableShape) {
-        this.lines.push(lineMeasure);
+    public addLine(shape: IMeasurableShape) {
+        this.lines.push(shape);
         this.updatePolygon();
-
-        lineMeasure.onLengthChange = () => { console.log("TODOODODODODO"); };
-        // (oldPoints: Konva.Vector2d, newPoints: Konva.Vector2d) => this.onLengthChange(lineMeasure, oldPoints, newPoints);
+        shape.onLengthChange = (oldPoint: Konva.Vector2d, newPoint: Konva.Vector2d) => this.onLengthChange(shape, oldPoint, newPoint);
     }
 
     public remove(node?: Konva.Shape | Konva.Stage | Konva.Node) {
@@ -52,9 +50,9 @@ export class DieState {
         }
     }
 
-    private onLengthChange(lineMeasure: any/*LineMeasurement*/, oldPoints: Konva.Vector2d, newPoints: Konva.Vector2d) {
-        const line = lineMeasure.line;
-        const attachedLine = this.findLinesWithEndpoint(oldPoints).filter(l => (l.extShape instanceof Konva.Line ? l.extShape._id : l.extShape.shape._id) != line._id)[0];
+    private onLengthChange(shape: IMeasurableShape, oldPoints: Konva.Vector2d, newPoints: Konva.Vector2d) {
+        const attachedLine = this.findShapesWithEndpoint(oldPoints).filter(s => s.getId() != shape.getId())[0];
+        console.log("onLengthChange", shape, oldPoints, newPoints, attachedLine);
         attachedLine?.updateEndpoint(oldPoints, newPoints);
     }
 
@@ -88,7 +86,7 @@ export class DieState {
         return uniqueVectors;
     }
 
-    public findAttachedLines(line: Konva.Line): Konva.Line[] {
+    /*public findAttachedLines(line: Konva.Line): Konva.Line[] {
         const attachedLines: Konva.Line[] = [];
         const coords = KonvaUtils.lineToCoords(line);
         for (const mLine of this.lines) {
@@ -99,14 +97,13 @@ export class DieState {
             }
         }
         return attachedLines;
-    }
+    }*/
 
-    public findLinesWithEndpoint(endpoint: Konva.Vector2d): IMeasurableShape[] {
+    public findShapesWithEndpoint(endpoint: Konva.Vector2d): IMeasurableShape[] {
         const attachedLines: IMeasurableShape[] = [];
         for (const mLine of this.lines) {
-            if (!(mLine.extShape instanceof Konva.Line)) continue;
-            const points = KonvaUtils.lineToCoords(mLine.extShape);
-            if ((points.x1 == endpoint.x && points.y1 == endpoint.y) || (points.x2 == endpoint.x && points.y2 == endpoint.y)) {
+            const sEndpoints = mLine.getEndPoints();
+            if ((sEndpoints[0].x == endpoint.x && sEndpoints[0].y == endpoint.y) || (sEndpoints[1].x == endpoint.x && sEndpoints[1].y == endpoint.y)) {
                 attachedLines.push(mLine);
             }
         }

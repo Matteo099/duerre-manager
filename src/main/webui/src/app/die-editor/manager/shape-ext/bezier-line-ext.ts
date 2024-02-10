@@ -105,8 +105,9 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
         return { x, y };
     }
 
-    calculatePointsGivenLength(length: number): number[] {
+    calculatePointsGivenLength(length: number): { oldPoints: number[], newPoints: number[] } {
         //const points: number[] = [];
+        const oldPoints = this.quad.toArray();
 
         let totalLength = 0;
         let prevX = this.quad.start.x;
@@ -148,7 +149,7 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
             prevY = y;
         }
 
-        return this.quad.toArray();//points;
+        return { oldPoints, newPoints: this.quad.toArray() };
     }
 
     updateEndpoint(oldPoint: Konva.Vector2d | ('start' | 'end'), newValue: Konva.Vector2d): void {

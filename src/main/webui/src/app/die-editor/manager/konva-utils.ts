@@ -1,5 +1,6 @@
 import Konva from "konva";
 import { GridManager } from "./tools/grid-manager";
+import { Vector2d } from "konva/lib/types";
 
 export class KonvaUtils {
 
@@ -20,6 +21,10 @@ export class KonvaUtils {
     public static lineToCoords(line: Konva.Line): { x1: number, y1: number, x2: number, y2: number } {
         const coords = line.points();
         return { x1: coords[0], y1: coords[1], x2: coords[2], y2: coords[3] };
+    }
+
+    static vector2dToPoints(...points: Vector2d[]): number[] {
+        return points.flatMap(v => [v.x, v.y]);
     }
 
     public static calculateDistance(coords: { x1: number, y1: number, x2: number, y2: number }): number {

@@ -5,7 +5,7 @@ export interface IExtendedShape<S extends Konva.Shape> {
     setPoints(p: number[]): S;
     calculateLength(): number;
     calculateMiddlePoint(): Konva.Vector2d;
-    calculatePointsGivenLength(length: number): number[];
+    calculatePointsGivenLength(length: number): { oldPoints: number[], newPoints: number[] };
     updateEndpoint(oldPoint: Konva.Vector2d, newValue: Konva.Vector2d): void;
     get shape(): S;
 }

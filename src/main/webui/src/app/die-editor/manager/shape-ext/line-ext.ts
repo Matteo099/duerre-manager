@@ -39,13 +39,13 @@ export class LineExt extends ExtendedShape<Konva.Line> {
         return KonvaUtils.calculateMiddlePoint(this._shape);
     }
 
-    calculatePointsGivenLength(length: number): number[] {
+    calculatePointsGivenLength(length: number): { oldPoints: number[], newPoints: number[] } {
         const point = KonvaUtils.findPoint(this._shape, length);
         const oldPoints = this._shape.points();
         const newPoints = [...oldPoints];
         newPoints[newPoints.length - 2] = point.x;
         newPoints[newPoints.length - 1] = point.y;
-        return newPoints;
+        return { oldPoints, newPoints };
     }
 
     updateEndpoint(oldPoint: Konva.Vector2d | ('start' | 'end'), newValue: Konva.Vector2d): void {

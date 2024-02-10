@@ -5,6 +5,7 @@ import { IDieEditor } from "../idie-editor";
 import { KonvaEditableText } from "./konva-editable-text";
 import { ExtendedShape } from "./extended-shape";
 import { IMeasurableShape, LengthChangeFn } from "./imeasurable-shape";
+import { KonvaUtils } from "../konva-utils";
 
 export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurableShape {
     private readonly editor: IDieEditor;
@@ -75,12 +76,16 @@ export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurabl
         return this.extShape.getEndPoints();
     }
 
+    getId(): number {
+        return this.extShape.getId();
+    }
+
     private onDeleteTextarea(value: string) {
         console.log(value);
         try {
             const length = parseFloat(value);
-            const newPoints = this.extShape.calculatePointsGivenLength(length);
-            this.updatePoints(newPoints);
+            const points = this.extShape.calculatePointsGivenLength(length);
+            this.updatePoints(points.newPoints);
             // const point = KonvaUtils.findPoint(this.shape, length);
             // const oldPoints = this.shape.points();
             // const newPoints = [...oldPoints];
@@ -90,11 +95,12 @@ export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurabl
             // this.onLengthChange?.(KonvaUtils.pointsVector2d(oldPoints)[1], KonvaUtils.pointsVector2d(newPoints)[1]);
 
             // TODO update onLengthChange method
-            // this.onLengthChange?.(length);
+            this.onLengthChange?.(KonvaUtils.pointsVector2d(points.oldPoints)[1], KonvaUtils.pointsVector2d(points.newPoints)[1]);
         } catch (error) { }
     }
 
     public updateEndpoint(oldPoint: Konva.Vector2d | ('start' | 'end'), newValue: Konva.Vector2d) {
+        console.log("updateEndpoints", oldPoint, newValue);
         this.extShape.updateEndpoint(oldPoint, newValue);
         this.updateText();
         // const coords = KonvaUtils.lineToCoords(this.shape);
