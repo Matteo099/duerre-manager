@@ -126,8 +126,8 @@ export class DieEditorComponent implements AfterViewInit, OnDestroy {
     if (this.stageContainer) this.editor?.resize(this.stageContainer);
   }
 
-  useSelectTool() {
-    this.editor?.useTool(Tool.SELECT);
+  useEditTool() {
+    this.editor?.useTool(Tool.EDIT);
   }
   useDrawTool(drawingTool: Tool) {
     this.editor?.useTool(drawingTool);

@@ -9,7 +9,7 @@ import { IDieEditor } from "./idie-editor";
 import { KonvaHelper } from "./konva-helper";
 import { KonvaUtils } from "./konva-utils";
 import { MoveToolHandler } from "./tools/move-tool-handler";
-import { SelectToolHandler } from "./tools/select-tool-handler";
+import { EditToolHandler } from "./tools/edit-tool-handler";
 import { Tool } from "./tools/tool";
 import { ToolHandler } from "./tools/tool-handler";
 
@@ -24,7 +24,7 @@ export class DieEditorManager implements IDieEditor {
     private _state!: DieState;
     private _selectedToolHandler?: ToolHandler;
 
-    private selectHandler!: SelectToolHandler;
+    private editHandler!: EditToolHandler;
     private drawHandler!: DrawToolHandler;
     private eraserHandler!: EraserToolHandler;
     private moveHandler!: MoveToolHandler;
@@ -90,7 +90,7 @@ export class DieEditorManager implements IDieEditor {
 
     private createTools() {
         this._konvaHelper = new KonvaHelper(this);
-        this.selectHandler = new SelectToolHandler(this);
+        this.editHandler = new EditToolHandler(this);
         this.drawHandler = new DrawToolHandler(this);
         this.eraserHandler = new EraserToolHandler(this);
         this.moveHandler = new MoveToolHandler(this);
@@ -158,8 +158,8 @@ export class DieEditorManager implements IDieEditor {
 
         this._selectedToolHandler?.onToolDeselected();
         switch (tool) {
-            case Tool.SELECT:
-                this._selectedToolHandler = this.selectHandler;
+            case Tool.EDIT:
+                this._selectedToolHandler = this.editHandler;
                 break;
             case Tool.DRAW_LINE:
             case Tool.DRAW_CURVE:
@@ -240,7 +240,7 @@ export class DieEditorManager implements IDieEditor {
     }
 
     public destroy(): void {
-        this.selectHandler.destroy(); 
+        this.editHandler.destroy(); 
         this.drawHandler.destroy(); 
         this.eraserHandler.destroy(); 
         this.moveHandler.destroy();

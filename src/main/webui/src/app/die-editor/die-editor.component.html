@@ -3,8 +3,8 @@
         <!-- Left column -->
         <div class="col-auto m-2">
             <div class="d-flex flex-column justify-content-center align-items-center h-100">
-                <button mat-mini-fab [color]="getColor(Tool.EDIT)" (click)="useSelectTool()" class="mb-2">
-                    <mat-icon>touch_app</mat-icon>
+                <button mat-mini-fab [color]="getColor(Tool.EDIT)" (click)="useEditTool()" class="mb-2">
+                    <mat-icon>open_with</mat-icon>
                 </button>
                 <button mat-mini-fab [color]="getColor(Tool.DRAW_LINE)" (click)="useDrawTool(Tool.DRAW_LINE)" class="mb-2">
                     <mat-icon>timeline</mat-icon>
@@ -28,20 +28,6 @@
                 <button mat-mini-fab color="primary" (click)="zoomOut()">
                     <mat-icon>zoom_out</mat-icon>
                 </button>
-                <!-- TODO
-                <button mat-mini-fab color="primary" (click)="undo()">
-                    <mat-icon>undo</mat-icon>
-                </button>
-                <button mat-mini-fab color="primary" (click)="redo()">
-                    <mat-icon>redo</mat-icon>
-                </button>
-                <button mat-mini-fab color="primary" (click)="save()">
-                    <mat-icon>save</mat-icon>
-                </button>
-                <button mat-mini-fab color="primary" (click)="cancel()">
-                    <mat-icon>cancel</mat-icon>
-                </button>
-                -->
             </div>
         </div>
 

@@ -21,7 +21,6 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
             lineJoin: 'round',
             hitStrokeWidth: 20,
             sceneFunc: (ctx, shape) => {
-                console.log(JSON.stringify(this.quad));
                 ctx.beginPath();
                 ctx.moveTo(this.quad.start.x, this.quad.start.y);
                 ctx.quadraticCurveTo(
