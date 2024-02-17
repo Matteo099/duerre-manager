@@ -24,6 +24,10 @@ export abstract class ToolHandler {
         return this.layers.find(l => l._id == selector || (selector instanceof Function ? selector(l) : false));
     }
 
+    protected getSnappingPoint(): { v: Konva.Vector2d, obj: "grid" | "vertex" } {
+        return this.editor.getSnappedToNearObject(this.editor.state.getEndPoints());
+    }
+
     onToolSelected(): void {
         this.layers.forEach(l => l.visible(true));
     }

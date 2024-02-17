@@ -1,6 +1,7 @@
 import Konva from "konva";
 import { KonvaUtils } from "./konva-utils";
-import { IMeasurableShape } from "./shape-ext/imeasurable-shape";
+import { IMeasurableShape, LengthChanged } from "./shape-ext/imeasurable-shape";
+import { Subscription } from "rxjs";
 
 export class DieState {
 
@@ -18,6 +19,7 @@ export class DieState {
         closed: true,
         visible: false
     });
+    public readonly subscriptions: Subscription[] = [];
 
     public canDrawNewLine(pos: Konva.Vector2d): boolean {
         if (this.lines.length > 0) {
@@ -31,7 +33,9 @@ export class DieState {
     public addLine(shape: IMeasurableShape) {
         this.lines.push(shape);
         this.updatePolygon();
-        shape.onLengthChange = (oldPoint: Konva.Vector2d, newPoint: Konva.Vector2d) => this.onLengthChange(shape, oldPoint, newPoint);
+        const s = shape.onLengthChanged.subscribe((v: LengthChanged) => this.onLengthChange(shape, v.oldPoint, v.newPoint));
+        this.subscriptions.push(s);
+        //shape.onLengthChange = (oldPoint: Konva.Vector2d, newPoint: Konva.Vector2d) => this.onLengthChange(shape, oldPoint, newPoint);
     }
 
     public remove(node?: Konva.Shape | Konva.Stage | Konva.Node) {

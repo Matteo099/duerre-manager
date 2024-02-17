@@ -1,11 +1,11 @@
+import { EventEmitter } from "@angular/core";
 import Konva from "konva";
-import { Vector2d } from "konva/lib/types";
 import { ERASABLE } from "../constants";
 import { IDieEditor } from "../idie-editor";
-import { KonvaEditableText } from "./konva-editable-text";
-import { ExtendedShape } from "./extended-shape";
-import { IMeasurableShape, LengthChangeFn } from "./imeasurable-shape";
 import { KonvaUtils } from "../konva-utils";
+import { ExtendedShape } from "./extended-shape";
+import { IMeasurableShape, LengthChanged } from "./imeasurable-shape";
+import { KonvaEditableText } from "./konva-editable-text";
 
 export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurableShape {
     private readonly editor: IDieEditor;
@@ -13,7 +13,8 @@ export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurabl
     public readonly extShape: S;
     public readonly text: KonvaEditableText;
 
-    public onLengthChange?: LengthChangeFn;
+    //public onLengthChange?: LengthChangeFn;
+    public onLengthChanged: EventEmitter<LengthChanged> = new EventEmitter();
 
     constructor(editor: IDieEditor, position: Konva.Vector2d, shapeConstructor: new (initialPosition: Konva.Vector2d) => S) {
         this.editor = editor;
@@ -72,11 +73,15 @@ export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurabl
         this.group.destroy();
     }
 
-    public getEndPoints(): Vector2d[] {
+    public getEndPoints(): Konva.Vector2d[] {
         return this.extShape.getEndPoints();
     }
 
-    getId(): number {
+    public getAnchorPoints(): Konva.Vector2d[] {
+        return this.extShape.getAnchorPoints();
+    }
+
+    public getId(): number {
         return this.extShape.getId();
     }
 
@@ -85,7 +90,8 @@ export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurabl
             const length = parseFloat(value);
             const points = this.extShape.calculatePointsGivenLength(length);
             this.updatePoints(points.newPoints);
-            this.onLengthChange?.(KonvaUtils.pointsVector2d(points.oldPoints)[1], KonvaUtils.pointsVector2d(points.newPoints)[1]);
+            //this.onLengthChange?.(KonvaUtils.pointsVector2d(points.oldPoints)[1], KonvaUtils.pointsVector2d(points.newPoints)[1]);
+            this.onLengthChanged.emit({ oldPoint: KonvaUtils.pointsVector2d(points.oldPoints)[1], newPoint: KonvaUtils.pointsVector2d(points.newPoints)[1] });
         } catch (error) { }
     }
 

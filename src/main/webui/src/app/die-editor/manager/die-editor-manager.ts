@@ -52,26 +52,6 @@ export class DieEditorManager implements IDieEditor {
         this.stage.add(this.layer);
     }
 
-    // addCircles() {
-    //     const circleData = [
-    //         { x: 10, y: 10, radius: 5 },
-    //         { x: 50, y: 50, radius: 3 },
-    //         { x: 50, y: 100, radius: 3 },
-    //         { x: 20, y: 40, radius: 3 },
-    //     ];
-
-    //     const circles = circleData.map(data => new Konva.Circle({
-    //         x: data.x,
-    //         y: data.y,
-    //         radius: data.radius,
-    //         stroke: '#ff0000',
-    //         strokeWidth: 1,
-    //         //draggable: true,
-    //     }));
-
-    //     circles.forEach(circle => this.layer.add(circle));
-    // }
-
     private createCanvas(stageContainer: ElementRef) {
         this._stage = new Konva.Stage({
             container: stageContainer.nativeElement,

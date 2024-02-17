@@ -98,10 +98,6 @@ export class DrawToolHandler extends ToolHandler {
         this.drawingLine = undefined;
     }
 
-    private getSnappingPoint(): { v: Konva.Vector2d, obj: "grid" | "vertex" } {
-        return this.editor.getSnappedToNearObject(this.editor.state.getEndPoints());
-    }
-
     private startAnimationAvailablePoints(): void {
         this.stopAnimationAvailablePoints();
 

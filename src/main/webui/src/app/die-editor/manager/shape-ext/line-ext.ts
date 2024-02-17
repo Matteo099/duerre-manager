@@ -22,6 +22,10 @@ export class LineExt extends ExtendedShape<Konva.Line> {
     override getEndPoints(): Konva.Vector2d[] {
         return KonvaUtils.pointsVector2d(this.getPoints());
     }
+    
+    override getAnchorPoints(): Konva.Vector2d[] {
+        return this.getEndPoints();
+    }
 
     getPoints(): number[] {
         return this._shape.points();

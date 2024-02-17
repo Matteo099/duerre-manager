@@ -1,10 +1,16 @@
 import Konva from "konva";
 import { ExtendedShape } from "./extended-shape";
 import { Quad } from "./quad";
+import { Layer } from "konva/lib/Layer";
+import { Shape, ShapeConfig } from "konva/lib/Shape";
+import { REMOVE_ONLY } from "../constants";
+import { Vector2d } from "konva/lib/types";
 
 export class BezierLineExt extends ExtendedShape<Konva.Shape> {
+
     public quad!: Quad;
     private readonly numberOfPoints: number = 100;
+    public quadLinePath?: Konva.Line;
 
     protected override createShape(position: Konva.Vector2d): Konva.Shape {
         this.quad = new Quad(
@@ -32,7 +38,22 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
                 ctx.fillStrokeShape(shape);
             }
         });
+
+        this.quadLinePath = new Konva.Line({
+            dash: [10, 10, 0, 10],
+            strokeWidth: 3,
+            stroke: 'black',
+            lineCap: 'round',
+            id: 'quadLinePath',
+            opacity: 0.3,
+            points: [0, 0],
+        });
+        this.quadLinePath.setAttr(REMOVE_ONLY, true);
         return bezierLine;
+    }
+
+    override getAnchorPoints(): Konva.Vector2d[] {
+        return [...this.getEndPoints(), { x: this.quad.control.x, y: this.quad.control.y }];
     }
 
     getEndPoints(): Konva.Vector2d[] {
@@ -72,6 +93,7 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
         } else {
             this.quad = p as Quad;
         }
+        this.updateDottedLines();
         return this._shape;
     }
 
@@ -109,28 +131,42 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
         return { oldPoints: this.quad.toArray(), newPoints: this.quad.toArray() };
     }
 
-    updateEndpoint(oldPoint: Konva.Vector2d | ('start' | 'end'), newValue: Konva.Vector2d): void {
+    updateEndpoint(oldPoint: Konva.Vector2d | ('start' | 'end' | 'control'), newValue: Konva.Vector2d): void {
         if (oldPoint == 'start' || (typeof oldPoint === 'object' &&
             oldPoint.x === this.quad.start.x &&
             oldPoint.y === this.quad.start.y)
         ) {
             this.quad.start.x = newValue.x;
             this.quad.start.y = newValue.y;
-        } else if (typeof oldPoint === 'object' &&
-            oldPoint.x === this.quad.control.x &&
-            oldPoint.y === this.quad.control.y
-        ) {
-            this.quad.control.x = newValue.x;
-            this.quad.control.y = newValue.y;
         } else if (oldPoint == 'end' || (typeof oldPoint === 'object' &&
             oldPoint.x === this.quad.end.x &&
             oldPoint.y === this.quad.end.y
         )) {
             this.quad.end.x = newValue.x;
             this.quad.end.y = newValue.y;
+        } else if (oldPoint == 'control' || (typeof oldPoint === 'object' &&
+            oldPoint.x === this.quad.control.x &&
+            oldPoint.y === this.quad.control.y
+        )) {
+            this.quad.control.x = newValue.x;
+            this.quad.control.y = newValue.y;
         }
 
-        // Update the shape based on the new quad points
-        // this._shape.points(this.getPoints());
+        this.updateDottedLines();
+    }
+
+    public isControlPoint(vector: Vector2d) {
+        return vector.x === this.quad.control.x && vector.y === this.quad.control.y;
+    }
+
+    public updateDottedLines(): void {
+        this.quadLinePath?.points([
+            this.quad.start.x,
+            this.quad.start.y,
+            this.quad.control.x,
+            this.quad.control.y,
+            this.quad.end.x,
+            this.quad.end.y,
+        ]);
     }
 }

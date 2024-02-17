@@ -1,7 +1,10 @@
 import Konva from "konva";
 import { IExtendedShape } from "./iextended-shape";
+import { Layer } from "konva/lib/Layer";
+import { Shape, ShapeConfig } from "konva/lib/Shape";
 
 export abstract class ExtendedShape<S extends Konva.Shape> implements IExtendedShape<S> {
+
     protected readonly _shape: S;
     get shape(): S { return this._shape; }
 
@@ -20,6 +23,7 @@ export abstract class ExtendedShape<S extends Konva.Shape> implements IExtendedS
     abstract calculateMiddlePoint(): Konva.Vector2d;
     abstract calculatePointsGivenLength(length: number): { oldPoints: number[], newPoints: number[] };
     abstract updateEndpoint(oldPoint: Konva.Vector2d | ('start' | 'end'), newValue: Konva.Vector2d): void;
+    abstract getAnchorPoints(): Konva.Vector2d[];
 
     protected abstract createShape(initialPosition: Konva.Vector2d): S;
 }
