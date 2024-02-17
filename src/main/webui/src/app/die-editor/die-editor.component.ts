@@ -1,163 +1,138 @@
-import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import {
+  MatDialog,
+  MAT_DIALOG_DATA,
+  MatDialogRef,
+  MatDialogTitle,
+  MatDialogContent,
+  MatDialogActions,
+  MatDialogClose,
+} from '@angular/material/dialog';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSelectModule } from '@angular/material/select';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatCardModule } from '@angular/material/card';
+import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { DieEditorManager } from './manager/die-editor-manager';
-import { Tool } from './manager/tools/tool';
+import { DieCreatorComponent } from '../die-creator/die-creator.component';
+
 
 @Component({
   selector: 'app-die-editor',
-  standalone: true,
-  imports: [MatButtonModule, MatIconModule],
   templateUrl: './die-editor.component.html',
-  styleUrl: './die-editor.component.scss'
+  styleUrl: './die-editor.component.scss',
+  standalone: true,
+  imports: [
+    MatInputModule,
+    MatButtonModule,
+    MatSelectModule,
+    MatRadioModule,
+    MatCardModule,
+    ReactiveFormsModule,
+    MatButtonModule,
+    RouterModule,
+    MatIconModule
+  ]
 })
-export class DieEditorComponent implements AfterViewInit, OnDestroy {
+export class DieEditorComponent {
 
+  constructor(public dialog: MatDialog) {}
 
-  @ViewChild('stageContainer', { static: false }) stageContainer?: ElementRef;
+  openDialog(): void {
+    const dialogRef = this.dialog.open(DieCreatorComponent, {
+      data: {name: "name", animal: "animal"},
+      width: "100%",
+      height: "100%",
+      maxWidth: "100vw"
+    });
 
-  Tool = Tool;
-
-
-  // stage!: Konva.Stage;
-  // layer!: Konva.Layer;
-  // circles: Konva.Circle[] = [];
-  // polygon!: Konva.Line;
-  // GUIDELINE_OFFSET = 5;
-
-  editor?: DieEditorManager;
-
-
-  ngAfterViewInit() {
-    this.editor = new DieEditorManager(this.stageContainer!);
-    setTimeout(() => this.editor!.useTool(Tool.DRAW_LINE), 100);
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('The dialog was closed', result);
+    });
   }
 
-  ngOnDestroy(): void {
-    this.editor?.destroy();
-  }
+  private fb = inject(FormBuilder);
+  addressForm = this.fb.group({
+    company: null,
+    firstName: [null, Validators.required],
+    lastName: [null, Validators.required],
+    address: [null, Validators.required],
+    address2: null,
+    city: [null, Validators.required],
+    state: [null, Validators.required],
+    postalCode: [null, Validators.compose([
+      Validators.required, Validators.minLength(5), Validators.maxLength(5)])
+    ],
+    shipping: ['free', Validators.required]
+  });
 
-  // addPolygon() {
-  //   const points = this.circles.map(circle => [circle.x(), circle.y()]).flat();
+  hasUnitNumber = false;
 
-  //   this.polygon = new Konva.Line({
-  //     points: points,
-  //     fill: '#ff000088',
-  //     stroke: '#ff0000',
-  //     strokeWidth: 1,
-  //     draggable: false,
-  //     closed: true,
-  //     dash: [],
-  //   });
+  states = [
+    {name: 'Alabama', abbreviation: 'AL'},
+    {name: 'Alaska', abbreviation: 'AK'},
+    {name: 'American Samoa', abbreviation: 'AS'},
+    {name: 'Arizona', abbreviation: 'AZ'},
+    {name: 'Arkansas', abbreviation: 'AR'},
+    {name: 'California', abbreviation: 'CA'},
+    {name: 'Colorado', abbreviation: 'CO'},
+    {name: 'Connecticut', abbreviation: 'CT'},
+    {name: 'Delaware', abbreviation: 'DE'},
+    {name: 'District Of Columbia', abbreviation: 'DC'},
+    {name: 'Federated States Of Micronesia', abbreviation: 'FM'},
+    {name: 'Florida', abbreviation: 'FL'},
+    {name: 'Georgia', abbreviation: 'GA'},
+    {name: 'Guam', abbreviation: 'GU'},
+    {name: 'Hawaii', abbreviation: 'HI'},
+    {name: 'Idaho', abbreviation: 'ID'},
+    {name: 'Illinois', abbreviation: 'IL'},
+    {name: 'Indiana', abbreviation: 'IN'},
+    {name: 'Iowa', abbreviation: 'IA'},
+    {name: 'Kansas', abbreviation: 'KS'},
+    {name: 'Kentucky', abbreviation: 'KY'},
+    {name: 'Louisiana', abbreviation: 'LA'},
+    {name: 'Maine', abbreviation: 'ME'},
+    {name: 'Marshall Islands', abbreviation: 'MH'},
+    {name: 'Maryland', abbreviation: 'MD'},
+    {name: 'Massachusetts', abbreviation: 'MA'},
+    {name: 'Michigan', abbreviation: 'MI'},
+    {name: 'Minnesota', abbreviation: 'MN'},
+    {name: 'Mississippi', abbreviation: 'MS'},
+    {name: 'Missouri', abbreviation: 'MO'},
+    {name: 'Montana', abbreviation: 'MT'},
+    {name: 'Nebraska', abbreviation: 'NE'},
+    {name: 'Nevada', abbreviation: 'NV'},
+    {name: 'New Hampshire', abbreviation: 'NH'},
+    {name: 'New Jersey', abbreviation: 'NJ'},
+    {name: 'New Mexico', abbreviation: 'NM'},
+    {name: 'New York', abbreviation: 'NY'},
+    {name: 'North Carolina', abbreviation: 'NC'},
+    {name: 'North Dakota', abbreviation: 'ND'},
+    {name: 'Northern Mariana Islands', abbreviation: 'MP'},
+    {name: 'Ohio', abbreviation: 'OH'},
+    {name: 'Oklahoma', abbreviation: 'OK'},
+    {name: 'Oregon', abbreviation: 'OR'},
+    {name: 'Palau', abbreviation: 'PW'},
+    {name: 'Pennsylvania', abbreviation: 'PA'},
+    {name: 'Puerto Rico', abbreviation: 'PR'},
+    {name: 'Rhode Island', abbreviation: 'RI'},
+    {name: 'South Carolina', abbreviation: 'SC'},
+    {name: 'South Dakota', abbreviation: 'SD'},
+    {name: 'Tennessee', abbreviation: 'TN'},
+    {name: 'Texas', abbreviation: 'TX'},
+    {name: 'Utah', abbreviation: 'UT'},
+    {name: 'Vermont', abbreviation: 'VT'},
+    {name: 'Virgin Islands', abbreviation: 'VI'},
+    {name: 'Virginia', abbreviation: 'VA'},
+    {name: 'Washington', abbreviation: 'WA'},
+    {name: 'West Virginia', abbreviation: 'WV'},
+    {name: 'Wisconsin', abbreviation: 'WI'},
+    {name: 'Wyoming', abbreviation: 'WY'}
+  ];
 
-  //   this.layer.add(this.polygon);
-  // }
-
-  // addEventListeners() {
-  //   this.circles.forEach(circle => this.addEventToCircle(circle));
-
-  //   this.polygon.on('click', (e) => {
-  //     this.handlePolygonClick();
-  //   });
-
-  //   this.layer.draw();
-  // }
-
-  // addEventToCircle(circle: Konva.Circle) {
-  //   circle.on('dragmove', (e) => {
-  //     console.log(e);
-  //     this.handleCircleDragMove(circle);
-  //   });
-
-  //   circle.on('mouseover', (e) => {
-  //     circle.radius(10);
-  //     this.layer.draw();
-  //   });
-
-  //   circle.on('mouseout', (e) => {
-  //     circle.radius(5);
-  //     this.layer.draw();
-  //   });
-  // }
-
-  // handleCircleDragMove(circle: Konva.Circle) {
-  //   const coords = this.snapToGrid({ x: circle.x(), y: circle.y() });
-  //   circle.x(coords.x);
-  //   circle.y(coords.y);
-  //   this.polygon.points(this.circles.map(c => [c.x(), c.y()]).flat());
-  //   this.layer.batchDraw();
-  // }
-
-  // handlePolygonClick() {
-  //   const mousePos = this.snapToGrid(this.stage.getPointerPosition()!);
-  //   const x = mousePos.x;
-  //   const y = mousePos.y;
-  //   const points = this.polygon.points();
-
-  //   for (let i = 0; i < points.length / 2; i++) {
-  //     const s_x = points[i * 2];
-  //     const s_y = points[i * 2 + 1];
-  //     const e_x = points[(i * 2 + 2) % points.length];
-  //     const e_y = points[(i * 2 + 3) % points.length];
-
-  //     if (((s_x <= x && x <= e_x) || (e_x <= x && x <= s_x)) &&
-  //       ((s_y <= y && y <= e_y) || (e_y <= y && y <= s_y))) {
-  //       const newPoint = new Konva.Circle({
-  //         x: x,
-  //         y: y,
-  //         radius: 3,
-  //         stroke: '#ff0000',
-  //         strokeWidth: 1,
-  //         draggable: true,
-  //       });
-
-  //       this.addEventToCircle(newPoint);
-  //       this.circles.splice(i + 1, 0, newPoint);
-  //       this.polygon.points(this.circles.map(c => [c.x(), c.y()]).flat());
-  //       this.layer.add(newPoint);
-  //       this.layer.draw();
-  //       break;
-  //     }
-  //   }
-  // }
-
-  @HostListener("window:resize")
-  updateCanvasSize() {
-    if (this.stageContainer) this.editor?.resize(this.stageContainer);
-  }
-
-  useEditTool() {
-    this.editor?.useTool(Tool.EDIT);
-  }
-  useDrawTool(drawingTool: Tool) {
-    this.editor?.useTool(drawingTool);
-  }
-  useEraserTool() {
-    this.editor?.useTool(Tool.ERASER);
-  }
-  useMoveTool() {
-    this.editor?.useTool(Tool.MOVE);
-  }
-  zoomIn() {
-    this.editor?.zoomIn();
-  }
-  restoreZoom() { }
-  zoomOut() {
-    this.editor?.zoomOut();
-  }
-
-  undo() { }
-  redo() { }
-  clear() {
-  }
-  cancel() { }
-
-  getColor(tool: Tool) {
-    if (this.editor?.selectedTool == tool)
-      return "warn";
-    return "primary";
-  }
-
-  save() {
+  onSubmit(): void {
+    alert('Thanks!');
   }
 }

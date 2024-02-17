@@ -1,60 +1,137 @@
-<div class="container-fluid h-100">
-    <div class="row h-100">
-        <!-- Left column -->
-        <div class="col-auto m-2">
-            <div class="d-flex flex-column justify-content-center align-items-center h-100">
-                <button mat-mini-fab [color]="getColor(Tool.EDIT)" (click)="useEditTool()" class="mb-2">
-                    <mat-icon>drag_indicator</mat-icon>
-                </button>
-                <button mat-mini-fab [color]="getColor(Tool.DRAW_LINE)" (click)="useDrawTool(Tool.DRAW_LINE)" class="mb-2">
-                    <mat-icon>timeline</mat-icon>
-                </button>
-                <button mat-mini-fab [color]="getColor(Tool.DRAW_CURVE)" (click)="useDrawTool(Tool.DRAW_CURVE)" class="mb-2">
-                    <mat-icon>gesture</mat-icon>
-                </button>
-                <button mat-mini-fab [color]="getColor(Tool.ERASER)" (click)="useEraserTool()" class="mb-2">
-                    <mat-icon>backspace</mat-icon>
-                </button>
-                <button mat-mini-fab [color]="getColor(Tool.MOVE)" (click)="useMoveTool()" class="mb-2">
-                    <mat-icon>open_with</mat-icon>
-                </button>
+<div class="container">
+  <form [formGroup]="addressForm" novalidate (ngSubmit)="onSubmit()">
+    <mat-card class="shipping-card">
+      <mat-card-header>
+        <mat-card-title>Informazioni Stampo</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
 
-                <button mat-mini-fab color="primary" (click)="zoomIn()" class="mb-2">
-                    <mat-icon>zoom_in</mat-icon>
-                </button>
-                <button mat-mini-fab color="primary" (click)="restoreZoom()" class="mb-2">
-                    <mat-icon>zoom_out_map</mat-icon>
-                </button>
-                <button mat-mini-fab color="primary" (click)="zoomOut()">
-                    <mat-icon>zoom_out</mat-icon>
-                </button>
+        <div class="row">
+          <div class="col-auto">
+            <div class="image">
+              <mat-card style="max-width: 200px;">
+                <!-- <mat-card-header>
+                  <mat-card-title>Immagine</mat-card-title>
+                </mat-card-header>
+                <img mat-card-image src="https://material.angular.io/assets/img/examples/shiba2.jpg"
+                  alt="Photo of a Shiba Inu"> -->
+                <mat-card-content>
+                  <div class="position-relative">
+                    <div class="position-absolute top-50 start-50 translate-middle">
+                      <button mat-fab color="primary" (click)="openDialog()">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                    </div>
+                    <img style="width: -webkit-fill-available;"
+                      src="https://material.angular.io/assets/img/examples/shiba2.jpg">
+                  </div>
+                </mat-card-content>
+              </mat-card>
             </div>
+          </div>
+          <div class="col">
+            <mat-form-field class="full-width">
+              <input matInput placeholder="Nome Stampo" formControlName="company">
+            </mat-form-field>
+
+            <mat-form-field class="full-width">
+              <input matInput placeholder="Altri dati..." formControlName="company">
+            </mat-form-field>
+          </div>
         </div>
 
-        <!-- Central column -->
-        <div class="col m-2 p-0">
-            <div class="w-100 h-100" #stageContainer>
-            </div>
+        <div class="row">
+          <div class="col">
+            <mat-form-field class="full-width">
+              <input matInput placeholder="Company" formControlName="company">
+            </mat-form-field>
+          </div>
         </div>
-
-        <div class="col-auto m-2">
-            <div class="d-flex flex-column justify-content-center align-items-center h-100">
-                <button mat-mini-fab color="primary" (click)="undo()" class="mb-2">
-                    <mat-icon>undo</mat-icon>
-                </button>
-                <button mat-mini-fab color="primary" (click)="redo()" class="mb-2">
-                    <mat-icon>redo</mat-icon>
-                </button>
-                <button mat-mini-fab color="primary" (click)="save()" class="mb-2">
-                    <mat-icon>save</mat-icon>
-                </button>
-                <button mat-mini-fab color="primary" (click)="clear()" class="mb-2">
-                    <mat-icon>delete</mat-icon>
-                </button>
-                <button mat-mini-fab color="primary" (click)="cancel()">
-                    <mat-icon>cancel</mat-icon>
-                </button>
-            </div>
+        <div class="row">
+          <div class="col">
+            <mat-form-field class="full-width">
+              <input matInput placeholder="First name" formControlName="firstName">
+              @if (addressForm.controls['firstName'].hasError('required')) {
+              <mat-error>First name is <strong>required</strong></mat-error>
+              }
+            </mat-form-field>
+          </div>
+          <div class="col">
+            <mat-form-field class="full-width">
+              <input matInput placeholder="Last name" formControlName="lastName">
+              @if (addressForm.controls['lastName'].hasError('required')) {
+              <mat-error>Last name is <strong>required</strong></mat-error>
+              }
+            </mat-form-field>
+          </div>
         </div>
-    </div>
+        <div class="row">
+          <div class="col">
+            <mat-form-field class="full-width">
+              <textarea matInput placeholder="Address" formControlName="address"></textarea>
+              @if (addressForm.controls['address'].hasError('required')) {
+              <mat-error>Address is <strong>required</strong></mat-error>
+              }
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            @if (hasUnitNumber) {
+            <mat-form-field class="full-width">
+              <textarea matInput placeholder="Address 2" formControlName="address2"></textarea>
+            </mat-form-field>
+            } @else {
+            <button mat-button type="button" (click)="hasUnitNumber = !hasUnitNumber">
+              + Add C/O, Apt, Suite, Unit
+            </button>
+            }
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <mat-form-field class="full-width">
+              <input matInput placeholder="City" formControlName="city">
+              @if (addressForm.controls['city'].hasError('required')) {
+              <mat-error>City is <strong>required</strong></mat-error>
+              }
+            </mat-form-field>
+          </div>
+          <div class="col">
+            <mat-form-field class="full-width">
+              <mat-select placeholder="State" formControlName="state">
+                @for (state of states; track state) {
+                <mat-option [value]="state.abbreviation">{{ state.name }}</mat-option>
+                }
+              </mat-select>
+              @if (addressForm.controls['state'].hasError('required')) {
+              <mat-error>State is <strong>required</strong></mat-error>
+              }
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <mat-form-field class="full-width">
+              <input matInput #postalCode maxlength="5" placeholder="Postal Code" type="number"
+                formControlName="postalCode">
+              <mat-hint align="end">{{postalCode.value.length}} / 5</mat-hint>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <mat-radio-group formControlName="shipping">
+              <mat-radio-button value="free">Free Shipping</mat-radio-button>
+              <mat-radio-button value="priority">Priority Shipping</mat-radio-button>
+              <mat-radio-button value="nextday">Next Day Shipping</mat-radio-button>
+            </mat-radio-group>
+          </div>
+        </div>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-raised-button color="primary" type="submit">Submit</button>
+      </mat-card-actions>
+    </mat-card>
+  </form>
 </div>
