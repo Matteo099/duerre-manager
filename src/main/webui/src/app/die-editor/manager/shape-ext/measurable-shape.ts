@@ -8,6 +8,10 @@ import { IMeasurableShape, LengthChanged } from "./imeasurable-shape";
 import { KonvaEditableText } from "./konva-editable-text";
 
 export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurableShape {
+    
+    public static readonly UNIT_MM_MINUS_1 = "mm⁻¹";
+    public static readonly UNIT_MM = "mm";
+
     private readonly editor: IDieEditor;
     public readonly group: Konva.Group;
     public readonly extShape: S;
@@ -59,10 +63,10 @@ export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurabl
         const width = this.text.text.width() || 0;
         const height = this.text.text.height() || 0;
         const middlePoint = this.extShape.calculateMiddlePoint();
-        const length = this.extShape.calculateLength().toFixed(2);
+        const length = (this.extShape.calculateLength() / 10).toFixed(1);
         this.text.text.x(middlePoint.x - width / 2);
         this.text.text.y(middlePoint.y - height / 2);
-        this.text.text.text(length + " mm");
+        this.text.text.text(length + " " + MeasurableShape.UNIT_MM);
     }
 
     public getLength(): number {

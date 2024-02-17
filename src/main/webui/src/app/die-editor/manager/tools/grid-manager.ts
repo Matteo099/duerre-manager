@@ -3,7 +3,7 @@ import { IDieEditor } from "../idie-editor";
 
 export class GridManager {
 
-    public static readonly STEP_SIZE = 40;
+    public static readonly STEP_SIZE = 10;
 
     private readonly editor: IDieEditor;
     private readonly layer: Konva.Layer;

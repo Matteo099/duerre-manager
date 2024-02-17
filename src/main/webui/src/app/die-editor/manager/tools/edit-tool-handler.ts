@@ -1,11 +1,10 @@
-import { KonvaEventObject } from "konva/lib/Node";
-import { IDieEditor } from "../idie-editor";
-import { ToolHandler } from "./tool-handler";
 import Konva from "konva";
-import { IMeasurableShape } from "../shape-ext/imeasurable-shape";
-import { BezierLineExt } from "../shape-ext/bezier-line-ext";
-import { REMOVE_ONLY } from "../constants";
+import { KonvaEventObject } from "konva/lib/Node";
 import { Subscription } from "rxjs";
+import { IDieEditor } from "../idie-editor";
+import { BezierLineExt } from "../shape-ext/bezier-line-ext";
+import { IMeasurableShape } from "../shape-ext/imeasurable-shape";
+import { ToolHandler } from "./tool-handler";
 
 export class EditToolHandler extends ToolHandler {
 
@@ -98,8 +97,13 @@ export class EditToolHandler extends ToolHandler {
 
         let lastPosition = anchor.position();
         let currentPosition = anchor.position();
-        anchor.on('mousedown touch', (event) => {
+        anchor.on('mousedown touchstart', (event) => {
             lastPosition = anchor.position();
+            this.highlightShapes(true, shapes);
+        });
+
+        anchor.on('mouseup touchend', (event) => {
+            this.highlightShapes(false, shapes);
         });
 
         anchor.on('dragmove', (event) => {
@@ -117,6 +121,20 @@ export class EditToolHandler extends ToolHandler {
                 // this.updateDottedLines();
             });
             lastPosition = anchor.position();
+        });
+
+        anchor.on('dragend', (event) => {
+            this.highlightShapes(false, shapes);
+        });
+    }
+
+    private highlightShapes(active: boolean, shapes: IMeasurableShape[]) {
+
+        shapes?.forEach(s => {
+            const shape: Konva.Shape = s.extShape.shape;
+            //shape.dash(active ? [10, 20, 0.001, 20] : []);
+            //shape.dashEnabled(active);
+            shape.stroke(active ? "#26df48" : "#df4b26" );
         });
     }
 

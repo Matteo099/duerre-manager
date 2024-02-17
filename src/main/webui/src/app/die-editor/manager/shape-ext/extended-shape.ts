@@ -19,6 +19,9 @@ export abstract class ExtendedShape<S extends Konva.Shape> implements IExtendedS
     abstract getEndPoints(): Konva.Vector2d[]
     abstract getPoints(): number[];
     abstract setPoints(p: number[]): S;
+    /**
+     * Return the length of the shape; the unit of measure is decimeter of millimiters (mm⁻¹)
+     */
     abstract calculateLength(): number;
     abstract calculateMiddlePoint(): Konva.Vector2d;
     abstract calculatePointsGivenLength(length: number): { oldPoints: number[], newPoints: number[] };

@@ -182,7 +182,7 @@ export class DieEditorManager implements IDieEditor {
         opts.event?.evt.preventDefault();
 
         const oldScale = this._stage.scaleX();
-        const pointer = this._stage.getPointerPosition()!;
+        const pointer = this._stage.getPointerPosition() || { x: 0, y: 0 };
 
         const mousePointTo = {
             x: (pointer.x - this._stage.x()) / oldScale,
@@ -220,9 +220,9 @@ export class DieEditorManager implements IDieEditor {
     }
 
     public destroy(): void {
-        this.editHandler.destroy(); 
-        this.drawHandler.destroy(); 
-        this.eraserHandler.destroy(); 
+        this.editHandler.destroy();
+        this.drawHandler.destroy();
+        this.eraserHandler.destroy();
         this.moveHandler.destroy();
         this.gridManager.destroy();
         this.layer.destroy();
