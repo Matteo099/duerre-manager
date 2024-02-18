@@ -174,7 +174,7 @@ export class DieCreatorComponent implements AfterViewInit, OnDestroy {
   clear() {
   }
   cancel() {
-    this.dialogRef.close();
+    this.dialogRef.close({a: "somedata"});
   }
 
   getColor(tool: Tool) {

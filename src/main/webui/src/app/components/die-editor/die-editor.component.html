@@ -6,7 +6,7 @@
       </mat-card-header>
       <mat-card-content>
 
-        <div class="row">
+        <div class="row mt-2 mb-3 align-items-center">
           <div class="col-auto">
             <div class="image">
               <mat-card style="max-width: 200px;">
@@ -18,12 +18,16 @@
                 <mat-card-content>
                   <div class="position-relative">
                     <div class="position-absolute top-50 start-50 translate-middle">
-                      <button mat-fab color="primary" (click)="openDialog()">
+                      <button mat-fab color="primary" [disabled]="addressForm.controls['dieData'].disabled"
+                        (click)="openDialog()">
                         <mat-icon>edit</mat-icon>
                       </button>
                     </div>
-                    <img style="width: -webkit-fill-available;"
-                      src="https://material.angular.io/assets/img/examples/shiba2.jpg">
+                    <img style="width: -webkit-fill-available;" src="/assets/images/milling.png">
+
+                    @if (addressForm.controls['dieData'].hasError('required')) {
+                    <mat-error>Il disegno dello stampo è <strong>obbligatorio</strong></mat-error>
+                    }
                   </div>
                 </mat-card-content>
               </mat-card>
@@ -31,16 +35,19 @@
           </div>
           <div class="col">
             <mat-form-field class="full-width">
-              <input matInput placeholder="Nome Stampo" formControlName="company">
+              <input matInput placeholder="Nome Stampo" formControlName="name">
+              @if (addressForm.controls['name'].hasError('required')) {
+              <mat-error>Il nome dello stampo è <strong>obbligatorio</strong></mat-error>
+              }
             </mat-form-field>
 
             <mat-form-field class="full-width">
-              <input matInput placeholder="Altri dati..." formControlName="company">
+              <input matInput placeholder="Altri dati..." formControlName="data">
             </mat-form-field>
           </div>
         </div>
 
-        <div class="row">
+        <!-- <div class="row">
           <div class="col">
             <mat-form-field class="full-width">
               <input matInput placeholder="Company" formControlName="company">
@@ -127,10 +134,10 @@
               <mat-radio-button value="nextday">Next Day Shipping</mat-radio-button>
             </mat-radio-group>
           </div>
-        </div>
+        </div> -->
       </mat-card-content>
-      <mat-card-actions>
-        <button mat-raised-button color="primary" type="submit">Submit</button>
+      <mat-card-actions style="flex-direction: row-reverse;">
+        <button mat-raised-button color="primary" type="submit">Crea</button>
       </mat-card-actions>
     </mat-card>
   </form>

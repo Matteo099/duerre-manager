@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
-import { DieDashboardComponent } from './die-dashboard/die-dashboard.component';
-import { DieEditorComponent } from './die-editor/die-editor.component';
-import { DieViewerComponent } from './die-viewer/die-viewer.component';
+import { DieDashboardComponent } from './components/die-dashboard/die-dashboard.component';
+import { DieEditorComponent } from './components/die-editor/die-editor.component';
+import { DieViewerComponent } from './components/die-viewer/die-viewer.component';
 import { DieCreatorComponent } from './die-creator/die-creator.component';
 
 export const routes: Routes = [
