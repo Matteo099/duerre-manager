@@ -5,6 +5,7 @@ import { Layer } from "konva/lib/Layer";
 import { Shape, ShapeConfig } from "konva/lib/Shape";
 import { REMOVE_ONLY } from "../constants";
 import { Vector2d } from "konva/lib/types";
+import { DieDataShapeDao } from "../../../models/dao/die-data-shape-dao";
 
 export class BezierLineExt extends ExtendedShape<Konva.Shape> {
 
@@ -54,6 +55,11 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
 
     override getAnchorPoints(): Konva.Vector2d[] {
         return [...this.getEndPoints(), { x: this.quad.control.x, y: this.quad.control.y }];
+    }
+
+    override toDieDataShape(): DieDataShapeDao {
+        // TODO
+        throw new Error("Method not implemented.");
     }
 
     getEndPoints(): Konva.Vector2d[] {

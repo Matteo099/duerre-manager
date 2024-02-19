@@ -57,7 +57,7 @@ export class DieEditorComponent {
     this.addressForm.controls['dieData'].markAsTouched()
 
     const dialogRef = this.dialog.open(DieCreatorComponent, {
-      data: { name: "name", animal: "animal" },
+      data: this.addressForm.controls['dieData'].value,
       width: "100%",
       height: "100%",
       maxWidth: "100vw"

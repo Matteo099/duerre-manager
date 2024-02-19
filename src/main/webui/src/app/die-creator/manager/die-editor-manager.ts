@@ -12,6 +12,7 @@ import { MoveToolHandler } from "./tools/move-tool-handler";
 import { EditToolHandler } from "./tools/edit-tool-handler";
 import { Tool } from "./tools/tool";
 import { ToolHandler } from "./tools/tool-handler";
+import { DieDataDao } from "../../models/dao/die-data-dao";
 
 export class DieEditorManager implements IDieEditor {
 
@@ -217,6 +218,17 @@ export class DieEditorManager implements IDieEditor {
         this._stage.position(newPos);
         this._stage.draw();
         this.gridManager.draw();
+    }
+
+    public setData(data: DieDataDao) {
+        
+        this.state.lines.forEach(l => {
+            l.extShape.toDieDataShape()
+        })
+    }
+
+    public getData(): DieDataDao | undefined {
+        return undefined;
     }
 
     public destroy(): void {

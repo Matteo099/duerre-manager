@@ -62,7 +62,9 @@ export class LoadingService {
       this.requestQueue.push({ reqId, reqMsg });
       msg = reqMsg;
     } else {
-      this.requestQueue.pop();
+      const index = this.requestQueue.findIndex((e: { reqId: string, reqMsg: string | undefined }) => e.reqId == reqId);
+      if(index >= 0) this.requestQueue.splice(index, 1);
+      
       if (this.requestQueue.length > 0) {
         const last = this.requestQueue[this.requestQueue.length - 1];
         msg = last.reqMsg;

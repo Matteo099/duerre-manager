@@ -1,14 +1,14 @@
-import { Component, inject } from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AsyncPipe } from '@angular/common';
-import { MatToolbarModule } from '@angular/material/toolbar';
+import { Component, ViewChild, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { Router, RouterModule, RouterOutlet } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
-import { RouterOutlet } from '@angular/router';
 import { LoaderComponent } from './components/loader/loader.component';
 
 @Component({
@@ -24,15 +24,25 @@ import { LoaderComponent } from './components/loader/loader.component';
     MatListModule,
     MatIconModule,
     AsyncPipe,
-    LoaderComponent
+    LoaderComponent,
+    RouterModule
   ]
 })
 export class AppComponent {
+
+  @ViewChild("drawer") drawer: any;
+
   private breakpointObserver = inject(BreakpointObserver);
+  private router = inject(Router);
 
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
     .pipe(
       map(result => result.matches),
       shareReplay()
     );
+
+  navigate(path: string) {
+    this.router.navigate([path]);
+    this.drawer.toggle();
+  }
 }

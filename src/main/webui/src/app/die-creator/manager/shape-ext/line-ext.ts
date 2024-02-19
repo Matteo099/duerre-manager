@@ -1,6 +1,7 @@
 import Konva from "konva";
 import { KonvaUtils } from "../konva-utils";
 import { ExtendedShape } from "./extended-shape";
+import { DieDataShapeDao } from "../../../models/dao/die-data-shape-dao";
 
 export class LineExt extends ExtendedShape<Konva.Line> {
 
@@ -25,6 +26,11 @@ export class LineExt extends ExtendedShape<Konva.Line> {
     
     override getAnchorPoints(): Konva.Vector2d[] {
         return this.getEndPoints();
+    }
+
+    override toDieDataShape(): DieDataShapeDao {
+        // TODO
+        throw new Error("Method not implemented.");
     }
 
     getPoints(): number[] {

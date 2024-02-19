@@ -2,6 +2,7 @@ import Konva from "konva";
 import { IExtendedShape } from "./iextended-shape";
 import { Layer } from "konva/lib/Layer";
 import { Shape, ShapeConfig } from "konva/lib/Shape";
+import { DieDataShapeDao } from "../../../models/dao/die-data-shape-dao";
 
 export abstract class ExtendedShape<S extends Konva.Shape> implements IExtendedShape<S> {
 
@@ -29,4 +30,6 @@ export abstract class ExtendedShape<S extends Konva.Shape> implements IExtendedS
     abstract getAnchorPoints(): Konva.Vector2d[];
 
     protected abstract createShape(initialPosition: Konva.Vector2d): S;
+
+    abstract toDieDataShape(): DieDataShapeDao;
 }

@@ -12,11 +12,7 @@ import {
   MatDialogActions,
   MatDialogClose,
 } from '@angular/material/dialog';
-
-export interface DialogData {
-  animal: string;
-  name: string;
-}
+import { DieDataDao } from '../models/dao/die-data-dao';
 
 @Component({
   selector: 'app-die-creator',
@@ -35,114 +31,23 @@ export class DieCreatorComponent implements AfterViewInit, OnDestroy {
 
   @ViewChild('stageContainer', { static: false }) stageContainer?: ElementRef;
 
-  Tool = Tool;
-
-
-  // stage!: Konva.Stage;
-  // layer!: Konva.Layer;
-  // circles: Konva.Circle[] = [];
-  // polygon!: Konva.Line;
-  // GUIDELINE_OFFSET = 5;
-
   editor?: DieEditorManager;
+  Tool = Tool;
 
   constructor(
     public dialogRef: MatDialogRef<DieCreatorComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: DialogData,
+    @Inject(MAT_DIALOG_DATA) public data: DieDataDao,
   ) { }
 
   ngAfterViewInit() {
     this.editor = new DieEditorManager(this.stageContainer!);
+    this.editor.setData(this.data);
     setTimeout(() => this.editor!.useTool(Tool.DRAW_LINE), 100);
   }
 
   ngOnDestroy(): void {
     this.editor?.destroy();
   }
-
-  // addPolygon() {
-  //   const points = this.circles.map(circle => [circle.x(), circle.y()]).flat();
-
-  //   this.polygon = new Konva.Line({
-  //     points: points,
-  //     fill: '#ff000088',
-  //     stroke: '#ff0000',
-  //     strokeWidth: 1,
-  //     draggable: false,
-  //     closed: true,
-  //     dash: [],
-  //   });
-
-  //   this.layer.add(this.polygon);
-  // }
-
-  // addEventListeners() {
-  //   this.circles.forEach(circle => this.addEventToCircle(circle));
-
-  //   this.polygon.on('click', (e) => {
-  //     this.handlePolygonClick();
-  //   });
-
-  //   this.layer.draw();
-  // }
-
-  // addEventToCircle(circle: Konva.Circle) {
-  //   circle.on('dragmove', (e) => {
-  //     console.log(e);
-  //     this.handleCircleDragMove(circle);
-  //   });
-
-  //   circle.on('mouseover', (e) => {
-  //     circle.radius(10);
-  //     this.layer.draw();
-  //   });
-
-  //   circle.on('mouseout', (e) => {
-  //     circle.radius(5);
-  //     this.layer.draw();
-  //   });
-  // }
-
-  // handleCircleDragMove(circle: Konva.Circle) {
-  //   const coords = this.snapToGrid({ x: circle.x(), y: circle.y() });
-  //   circle.x(coords.x);
-  //   circle.y(coords.y);
-  //   this.polygon.points(this.circles.map(c => [c.x(), c.y()]).flat());
-  //   this.layer.batchDraw();
-  // }
-
-  // handlePolygonClick() {
-  //   const mousePos = this.snapToGrid(this.stage.getPointerPosition()!);
-  //   const x = mousePos.x;
-  //   const y = mousePos.y;
-  //   const points = this.polygon.points();
-
-  //   for (let i = 0; i < points.length / 2; i++) {
-  //     const s_x = points[i * 2];
-  //     const s_y = points[i * 2 + 1];
-  //     const e_x = points[(i * 2 + 2) % points.length];
-  //     const e_y = points[(i * 2 + 3) % points.length];
-
-  //     if (((s_x <= x && x <= e_x) || (e_x <= x && x <= s_x)) &&
-  //       ((s_y <= y && y <= e_y) || (e_y <= y && y <= s_y))) {
-  //       const newPoint = new Konva.Circle({
-  //         x: x,
-  //         y: y,
-  //         radius: 3,
-  //         stroke: '#ff0000',
-  //         strokeWidth: 1,
-  //         draggable: true,
-  //       });
-
-  //       this.addEventToCircle(newPoint);
-  //       this.circles.splice(i + 1, 0, newPoint);
-  //       this.polygon.points(this.circles.map(c => [c.x(), c.y()]).flat());
-  //       this.layer.add(newPoint);
-  //       this.layer.draw();
-  //       break;
-  //     }
-  //   }
-  // }
 
   @HostListener("window:resize")
   updateCanvasSize() {
@@ -174,7 +79,7 @@ export class DieCreatorComponent implements AfterViewInit, OnDestroy {
   clear() {
   }
   cancel() {
-    this.dialogRef.close({a: "somedata"});
+    this.dialogRef.close(this.data);
   }
 
   getColor(tool: Tool) {
@@ -184,5 +89,7 @@ export class DieCreatorComponent implements AfterViewInit, OnDestroy {
   }
 
   save() {
+    const dieDataDao = this.editor?.getData();
+    this.dialogRef.close(dieDataDao);
   }
 }
