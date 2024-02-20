@@ -1,14 +1,48 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { DieEditorComponent } from './die-editor/die-editor.component';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { AsyncPipe } from '@angular/common';
+import { Component, ViewChild, inject } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { Router, RouterModule, RouterOutlet } from '@angular/router';
+import { Observable } from 'rxjs';
+import { map, shareReplay } from 'rxjs/operators';
+import { LoaderComponent } from './components/loader/loader.component';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
-  imports: [RouterOutlet, DieEditorComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrl: './app.component.scss',
+  standalone: true,
+  imports: [
+    RouterOutlet,
+    MatToolbarModule,
+    MatButtonModule,
+    MatSidenavModule,
+    MatListModule,
+    MatIconModule,
+    AsyncPipe,
+    LoaderComponent,
+    RouterModule
+  ]
 })
 export class AppComponent {
-  title = 'webui';
+
+  @ViewChild("drawer") drawer: any;
+
+  private breakpointObserver = inject(BreakpointObserver);
+  private router = inject(Router);
+
+  isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
+    .pipe(
+      map(result => result.matches),
+      shareReplay()
+    );
+
+  navigate(path: string) {
+    this.router.navigate([path]);
+    this.drawer.toggle();
+  }
 }

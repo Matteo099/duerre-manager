@@ -1,3 +1,0 @@
-export enum Tool {
-    SELECT, DRAW_LINE, DRAW_CURVE, ERASER, MOVE, EDIT
-}

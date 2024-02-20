@@ -1,0 +1,60 @@
+<div class="container-fluid h-100">
+    <div class="row h-100">
+        <!-- Left column -->
+        <div class="col-auto m-2">
+            <div class="d-flex flex-column justify-content-center align-items-center h-100">
+                <button mat-mini-fab [color]="getColor(Tool.EDIT)" (click)="useEditTool()" class="mb-2">
+                    <mat-icon>drag_indicator</mat-icon>
+                </button>
+                <button mat-mini-fab [color]="getColor(Tool.DRAW_LINE)" (click)="useDrawTool(Tool.DRAW_LINE)" class="mb-2">
+                    <mat-icon>timeline</mat-icon>
+                </button>
+                <button mat-mini-fab [color]="getColor(Tool.DRAW_CURVE)" (click)="useDrawTool(Tool.DRAW_CURVE)" class="mb-2">
+                    <mat-icon>gesture</mat-icon>
+                </button>
+                <button mat-mini-fab [color]="getColor(Tool.ERASER)" (click)="useEraserTool()" class="mb-2">
+                    <mat-icon>backspace</mat-icon>
+                </button>
+                <button mat-mini-fab [color]="getColor(Tool.MOVE)" (click)="useMoveTool()" class="mb-2">
+                    <mat-icon>open_with</mat-icon>
+                </button>
+
+                <button mat-mini-fab color="primary" (click)="zoomIn()" class="mb-2">
+                    <mat-icon>zoom_in</mat-icon>
+                </button>
+                <button mat-mini-fab color="primary" (click)="restoreZoom()" class="mb-2">
+                    <mat-icon>zoom_out_map</mat-icon>
+                </button>
+                <button mat-mini-fab color="primary" (click)="zoomOut()">
+                    <mat-icon>zoom_out</mat-icon>
+                </button>
+            </div>
+        </div>
+
+        <!-- Central column -->
+        <div class="col m-2 p-0">
+            <div class="w-100 h-100" #stageContainer>
+            </div>
+        </div>
+
+        <div class="col-auto m-2">
+            <div class="d-flex flex-column justify-content-center align-items-center h-100">
+                <button mat-mini-fab color="primary" (click)="undo()" class="mb-2">
+                    <mat-icon>undo</mat-icon>
+                </button>
+                <button mat-mini-fab color="primary" (click)="redo()" class="mb-2">
+                    <mat-icon>redo</mat-icon>
+                </button>
+                <button mat-mini-fab color="primary" (click)="save()" class="mb-2">
+                    <mat-icon>save</mat-icon>
+                </button>
+                <button mat-mini-fab color="primary" (click)="clear()" class="mb-2">
+                    <mat-icon>delete</mat-icon>
+                </button>
+                <button mat-mini-fab color="primary" (click)="cancel()">
+                    <mat-icon>cancel</mat-icon>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
