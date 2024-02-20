@@ -1,24 +1,18 @@
 import { Component, inject } from '@angular/core';
-import {
-  MatDialog,
-  MAT_DIALOG_DATA,
-  MatDialogRef,
-  MatDialogTitle,
-  MatDialogContent,
-  MatDialogActions,
-  MatDialogClose,
-} from '@angular/material/dialog';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { MatInputModule } from '@angular/material/input';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSelectModule } from '@angular/material/select';
-import { MatRadioModule } from '@angular/material/radio';
 import { MatCardModule } from '@angular/material/card';
-import { ActivatedRoute, Route, Router, RouterLink, RouterModule } from '@angular/router';
+import {
+  MatDialog
+} from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatSelectModule } from '@angular/material/select';
+import { Router, RouterModule } from '@angular/router';
 import { DieCreatorComponent } from '../../die-creator/die-creator.component';
-import { DieService } from '../../services/die.service';
 import { DieDao } from '../../models/dao/die-dao';
+import { DieService } from '../../services/die.service';
 
 
 @Component({
@@ -43,7 +37,7 @@ export class DieEditorComponent {
   private fb = inject(FormBuilder);
   addressForm = this.fb.group({
     name: [null, Validators.required],
-    dieData: [null], //, Validators.required
+    dieData: [null, Validators.required],
     data: null,
   });
 
@@ -82,7 +76,7 @@ export class DieEditorComponent {
     this.dieService.create(die).subscribe({
       next: (idW) => {
         console.log(idW);
-        //this.router.navigate(['/die/' + idW.id])
+        this.router.navigate(['/die/' + idW.id])
       },
       error: (erW) => {
         console.log(erW);

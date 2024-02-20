@@ -87,7 +87,7 @@ export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurabl
         for (let i = 0; i < myEndpoints.length; i++) {
             const ep = myEndpoints[i];
             for (let j = 0; j < otherEndpoints.length; j++) {
-                const oEp = otherEndpoints[i];
+                const oEp = otherEndpoints[j];
                 if (oEp.x == ep.x && oEp.y == ep.y) {
                     return true;
                 }

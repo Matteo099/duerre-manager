@@ -37,6 +37,13 @@ export class EditToolHandler extends ToolHandler {
         this.tempSubscriptions = [];
     }
 
+    override clear(): void {
+        super.clear();
+        
+        this.tempSubscriptions.forEach(s => s.unsubscribe());
+        this.tempSubscriptions = [];
+    }
+
     private createAnchorPoints() {
         this.gizmoLayer.removeChildren();
 

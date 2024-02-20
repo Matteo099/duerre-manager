@@ -228,8 +228,15 @@ export class DieEditorManager implements IDieEditor {
         this.gridManager.draw();
     }
 
-    public setData(data: DieDataDao) {
+    public clear() {
         this.state.clear();
+        this.editHandler.clear();
+        this.drawHandler.clear();
+        this.eraserHandler.clear();
+    }
+
+    public setData(data: DieDataDao) {
+        this.clear();
         data.state.forEach(s => {
             const drawingLine = new MeasurableShape<any>(this, { x: 0, y: 0 }, s.type == 'line' ? LineExt : BezierLineExt);
             drawingLine.updatePoints(s.points);

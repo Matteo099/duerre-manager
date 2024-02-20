@@ -37,6 +37,17 @@ export class DrawToolHandler extends ToolHandler {
         }));
     }
 
+    override clear(): void {
+        super.clear();
+
+        this.stopAnimationAvailablePoints();
+        this.clearGitzmos();
+        this.drawingLine?.destroy();
+        this.drawingLine = undefined;
+        this.isDrawing = false;
+        this.startingPoint = undefined;
+    }
+
     protected override createLayers(): void {
         this.animationLayer = new Konva.Layer({
             name: DrawToolHandler.ANIMATION_LAYER_NAME

@@ -64,6 +64,14 @@ export class EraserToolHandler extends ToolHandler {
         //this.editor.layer.toggleHitCanvas();
     }
 
+    override clear(): void {
+        super.clear();
+
+        this.anim.stop();
+        this.shapesToDelete.splice(0, this.shapesToDelete.length);
+        this.trail.points([]);
+    }
+
     override onMouseDown(event: KonvaEventObject<any>): void {
         const pos = this.editor.stage.getRelativePointerPosition();
         if (!pos) return;

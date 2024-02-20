@@ -41,6 +41,11 @@ export abstract class ToolHandler {
         this.layers.forEach(l => l.destroy());
     }
 
+    clear() {
+        this.layers.forEach(l => l.removeChildren());
+    }
+
+
     abstract onMouseDown(event: KonvaEventObject<any>): void;
     abstract onMouseMove(event: KonvaEventObject<any>): void;
     abstract onMouseUp(event: KonvaEventObject<any>): void;

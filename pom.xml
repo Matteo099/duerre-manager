@@ -44,13 +44,13 @@
     </dependency>
     <!-- Hibernate ORM specific dependencies -->
     <dependency>
-        <groupId>io.quarkus</groupId>
-        <artifactId>quarkus-hibernate-orm-panache</artifactId>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-hibernate-orm-panache</artifactId>
     </dependency>
     <!-- JDBC driver dependencies -->
     <dependency>
-        <groupId>io.quarkus</groupId>
-        <artifactId>quarkus-jdbc-postgresql</artifactId>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-jdbc-postgresql</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkiverse.quinoa</groupId>
@@ -105,11 +105,11 @@
           <annotationProcessorPaths>
             <!-- Your existing annotation processor(s)... -->
             <path>
-                <groupId>io.quarkus</groupId>
-                <artifactId>quarkus-panache-common</artifactId>
-                <version>${quarkus.platform.version}</version>
+              <groupId>io.quarkus</groupId>
+              <artifactId>quarkus-panache-common</artifactId>
+              <version>${quarkus.platform.version}</version>
             </path>
-        </annotationProcessorPaths>
+          </annotationProcessorPaths>
         </configuration>
       </plugin>
       <plugin>

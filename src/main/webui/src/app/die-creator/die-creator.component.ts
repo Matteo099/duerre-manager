@@ -36,12 +36,12 @@ export class DieCreatorComponent implements AfterViewInit, OnDestroy {
 
   constructor(
     public dialogRef: MatDialogRef<DieCreatorComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: DieDataDao,
+    @Inject(MAT_DIALOG_DATA) public data?: DieDataDao,
   ) { }
 
   ngAfterViewInit() {
     this.editor = new DieEditorManager(this.stageContainer!);
-    this.editor.setData(this.data);
+    if(this.data) this.editor.setData(this.data);
     setTimeout(() => this.editor!.useTool(Tool.DRAW_LINE), 100);
   }
 
@@ -77,6 +77,7 @@ export class DieCreatorComponent implements AfterViewInit, OnDestroy {
   undo() { }
   redo() { }
   clear() {
+    this.editor?.clear();
   }
   cancel() {
     this.dialogRef.close(this.data);

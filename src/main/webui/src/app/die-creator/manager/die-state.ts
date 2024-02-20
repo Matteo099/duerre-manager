@@ -122,6 +122,8 @@ export class DieState {
 
     public save(): DieDataShapeDao[] {
 
+        debugger;
+        
         const dieDataShapeDao: DieDataShapeDao[] = [];
         const orderedLines: IMeasurableShape[] = [];
         const allLinesCopy = [...this.lines]; // Create a copy to avoid modifying the original array
@@ -130,7 +132,6 @@ export class DieState {
         // Order the lines so that it generates an array of contigous lines
         while (allLinesCopy.length > 0) {
             const currentLine = allLinesCopy[i];
-
             if (orderedLines.length === 0 || currentLine.hasCommonEndPointWith(orderedLines[orderedLines.length - 1])) {
                 orderedLines.push(currentLine);
                 allLinesCopy.splice(i, 1);
