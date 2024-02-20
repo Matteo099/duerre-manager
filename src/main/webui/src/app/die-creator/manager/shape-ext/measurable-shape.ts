@@ -118,4 +118,8 @@ export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurabl
         this.extShape.updateEndpoint(oldPoint, newValue);
         this.updateText();
     }
+
+    public toggleText(active?: boolean) {
+        this.text.text.visible(active ?? this.text.text.visible());
+    }
 }

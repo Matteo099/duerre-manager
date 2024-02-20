@@ -13,14 +13,14 @@ export class DieState {
     // permette di ottenere gli endpoints
 
     public readonly lines: IMeasurableShape[] = [];
-    public readonly polygon: Konva.Line = new Konva.Line({
-        points: [],
-        fill: '#00D2FF',
-        stroke: 'black',
-        strokeWidth: 5,
-        closed: true,
-        visible: false
-    });
+    // public readonly polygon: Konva.Line = new Konva.Line({
+    //     points: [],
+    //     fill: '#00D2FF',
+    //     stroke: 'black',
+    //     strokeWidth: 5,
+    //     closed: true,
+    //     visible: false
+    // });
     public readonly subscriptions: Subscription[] = [];
 
     public canDrawNewLine(pos: Konva.Vector2d): boolean {
@@ -38,7 +38,7 @@ export class DieState {
 
     public addLine(shape: IMeasurableShape) {
         this.lines.push(shape);
-        this.updatePolygon();
+        // this.updatePolygon();
         const s = shape.onLengthChanged.subscribe((v: LengthChanged) => this.onLengthChange(shape, v.oldPoint, v.newPoint));
         this.subscriptions.push(s);
         //shape.onLengthChange = (oldPoint: Konva.Vector2d, newPoint: Konva.Vector2d) => this.onLengthChange(shape, oldPoint, newPoint);
@@ -51,18 +51,18 @@ export class DieState {
         if (index >= 0) {
             this.lines[index].destroy();
             this.lines.splice(index, 1);
-            this.updatePolygon();
+            // this.updatePolygon();
         }
     }
 
-    private updatePolygon() {
-        this.polygon.points(this.lines.flatMap(l => (l.extShape instanceof Konva.Line ? l.extShape.points() : l.extShape.getPoints())));
+    // private updatePolygon() {
+    //     this.polygon.points(this.lines.flatMap(l => (l.extShape instanceof Konva.Line ? l.extShape.points() : l.extShape.getPoints())));
 
-        const endpoints = this.getEndPoints();
-        if (endpoints.length == 0) {
-            this.polygon.visible(true);
-        }
-    }
+    //     const endpoints = this.getEndPoints();
+    //     if (endpoints.length == 0) {
+    //         this.polygon.visible(true);
+    //     }
+    // }
 
     private onLengthChange(shape: IMeasurableShape, oldPoints: Konva.Vector2d, newPoints: Konva.Vector2d) {
         const attachedLine = this.findShapesWithEndpoint(oldPoints).filter(s => s.getId() != shape.getId())[0];

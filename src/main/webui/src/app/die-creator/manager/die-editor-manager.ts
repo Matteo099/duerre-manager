@@ -1,22 +1,24 @@
 import { ElementRef } from "@angular/core";
 import Konva from "konva";
 import { KonvaEventObject } from "konva/lib/Node";
+import { DieDataDao } from "../../models/dao/die-data-dao";
+import { DieDataShapeDao } from "../../models/dao/die-data-shape-dao";
 import { DieState } from "./die-state";
 import { GuidelinesManager } from "./guidelines-manager";
-import { DrawToolHandler } from "./tools/draw-tool-handler";
-import { EraserToolHandler } from "./tools/eraser-tool-handler";
-import { GridManager } from "./tools/grid-manager";
 import { IDieEditor } from "./idie-editor";
 import { KonvaHelper } from "./konva-helper";
 import { KonvaUtils } from "./konva-utils";
-import { MoveToolHandler } from "./tools/move-tool-handler";
+import { BezierLineExt } from "./shape-ext/bezier-line-ext";
+import { LineExt } from "./shape-ext/line-ext";
+import { MeasurableShape } from "./shape-ext/measurable-shape";
+import { DrawToolHandler } from "./tools/draw-tool-handler";
 import { EditToolHandler } from "./tools/edit-tool-handler";
+import { EraserToolHandler } from "./tools/eraser-tool-handler";
+import { GridManager } from "./tools/grid-manager";
+import { MoveToolHandler } from "./tools/move-tool-handler";
 import { Tool } from "./tools/tool";
 import { ToolHandler } from "./tools/tool-handler";
-import { DieDataDao } from "../../models/dao/die-data-dao";
-import { MeasurableShape } from "./shape-ext/measurable-shape";
-import { LineExt } from "./shape-ext/line-ext";
-import { BezierLineExt } from "./shape-ext/bezier-line-ext";
+import { ExtendedShape } from "./shape-ext/extended-shape";
 
 export class DieEditorManager implements IDieEditor {
 
@@ -71,7 +73,7 @@ export class DieEditorManager implements IDieEditor {
 
     private createState() {
         this._state = new DieState();
-        this._layer.add(this._state.polygon);
+        // this._layer.add(this._state.polygon);
     }
 
     private createTools() {
@@ -261,7 +263,53 @@ export class DieEditorManager implements IDieEditor {
         this.stage.destroy();
     }
 
-    public exportImage() : any {
+    public exportImage(): string {
+        const container = document.createElement("div");
+        container.style.display = "none";
+        const width = 300;
+        const height = 300;
+        const crpStage = new Konva.Stage({
+            container,
+            width,
+            height
+        });
+        const crpLayer = new Konva.Layer();
+        crpStage.add(crpLayer);
 
+        const dieState: DieDataShapeDao[] = this.state.save();
+        let minX = Infinity;
+        let minY = Infinity;
+        let maxX = -Infinity;
+        let maxY = -Infinity;
+
+        dieState.forEach(s => {
+            const drawingLine = new MeasurableShape<ExtendedShape<any>>(this, { x: 0, y: 0 }, s.type == 'line' ? LineExt : BezierLineExt);
+            drawingLine.updatePoints(s.points);
+            const shape: Konva.Shape = drawingLine.extShape.shape;
+            crpLayer.add(shape);
+
+            const points = shape.getClientRect();
+            minX = Math.min(minX, points.x);
+            minY = Math.min(minY, points.y);
+            maxX = Math.max(maxX, points.x + points.width);
+            maxY = Math.max(maxY, points.y + points.height);
+        });
+
+        const translateX = (width - (maxX - minX)) / 2;
+        const translateY = (height - (maxY - minY)) / 2;
+        // Shift all shapes to the left side + translation to center
+        crpLayer.children.forEach(shape => {
+            shape.x(shape.x() - minX + translateX);
+            shape.y(shape.y() - minY + translateY);
+        });
+
+        const scaleX = width / (maxX - minX);
+        const scaleY = height / (maxY - minY);
+        const scaleFactor = Math.min(scaleX, scaleY);
+        crpLayer.scale({ x: scaleFactor, y: scaleFactor });
+
+        const dataURL = crpStage.toDataURL();
+        container.remove();
+        return dataURL;
     }
 }

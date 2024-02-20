@@ -18,7 +18,7 @@ import { Tool } from './manager/tools/tool';
 export function validDieValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const dieData: DieDataDao = control.value;
-    return dieData.valid ? null : { validDie: { value: dieData.valid } };
+    return dieData?.valid ? null : { validDie: { value: dieData?.valid || false } };
   };
 }
 
@@ -99,6 +99,7 @@ export class DieCreatorComponent implements AfterViewInit, OnDestroy {
 
   save() {
     const dieDataDao = this.editor?.getData();
+    console.log(this.editor?.exportImage());
     this.dialogRef.close(dieDataDao);
   }
 }

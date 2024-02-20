@@ -28,7 +28,7 @@
                     @if (addressForm.controls['dieData'].hasError('required')) {
                     <mat-error>Il disegno dello stampo è <strong>obbligatorio</strong></mat-error>
                     }
-                    @if (addressForm.controls['dieData'].hasError('validDie')) {
+                    @else if(addressForm.controls['dieData'].hasError('validDie')) {
                       <mat-error>Il disegno dello stampo non è <strong>completo</strong></mat-error>
                     }
                   </div>
