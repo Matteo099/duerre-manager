@@ -14,6 +14,9 @@ import { EditToolHandler } from "./tools/edit-tool-handler";
 import { Tool } from "./tools/tool";
 import { ToolHandler } from "./tools/tool-handler";
 import { DieDataDao } from "../../models/dao/die-data-dao";
+import { MeasurableShape } from "./shape-ext/measurable-shape";
+import { LineExt } from "./shape-ext/line-ext";
+import { BezierLineExt } from "./shape-ext/bezier-line-ext";
 
 export class DieEditorManager implements IDieEditor {
 
@@ -226,14 +229,18 @@ export class DieEditorManager implements IDieEditor {
     }
 
     public setData(data: DieDataDao) {
-        
-        this.state.lines.forEach(l => {
-            l.extShape.toDieDataShape()
-        })
+        this.state.clear();
+        data.state.forEach(s => {
+            const drawingLine = new MeasurableShape<any>(this, { x: 0, y: 0 }, s.type == 'line' ? LineExt : BezierLineExt);
+            drawingLine.updatePoints(s.points);
+            this.layer.add(drawingLine.group);
+            this.state.addLine(drawingLine);
+        });
     }
 
     public getData(): DieDataDao | undefined {
-        return undefined;
+        const state = this.state.save();
+        return { state }
     }
 
     public destroy(): void {

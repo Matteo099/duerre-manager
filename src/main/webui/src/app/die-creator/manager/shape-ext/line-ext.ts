@@ -29,10 +29,12 @@ export class LineExt extends ExtendedShape<Konva.Line> {
     }
 
     override toDieDataShape(): DieDataShapeDao {
-        // TODO
-        throw new Error("Method not implemented.");
+        return {
+            type: 'line',
+            points: this.getPoints()
+        };
     }
-
+    
     getPoints(): number[] {
         return this._shape.points();
     }

@@ -12,7 +12,8 @@ export interface IMeasurableShape {
     group: Konva.Group;
     extShape: IExtendedShape<any>;
     text: KonvaEditableText;
-
+    
+    hasCommonEndPointWith(shape: IMeasurableShape): boolean;
     updatePoints(newPoints: number[]): void;
     updateText(): void;
     getLength(): number;

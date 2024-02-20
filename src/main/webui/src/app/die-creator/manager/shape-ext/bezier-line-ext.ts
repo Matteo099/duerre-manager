@@ -58,8 +58,17 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
     }
 
     override toDieDataShape(): DieDataShapeDao {
-        // TODO
-        throw new Error("Method not implemented.");
+        return {
+            type: 'bezier',
+            points: [
+                this.quad.start.x,
+                this.quad.start.y,
+                this.quad.control.x,
+                this.quad.control.y,
+                this.quad.end.x,
+                this.quad.end.y,
+            ]
+        };
     }
 
     getEndPoints(): Konva.Vector2d[] {

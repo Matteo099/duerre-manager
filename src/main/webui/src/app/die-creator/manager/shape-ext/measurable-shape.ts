@@ -8,7 +8,7 @@ import { IMeasurableShape, LengthChanged } from "./imeasurable-shape";
 import { KonvaEditableText } from "./konva-editable-text";
 
 export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurableShape {
-    
+
     public static readonly UNIT_MM_MINUS_1 = "mm⁻¹";
     public static readonly UNIT_MM = "mm";
 
@@ -79,6 +79,21 @@ export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurabl
 
     public getEndPoints(): Konva.Vector2d[] {
         return this.extShape.getEndPoints();
+    }
+
+    public hasCommonEndPointWith(shape: IMeasurableShape): boolean {
+        const myEndpoints = this.getEndPoints();
+        const otherEndpoints = shape.getEndPoints();
+        for (let i = 0; i < myEndpoints.length; i++) {
+            const ep = myEndpoints[i];
+            for (let j = 0; j < otherEndpoints.length; j++) {
+                const oEp = otherEndpoints[i];
+                if (oEp.x == ep.x && oEp.y == ep.y) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public getAnchorPoints(): Konva.Vector2d[] {

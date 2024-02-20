@@ -1,7 +1,9 @@
 import Konva from "konva";
-import { KonvaUtils } from "./konva-utils";
-import { IMeasurableShape, LengthChanged } from "./shape-ext/imeasurable-shape";
 import { Subscription } from "rxjs";
+import { DieDataDao } from "../../models/dao/die-data-dao";
+import { IMeasurableShape, LengthChanged } from "./shape-ext/imeasurable-shape";
+import { DieDataShapeDao } from "../../models/dao/die-data-shape-dao";
+import { MeasurableShape } from "./shape-ext/measurable-shape";
 
 export class DieState {
 
@@ -117,4 +119,38 @@ export class DieState {
         }
         return attachedLines;
     }
+
+    public save(): DieDataShapeDao[] {
+
+        const dieDataShapeDao: DieDataShapeDao[] = [];
+        const orderedLines: IMeasurableShape[] = [];
+        const allLinesCopy = [...this.lines]; // Create a copy to avoid modifying the original array
+        let i = 0;
+
+        // Order the lines so that it generates an array of contigous lines
+        while (allLinesCopy.length > 0) {
+            const currentLine = allLinesCopy[i];
+
+            if (orderedLines.length === 0 || currentLine.hasCommonEndPointWith(orderedLines[orderedLines.length - 1])) {
+                orderedLines.push(currentLine);
+                allLinesCopy.splice(i, 1);
+                i = 0;
+            } else {
+                i++;
+            }
+        }
+
+        for (const line of orderedLines)
+            dieDataShapeDao.push(line.extShape.toDieDataShape());
+
+        return dieDataShapeDao;
+    }
+
+    public clear() {
+        this.lines.forEach(element => {
+            element.destroy();
+        });
+        this.lines.splice(0, this.lines.length);
+    }
+
 }
