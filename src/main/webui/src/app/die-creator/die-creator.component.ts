@@ -1,18 +1,26 @@
 import { AfterViewInit, Component, ElementRef, HostListener, Inject, OnDestroy, ViewChild } from '@angular/core';
+import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { DieEditorManager } from './manager/die-editor-manager';
-import { Tool } from './manager/tools/tool';
 import {
-  MatDialog,
   MAT_DIALOG_DATA,
-  MatDialogRef,
-  MatDialogTitle,
-  MatDialogContent,
   MatDialogActions,
   MatDialogClose,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle
 } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 import { DieDataDao } from '../models/dao/die-data-dao';
+import { DieEditorManager } from './manager/die-editor-manager';
+import { Tool } from './manager/tools/tool';
+
+
+export function validDieValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const dieData: DieDataDao = control.value;
+    return dieData.valid ? null : { validDie: { value: dieData.valid } };
+  };
+}
 
 @Component({
   selector: 'app-die-creator',
@@ -41,7 +49,7 @@ export class DieCreatorComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     this.editor = new DieEditorManager(this.stageContainer!);
-    if(this.data) this.editor.setData(this.data);
+    if (this.data) this.editor.setData(this.data);
     setTimeout(() => this.editor!.useTool(Tool.DRAW_LINE), 100);
   }
 

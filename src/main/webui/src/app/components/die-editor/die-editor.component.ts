@@ -10,7 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { Router, RouterModule } from '@angular/router';
-import { DieCreatorComponent } from '../../die-creator/die-creator.component';
+import { DieCreatorComponent, validDieValidator } from '../../die-creator/die-creator.component';
 import { DieDao } from '../../models/dao/die-dao';
 import { DieService } from '../../services/die.service';
 
@@ -37,7 +37,7 @@ export class DieEditorComponent {
   private fb = inject(FormBuilder);
   addressForm = this.fb.group({
     name: [null, Validators.required],
-    dieData: [null, Validators.required],
+    dieData: [null, [Validators.required, validDieValidator()]],
     data: null,
   });
 

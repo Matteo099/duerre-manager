@@ -32,6 +32,10 @@ export class DieState {
         return true;
     }
 
+    public isPolygonCreated(): boolean {
+        return this.lines.length > 0 && this.getEndPoints().length == 0;
+    }
+
     public addLine(shape: IMeasurableShape) {
         this.lines.push(shape);
         this.updatePolygon();

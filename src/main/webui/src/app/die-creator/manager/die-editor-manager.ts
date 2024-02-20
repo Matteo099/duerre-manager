@@ -247,7 +247,8 @@ export class DieEditorManager implements IDieEditor {
 
     public getData(): DieDataDao | undefined {
         const state = this.state.save();
-        return { state }
+        const valid = this.state.isPolygonCreated();
+        return { state, valid }
     }
 
     public destroy(): void {
@@ -258,5 +259,9 @@ export class DieEditorManager implements IDieEditor {
         this.gridManager.destroy();
         this.layer.destroy();
         this.stage.destroy();
+    }
+
+    public exportImage() : any {
+
     }
 }
