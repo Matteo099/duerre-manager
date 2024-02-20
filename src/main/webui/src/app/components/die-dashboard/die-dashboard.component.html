@@ -16,12 +16,12 @@
   </div>
 
   <mat-grid-list cols="2" rowHeight="350px">
-    @for (card of cards | async; track card) {
-    <mat-grid-tile [colspan]="card.cols" [rowspan]="card.rows">
+    @for (die of dies | async; track die) {
+    <mat-grid-tile colspan="1" rowspan="1">
       <mat-card class="dashboard-card">
         <mat-card-header>
           <mat-card-title>
-            {{card.title}}
+            {{ die.name }}
             <button mat-icon-button class="more-button" [matMenuTriggerFor]="menu" aria-label="Toggle menu">
               <mat-icon>more_vert</mat-icon>
             </button>
@@ -31,8 +31,9 @@
             </mat-menu>
           </mat-card-title>
         </mat-card-header>
-        <mat-card-content class="dashboard-card-content">
-          <div>Card Content Here</div>
+        <mat-card-content>
+            <!-- TODO: [src]="die.img" -->
+            <a [routerLink]="'die/' + die.id"><img style="width: -webkit-fill-available;" src="/assets/images/milling.png"></a>
         </mat-card-content>
       </mat-card>
     </mat-grid-tile>

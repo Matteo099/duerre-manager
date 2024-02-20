@@ -122,8 +122,6 @@ export class DieState {
 
     public save(): DieDataShapeDao[] {
 
-        debugger;
-        
         const dieDataShapeDao: DieDataShapeDao[] = [];
         const orderedLines: IMeasurableShape[] = [];
         const allLinesCopy = [...this.lines]; // Create a copy to avoid modifying the original array

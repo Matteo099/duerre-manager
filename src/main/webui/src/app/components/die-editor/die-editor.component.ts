@@ -76,7 +76,7 @@ export class DieEditorComponent {
     this.dieService.create(die).subscribe({
       next: (idW) => {
         console.log(idW);
-        this.router.navigate(['/die/' + idW.id])
+        if(idW.id !== undefined) this.router.navigate(['/die/' + idW.id])
       },
       error: (erW) => {
         console.log(erW);

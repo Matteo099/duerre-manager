@@ -13,6 +13,7 @@ import com.github.matteo099.services.DieService;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -49,6 +50,21 @@ public class DieResource {
             logger.info("creating die");
             Long id = dieService.createDie(die);
             return Response.ok().entity(IdWrapper.of(id)).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.serverError().entity(ErrorWrapper.of(e)).build();
+        }
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/list-dies")
+    public Response listDies() {
+        try {
+            logger.info("listing dies");
+            var dies = dieService.listDies();
+            logger.info(dies.size());
+            return Response.ok().entity(dies).build();
         } catch (Exception e) {
             e.printStackTrace();
             return Response.serverError().entity(ErrorWrapper.of(e)).build();

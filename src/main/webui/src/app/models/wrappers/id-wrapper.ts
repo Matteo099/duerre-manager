@@ -1,3 +1,3 @@
 export interface IdWrapper {
-    id: string | number;
+    id?: string | number;
 }
