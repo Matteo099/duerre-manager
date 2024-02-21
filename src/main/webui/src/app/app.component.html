@@ -14,7 +14,10 @@
       <button type="button" aria-label="Toggle sidenav" mat-icon-button (click)="drawer.toggle()">
         <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
       </button>
-      <span>DUERRE MANAGER</span>
+      <span class="spacer">DUERRE MANAGER</span>
+      <button mat-icon-button (click)="goBack()">
+        <mat-icon>navigate_before</mat-icon>
+      </button>
     </mat-toolbar>
     <!-- Add Content Here -->
     <router-outlet />

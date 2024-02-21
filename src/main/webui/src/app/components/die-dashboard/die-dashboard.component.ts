@@ -1,20 +1,20 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { Breakpoints, BreakpointObserver } from '@angular/cdk/layout';
-import { map } from 'rxjs/operators';
 import { AsyncPipe } from '@angular/common';
-import { MatGridListModule } from '@angular/material/grid-list';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatIconModule } from '@angular/material/icon';
+import { Component, OnInit, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatSelectModule } from '@angular/material/select';
-import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatSelectModule } from '@angular/material/select';
 import { RouterModule } from '@angular/router';
-import { DieService } from '../../services/die.service';
-import { Observable, Subject } from 'rxjs';
-import { DieDao } from '../../models/dao/die-dao';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { KonvaUtils } from '../../die-creator/manager/konva-utils';
 import { Die } from '../../models/entities/die';
+import { DieService } from '../../services/die.service';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-die-dashboard',
@@ -32,35 +32,27 @@ import { Die } from '../../models/entities/die';
     MatInputModule,
     MatFormFieldModule,
     RouterModule,
+    FormsModule,
+    ReactiveFormsModule
   ]
 })
 export class DieDashboardComponent implements OnInit {
-  private breakpointObserver = inject(BreakpointObserver);
   private dieService = inject(DieService);
-  dies!: Observable<Die[]>;
 
-  // /** Based on the screen size, switch from standard to one column per row */
-  // cards = this.breakpointObserver.observe(Breakpoints.Handset).pipe(
-  //   map(({ matches }) => {
-  //     if (matches) {
-  //       return [
-  //         { title: 'Card 1', cols: 1, rows: 1 },
-  //         { title: 'Card 2', cols: 1, rows: 1 },
-  //         { title: 'Card 3', cols: 1, rows: 1 },
-  //         { title: 'Card 4', cols: 1, rows: 1 }
-  //       ];
-  //     }
+  gridView: boolean = true;
+  dies!: Observable<(Die & { img: string })[]>;
 
-  //     return [
-  //       { title: 'Card 1', cols: 2, rows: 1 },
-  //       { title: 'Card 2', cols: 1, rows: 1 },
-  //       { title: 'Card 3', cols: 1, rows: 2 },
-  //       { title: 'Card 4', cols: 1, rows: 1 }
-  //     ];
-  //   })
-  // );
+  customers = new FormControl('');
+
+  customerList: string[] = Array.from({ length: 10 }, (_, i) => "Cliente " + (i + 1));
 
   ngOnInit(): void {
-    this.dies = this.dieService.list();
+    this.dies = this.dieService.list().pipe(
+      map((val, i) => {
+        return val.map((die: Die) => {
+          return { ...die, img: KonvaUtils.exportImage(die.dieData.state) };
+        });
+      })
+    );
   }
 }

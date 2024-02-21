@@ -1,5 +1,5 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, Location } from '@angular/common';
 import { Component, ViewChild, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -34,6 +34,7 @@ export class AppComponent {
 
   private breakpointObserver = inject(BreakpointObserver);
   private router = inject(Router);
+  private location = inject(Location);
 
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
     .pipe(
@@ -44,5 +45,9 @@ export class AppComponent {
   navigate(path: string) {
     this.router.navigate([path]);
     this.drawer.toggle();
+  }
+
+  goBack() {
+    this.location.back();
   }
 }

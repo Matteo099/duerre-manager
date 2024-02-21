@@ -16,6 +16,10 @@
   z-index: 1;
 }
 
+.spacer {
+  flex: 1 1 auto;
+}
+
 .no-outline {
   outline: 0 !important;
   text-decoration: none !important;
