@@ -23,7 +23,7 @@
                         <mat-icon>edit</mat-icon>
                       </button>
                     </div>
-                    <img style="width: -webkit-fill-available;" src="/assets/images/milling.png">
+                    <img style="width: -webkit-fill-available;" [src]="imageURL">
 
                     @if (addressForm.controls['dieData'].hasError('required')) {
                     <mat-error>Il disegno dello stampo è <strong>obbligatorio</strong></mat-error>

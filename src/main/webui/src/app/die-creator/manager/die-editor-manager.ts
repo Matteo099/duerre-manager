@@ -263,11 +263,9 @@ export class DieEditorManager implements IDieEditor {
         this.stage.destroy();
     }
 
-    public exportImage(): string {
+    public exportImage(width: number= 300, height: number = 300, border: number = 10): string {
         const container = document.createElement("div");
         container.style.display = "none";
-        const width = 300;
-        const height = 300;
         const crpStage = new Konva.Stage({
             container,
             width,
@@ -282,31 +280,56 @@ export class DieEditorManager implements IDieEditor {
         let maxX = -Infinity;
         let maxY = -Infinity;
 
+        const shapes: MeasurableShape<ExtendedShape<any>>[] = [];
         dieState.forEach(s => {
             const drawingLine = new MeasurableShape<ExtendedShape<any>>(this, { x: 0, y: 0 }, s.type == 'line' ? LineExt : BezierLineExt);
             drawingLine.updatePoints(s.points);
+            shapes.push(drawingLine);
             const shape: Konva.Shape = drawingLine.extShape.shape;
             crpLayer.add(shape);
 
-            const points = shape.getClientRect();
-            minX = Math.min(minX, points.x);
-            minY = Math.min(minY, points.y);
-            maxX = Math.max(maxX, points.x + points.width);
-            maxY = Math.max(maxY, points.y + points.height);
+            const rect = drawingLine.extShape.calculateClientRect();
+            console.log(rect);
+            minX = Math.min(minX, rect.x);
+            minY = Math.min(minY, rect.y);
+            maxX = Math.max(maxX, rect.x + rect.width);
+            maxY = Math.max(maxY, rect.y + rect.height);
         });
 
+        // Shift all shapes to the top-left side and scale to fit the canvas
+        const scaleX = (width - border) / (maxX - minX);
+        const scaleY = (height - border) / (maxY - minY);
+        const scaleFactor = Math.min(scaleX, scaleY);
+        const tempMinX = minX;
+        const tempMinY = minY;
+        minX = Infinity;
+        minY = Infinity;
+        maxX = -Infinity;
+        maxY = -Infinity;
+        shapes.forEach(s => {
+            console.log(s.extShape.getPoints());
+            let i = 0;
+            const points = s.extShape.getPoints().map(e => {
+                if (i++ % 2 == 0) return (e - tempMinX) * scaleFactor;
+                return (e - tempMinY) * scaleFactor;
+            });
+            s.extShape.setPoints(points);
+            console.log(points);
+
+            const rect = s.extShape.calculateClientRect();
+            minX = Math.min(minX, rect.x);
+            minY = Math.min(minY, rect.y);
+            maxX = Math.max(maxX, rect.x + rect.width);
+            maxY = Math.max(maxY, rect.y + rect.height);
+        });
+
+        // Center in the canvas
         const translateX = (width - (maxX - minX)) / 2;
         const translateY = (height - (maxY - minY)) / 2;
-        // Shift all shapes to the left side + translation to center
         crpLayer.children.forEach(shape => {
-            shape.x(shape.x() - minX + translateX);
-            shape.y(shape.y() - minY + translateY);
+            shape.x(shape.x() + translateX);
+            shape.y(shape.y() + translateY);
         });
-
-        const scaleX = width / (maxX - minX);
-        const scaleY = height / (maxY - minY);
-        const scaleFactor = Math.min(scaleX, scaleY);
-        crpLayer.scale({ x: scaleFactor, y: scaleFactor });
 
         const dataURL = crpStage.toDataURL();
         container.remove();

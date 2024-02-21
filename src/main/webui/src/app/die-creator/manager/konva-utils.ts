@@ -1,6 +1,11 @@
 import Konva from "konva";
-import { GridManager } from "./tools/grid-manager";
 import { Vector2d } from "konva/lib/types";
+import { DieDataShapeDao } from "../../models/dao/die-data-shape-dao";
+import { GridManager } from "./tools/grid-manager";
+import { MeasurableShape } from "./shape-ext/measurable-shape";
+import { ExtendedShape } from "./shape-ext/extended-shape";
+import { LineExt } from "./shape-ext/line-ext";
+import { BezierLineExt } from "./shape-ext/bezier-line-ext";
 
 export class KonvaUtils {
 
@@ -100,5 +105,79 @@ export class KonvaUtils {
         const y3 = points.y1 + normalizedDy * distance;
 
         return { x: x3, y: y3 };
+    }
+
+    public static exportImage(dieState: DieDataShapeDao[], width: number = 300, height: number = 300, border: number = 10): string {
+        const container = document.createElement("div");
+        container.style.display = "none";
+        const crpStage = new Konva.Stage({
+            container,
+            width,
+            height
+        });
+        const crpLayer = new Konva.Layer();
+        crpStage.add(crpLayer);
+
+        let minX = Infinity;
+        let minY = Infinity;
+        let maxX = -Infinity;
+        let maxY = -Infinity;
+
+
+        const shapes: ExtendedShape<any>[] = [];
+        dieState.forEach(s => {
+            const extShape = s.type == 'line' ? new LineExt({ x: 0, y: 0 }) : new BezierLineExt({ x: 0, y: 0 })
+            extShape.setPoints(s.points);
+            shapes.push(extShape);
+            const shape: Konva.Shape = extShape.shape;
+            crpLayer.add(shape);
+
+            const rect = extShape.calculateClientRect();
+            console.log(rect);
+            minX = Math.min(minX, rect.x);
+            minY = Math.min(minY, rect.y);
+            maxX = Math.max(maxX, rect.x + rect.width);
+            maxY = Math.max(maxY, rect.y + rect.height);
+        });
+
+
+        // Shift all shapes to the top-left side and scale to fit the canvas
+        const scaleX = (width - border) / (maxX - minX);
+        const scaleY = (height - border) / (maxY - minY);
+        const scaleFactor = Math.min(scaleX, scaleY);
+        const tempMinX = minX;
+        const tempMinY = minY;
+        minX = Infinity;
+        minY = Infinity;
+        maxX = -Infinity;
+        maxY = -Infinity;
+        shapes.forEach(s => {
+            console.log(s.getPoints());
+            let i = 0;
+            const points = s.getPoints().map(e => {
+                if (i++ % 2 == 0) return (e - tempMinX) * scaleFactor;
+                return (e - tempMinY) * scaleFactor;
+            });
+            s.setPoints(points);
+            console.log(points);
+
+            const rect = s.calculateClientRect();
+            minX = Math.min(minX, rect.x);
+            minY = Math.min(minY, rect.y);
+            maxX = Math.max(maxX, rect.x + rect.width);
+            maxY = Math.max(maxY, rect.y + rect.height);
+        });
+
+        // Center in the canvas
+        const translateX = (width - (maxX - minX)) / 2;
+        const translateY = (height - (maxY - minY)) / 2;
+        crpLayer.children.forEach(shape => {
+            shape.x(shape.x() + translateX);
+            shape.y(shape.y() + translateY);
+        });
+
+        const dataURL = crpStage.toDataURL();
+        container.remove();
+        return dataURL;
     }
 }

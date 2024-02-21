@@ -13,6 +13,8 @@ import { Router, RouterModule } from '@angular/router';
 import { DieCreatorComponent, validDieValidator } from '../../die-creator/die-creator.component';
 import { DieDao } from '../../models/dao/die-dao';
 import { DieService } from '../../services/die.service';
+import { KonvaUtils } from '../../die-creator/manager/konva-utils';
+import { DieDataDao } from '../../models/dao/die-data-dao';
 
 
 @Component({
@@ -36,10 +38,11 @@ export class DieEditorComponent {
 
   private fb = inject(FormBuilder);
   addressForm = this.fb.group({
-    name: [null, Validators.required],
-    dieData: [null, [Validators.required, validDieValidator()]],
-    data: null,
+    name: [null as (string | null), Validators.required],
+    dieData: [null as (DieDataDao | null), [Validators.required, validDieValidator()]],
+    data: null as (string | null),
   });
+  imageURL: string = "/assets/images/milling.png";
 
   constructor(
     public dialog: MatDialog,
@@ -57,9 +60,10 @@ export class DieEditorComponent {
       maxWidth: "100vw"
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result: DieDataDao) => {
       console.log('The dialog was closed', result);
       this.addressForm.controls['dieData'].setValue(result);
+      this.imageURL = KonvaUtils.exportImage(result.state);
     });
   }
 

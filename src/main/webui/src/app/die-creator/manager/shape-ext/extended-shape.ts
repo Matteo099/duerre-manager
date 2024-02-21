@@ -25,6 +25,7 @@ export abstract class ExtendedShape<S extends Konva.Shape> implements IExtendedS
      */
     abstract calculateLength(): number;
     abstract calculateMiddlePoint(): Konva.Vector2d;
+    abstract calculateClientRect(): Konva.Vector2d & {width: number, height: number};
     abstract calculatePointsGivenLength(length: number): { oldPoints: number[], newPoints: number[] };
     abstract updateEndpoint(oldPoint: Konva.Vector2d | ('start' | 'end'), newValue: Konva.Vector2d): void;
     abstract getAnchorPoints(): Konva.Vector2d[];
@@ -32,4 +33,27 @@ export abstract class ExtendedShape<S extends Konva.Shape> implements IExtendedS
     protected abstract createShape(initialPosition: Konva.Vector2d): S;
 
     abstract toDieDataShape(): DieDataShapeDao;
+
+    protected calculateClientRectGivenPoints(points: number[]): Konva.Vector2d & { width: number; height: number; } {
+        let i = 0;
+        let minX = Infinity;
+        let minY = Infinity;
+        let maxX = -Infinity;
+        let maxY = -Infinity;
+        points.forEach(p => {
+            if (i++ % 2 == 0) {
+                minX = Math.min(minX, p);
+                maxX = Math.max(maxX, p);
+            } else {
+                minY = Math.min(minY, p);
+                maxY = Math.max(maxY, p);
+            }
+        })
+        return {
+            x: minX,
+            y: minY,
+            width: maxX - minX,
+            height: maxY - minY,
+        }
+    }
 }

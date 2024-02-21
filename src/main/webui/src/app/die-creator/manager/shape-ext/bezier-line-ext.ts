@@ -1,11 +1,9 @@
 import Konva from "konva";
-import { ExtendedShape } from "./extended-shape";
-import { Quad } from "./quad";
-import { Layer } from "konva/lib/Layer";
-import { Shape, ShapeConfig } from "konva/lib/Shape";
-import { REMOVE_ONLY } from "../constants";
 import { Vector2d } from "konva/lib/types";
 import { DieDataShapeDao } from "../../../models/dao/die-data-shape-dao";
+import { REMOVE_ONLY } from "../constants";
+import { ExtendedShape } from "./extended-shape";
+import { Quad } from "./quad";
 
 export class BezierLineExt extends ExtendedShape<Konva.Shape> {
 
@@ -60,14 +58,7 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
     override toDieDataShape(): DieDataShapeDao {
         return {
             type: 'bezier',
-            points: [
-                this.quad.start.x,
-                this.quad.start.y,
-                this.quad.control.x,
-                this.quad.control.y,
-                this.quad.end.x,
-                this.quad.end.y,
-            ]
+            points: this.getPoints()
         };
     }
 
@@ -76,8 +67,20 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
     }
 
     getPoints(): number[] {
+        return [
+            this.quad.start.x,
+            this.quad.start.y,
+            this.quad.control.x,
+            this.quad.control.y,
+            this.quad.end.x,
+            this.quad.end.y,
+        ];
+    }
+
+    public getCurvePoints(precision?: number): number[] {
         const points: number[] = [];
-        for (let t = 0; t <= 1; t += 1 / this.numberOfPoints) {
+        precision ??= this.numberOfPoints;
+        for (let t = 0; t <= 1; t += 1 / precision) {
             const x = Math.pow(1 - t, 2) * this.quad.start.x + 2 * (1 - t) * t * this.quad.control.x + t * t * this.quad.end.x;
             const y = Math.pow(1 - t, 2) * this.quad.start.y + 2 * (1 - t) * t * this.quad.control.y + t * t * this.quad.end.y;
             points.push(x, y);
@@ -175,13 +178,10 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
     }
 
     public updateDottedLines(): void {
-        this.quadLinePath?.points([
-            this.quad.start.x,
-            this.quad.start.y,
-            this.quad.control.x,
-            this.quad.control.y,
-            this.quad.end.x,
-            this.quad.end.y,
-        ]);
+        this.quadLinePath?.points(this.getPoints());
+    }
+
+    override calculateClientRect(): Konva.Vector2d & { width: number; height: number; } {
+        return super.calculateClientRectGivenPoints(this.getCurvePoints());
     }
 }

@@ -72,7 +72,7 @@ export class DieState {
 
     public getVertices(): Konva.Vector2d[] {
         return this.lines.flatMap(l => {
-            const points = (l.extShape instanceof Konva.Line ? l.extShape.points() : l.extShape.getPoints());
+            const points = l.extShape.getPoints();
             const vertices: Konva.Vector2d[] = [];
             for (let i = 0; i < points.length - 1; i += 2) {
                 vertices.push({ x: points[i], y: points[i + 1] });

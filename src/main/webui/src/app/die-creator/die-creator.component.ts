@@ -99,7 +99,6 @@ export class DieCreatorComponent implements AfterViewInit, OnDestroy {
 
   save() {
     const dieDataDao = this.editor?.getData();
-    console.log(this.editor?.exportImage());
     this.dialogRef.close(dieDataDao);
   }
 }

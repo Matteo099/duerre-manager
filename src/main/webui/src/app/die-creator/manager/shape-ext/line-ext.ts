@@ -72,4 +72,8 @@ export class LineExt extends ExtendedShape<Konva.Line> {
             ]);
         }
     }
+
+    override calculateClientRect(): Konva.Vector2d & { width: number; height: number; } {
+        return super.calculateClientRectGivenPoints(this.getPoints());
+    }
 }
