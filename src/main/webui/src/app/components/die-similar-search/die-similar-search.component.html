@@ -1,0 +1,53 @@
+<div class="container m-3">
+    <form class="m-2" [formGroup]="addressForm" novalidate (ngSubmit)="onSubmit()">
+        <div class="row justify-content-center align-items-center">
+            <div class="col-auto">
+                <mat-card style="max-width: 200px;">
+                    <mat-card-content>
+                        <div class="position-relative">
+                            <div class="position-absolute top-50 start-50 translate-middle">
+                                <button mat-fab color="primary" [disabled]="addressForm.controls['dieData'].disabled"
+                                    (click)="openDialog()">
+                                    <mat-icon>edit</mat-icon>
+                                </button>
+                            </div>
+                            <img style="width: -webkit-fill-available;" [src]="imageURL">
+
+                            @if (addressForm.controls['dieData'].hasError('required')) {
+                            <mat-error style="color:red">Il disegno dello stampo è <strong>obbligatorio</strong></mat-error>
+                            }
+                            @else if(addressForm.controls['dieData'].hasError('validDie')) {
+                            <mat-error style="color:red">Il disegno dello stampo non è <strong>completo</strong></mat-error>
+                            }
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </div>
+        <div class="row justify-content-center align-items-center mt-2">
+            <div class="col-auto">
+                <button mat-raised-button color="primary" type="submit" [disabled]="searching">Cerca</button>
+            </div>
+        </div>
+    </form>
+
+    @if (similarDies) {
+    <mat-grid-list cols="2">
+        @for (die of similarDies | async; track die.dieId) {
+        <mat-grid-tile colspan="1" rowspan="1">
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>
+                        {{ die.dieId }}
+                        {{ die.matchScore }}
+                    </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <a [routerLink]="'/die/' + die.dieId"><img style="width: 100%;" [src]="die.dieId"></a>
+                </mat-card-content>
+            </mat-card>
+        </mat-grid-tile>
+        }
+    </mat-grid-list>
+    }
+</div>

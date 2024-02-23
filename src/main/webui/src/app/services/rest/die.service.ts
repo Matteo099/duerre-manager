@@ -7,6 +7,8 @@ import { IdWrapper } from '../../models/wrappers/id-wrapper';
 import { LoadingService } from '../loading.service';
 import { Die } from '../../models/entities/die';
 import { BaseRestService } from './base-rest.service';
+import { DieSimilarSearchDao } from '../../models/dao/die-similar-search-dao';
+import { SimilarDieSearchResult } from '../../models/projections/similar-die-search-result';
 
 @Injectable({
   providedIn: 'root'
@@ -26,6 +28,14 @@ export class DieService extends BaseRestService {
   list(): Observable<Die[]> {
     return this.http.get<Die[]>(DieService.DIE_URL + "/list-dies").pipe(
       catchError(this.handleError<Die[]>('listDies', []))
+    );
+  }
+
+  searchSimilarDies(dieSimilarSearch: DieSimilarSearchDao): Observable<SimilarDieSearchResult[]> {
+    return this.http.put<SimilarDieSearchResult[]>(DieService.DIE_URL + "/search-similar-dies", dieSimilarSearch, {
+      headers: LoadingService.generateHeader("Ricerca stampi simili in corso")
+    }).pipe(
+      catchError(this.handleError<SimilarDieSearchResult[]>('searchSimilarShapes', []))
     );
   }
 }

@@ -1,14 +1,11 @@
 package com.github.matteo099.resources;
 
-import java.util.List;
-
 import org.jboss.logging.Logger;
 
-import com.github.matteo099.model.DieDraw;
 import com.github.matteo099.model.dao.DieDao;
+import com.github.matteo099.model.dao.DieSimilarSearchDao;
 import com.github.matteo099.model.wrappers.ErrorWrapper;
 import com.github.matteo099.model.wrappers.IdWrapper;
-import com.github.matteo099.opencv.ShapeMatcher;
 import com.github.matteo099.services.DieService;
 
 import jakarta.inject.Inject;
@@ -26,9 +23,6 @@ import jakarta.ws.rs.core.Response;
 public class DieResource {
 
     @Inject
-    ShapeMatcher shapeMatcher;
-
-    @Inject
     DieService dieService;
 
     @Inject
@@ -36,10 +30,17 @@ public class DieResource {
 
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/similar-dies")
-    public List<DieDraw> getSimilarDies(DieDraw dieDraw,
-            @QueryParam("threshold") @DefaultValue(value = "0.1") Float threshold) {
-        return shapeMatcher.findSimilarShapes(dieDraw, threshold);
+    @Path("/search-similar-dies")
+    public Response searchSimilarDies(DieSimilarSearchDao dieSimilarSearchDao,
+            @QueryParam("threshold") @DefaultValue("1000.0") Float threshold) {
+        try {
+            logger.info("searching similar dies " + threshold);
+            var similarDies = dieService.searchSimilarDies(dieSimilarSearchDao, threshold);
+            return Response.ok().entity(similarDies).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.serverError().entity(ErrorWrapper.of(e)).build();
+        }
     }
 
     @POST

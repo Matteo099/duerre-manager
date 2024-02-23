@@ -36,7 +36,6 @@ import { MatChipEditedEvent, MatChipInputEvent, MatChipsModule } from '@angular/
     MatRadioModule,
     MatCardModule,
     ReactiveFormsModule,
-    MatButtonModule,
     RouterModule,
     MatIconModule,
     AsyncPipe,
@@ -50,6 +49,7 @@ export class DieEditorComponent implements OnInit {
   private router = inject(Router);
   private dieService = inject(DieService);
   private customerService = inject(CustomerService);
+  public dialog = inject(MatDialog);
   announcer = inject(LiveAnnouncer);
 
   addressForm = this.fb.group({
@@ -68,10 +68,6 @@ export class DieEditorComponent implements OnInit {
 
   customers: Customer[] = [];
   filteredCustomers?: Observable<string[]>;
-
-  constructor(
-    public dialog: MatDialog
-  ) { }
 
   ngOnInit(): void {
     this.customerService.list().subscribe({
