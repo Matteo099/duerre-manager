@@ -4,4 +4,5 @@ export interface DieDao {
     name: string;
     dieData: DieDataDao;
     data: string | null;
+    customer: string;
 }

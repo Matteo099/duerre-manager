@@ -29,7 +29,7 @@
                     <mat-error>Il disegno dello stampo è <strong>obbligatorio</strong></mat-error>
                     }
                     @else if(addressForm.controls['dieData'].hasError('validDie')) {
-                      <mat-error>Il disegno dello stampo non è <strong>completo</strong></mat-error>
+                    <mat-error>Il disegno dello stampo non è <strong>completo</strong></mat-error>
                     }
                   </div>
                 </mat-card-content>
@@ -45,19 +45,38 @@
             </mat-form-field>
 
             <mat-form-field class="full-width">
-              <input matInput placeholder="Altri dati..." formControlName="data">
+              <input matInput placeholder="Alias" formControlName="alias">
             </mat-form-field>
           </div>
         </div>
 
-        <!-- <div class="row">
+        <div class="row">
+          <mat-form-field class="col">
+            <mat-label>Cliente</mat-label>
+            <input type="text" placeholder="Seleziona un cliente" aria-label="Customer" matInput
+            formControlName="customer" [matAutocomplete]="auto">
+            <mat-autocomplete #auto="matAutocomplete">
+              @for (customer of filteredCustomers | async; track customer) {
+              <mat-option [value]="customer">{{customer}}</mat-option>
+              }
+            </mat-autocomplete>
+            @if (addressForm.controls['customer'].hasError('required')) {
+            <mat-error>Il nome del cliente è <strong>obbligatorio</strong></mat-error>
+            }
+            @else if (addressForm.controls['customer'].hasError('minlength')) {
+            <mat-error>Il nome del cliente deve essere lungo almeno 2 caratteri</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="row">
           <div class="col">
             <mat-form-field class="full-width">
-              <input matInput placeholder="Company" formControlName="company">
+              <input matInput placeholder="Altri dati..." formControlName="data">
             </mat-form-field>
           </div>
         </div>
-        <div class="row">
+        <!-- <div class="row">
           <div class="col">
             <mat-form-field class="full-width">
               <input matInput placeholder="First name" formControlName="firstName">

@@ -13,7 +13,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { KonvaUtils } from '../../die-creator/manager/konva-utils';
 import { Die } from '../../models/entities/die';
-import { DieService } from '../../services/die.service';
+import { DieService } from '../../services/rest/die.service';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
