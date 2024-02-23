@@ -30,10 +30,7 @@ import { LoaderComponent } from './components/loader/loader.component';
 })
 export class AppComponent {
 
-  @ViewChild("drawer") drawer: any;
-
   private breakpointObserver = inject(BreakpointObserver);
-  private router = inject(Router);
   private location = inject(Location);
 
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
@@ -41,11 +38,6 @@ export class AppComponent {
       map(result => result.matches),
       shareReplay()
     );
-
-  navigate(path: string) {
-    this.router.navigate([path]);
-    this.drawer.toggle();
-  }
 
   goBack() {
     this.location.back();
