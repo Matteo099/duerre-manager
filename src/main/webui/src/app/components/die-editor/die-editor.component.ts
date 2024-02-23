@@ -69,8 +69,6 @@ export class DieEditorComponent implements OnInit {
   customers: Customer[] = [];
   filteredCustomers?: Observable<string[]>;
 
-
-
   constructor(
     public dialog: MatDialog
   ) { }
@@ -79,6 +77,7 @@ export class DieEditorComponent implements OnInit {
     this.customerService.list().subscribe({
       next: (c: Customer[]) => {
         this.customers = c;
+        this.addressForm.controls['customer'].updateValueAndValidity();
       }
     });
 

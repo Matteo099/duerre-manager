@@ -15,6 +15,8 @@ import { KonvaUtils } from '../../die-creator/manager/konva-utils';
 import { Die } from '../../models/entities/die';
 import { DieService } from '../../services/rest/die.service';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { CustomerService } from '../../services/rest/customer.service';
+import { Customer } from '../../models/entities/customer';
 
 @Component({
   selector: 'app-die-dashboard',
@@ -38,6 +40,7 @@ import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 })
 export class DieDashboardComponent implements OnInit {
   private dieService = inject(DieService);
+  private customerService = inject(CustomerService);
 
   gridView: boolean = true;
   dies!: Observable<(Die & { img: string })[]>;
@@ -54,5 +57,12 @@ export class DieDashboardComponent implements OnInit {
         });
       })
     );
+
+    this.customerService.list().subscribe({
+      next: (c: Customer[]) => {
+        this.customerList = c.map(o => o.name);
+        this.customers.updateValueAndValidity();
+      }
+    });
   }
 }
