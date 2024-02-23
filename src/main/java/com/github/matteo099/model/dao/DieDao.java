@@ -1,5 +1,7 @@
 package com.github.matteo099.model.dao;
 
+import java.util.List;
+
 import com.github.matteo099.model.interfaces.ICustomer;
 import com.github.matteo099.model.interfaces.IDie;
 
@@ -8,6 +10,7 @@ public class DieDao implements IDie {
     public DieDataDao dieData;
     public String data;
     public String customer;
+    public List<String> aliases;
 
     @Override
     public String getName() {
@@ -32,5 +35,10 @@ public class DieDao implements IDie {
                 return customer;
             }
         };
+    }
+
+    @Override
+    public List<String> getAliases() {
+        return aliases;
     }
 }

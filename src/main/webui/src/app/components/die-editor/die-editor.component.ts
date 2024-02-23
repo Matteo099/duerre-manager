@@ -5,6 +5,7 @@ import { MatCardModule } from '@angular/material/card';
 import {
   MatDialog
 } from '@angular/material/dialog';
+import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
@@ -20,6 +21,8 @@ import { CustomerService } from '../../services/rest/customer.service';
 import { Customer } from '../../models/entities/customer';
 import { AsyncPipe } from '@angular/common';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
+import { MatChipEditedEvent, MatChipInputEvent, MatChipsModule } from '@angular/material/chips';
 
 @Component({
   selector: 'app-die-editor',
@@ -37,7 +40,8 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
     RouterModule,
     MatIconModule,
     AsyncPipe,
-    MatAutocompleteModule
+    MatAutocompleteModule,
+    MatChipsModule
   ]
 })
 export class DieEditorComponent implements OnInit {
@@ -46,17 +50,26 @@ export class DieEditorComponent implements OnInit {
   private router = inject(Router);
   private dieService = inject(DieService);
   private customerService = inject(CustomerService);
+  announcer = inject(LiveAnnouncer);
 
   addressForm = this.fb.group({
     name: [null as (string | null), Validators.required],
     dieData: [null as (DieDataDao | null), [Validators.required, validDieValidator()]],
+    alias: [],
     customer: [null as (string | null), [Validators.required, Validators.minLength(2)]],
     data: null as (string | null),
   });
   imageURL: string = "/assets/images/milling.png";
 
+  addOnBlur = true;
+  readonly separatorKeysCodes = [ENTER, COMMA] as const;
+  aliases: string[] = [];
+
+
   customers: Customer[] = [];
   filteredCustomers?: Observable<string[]>;
+
+
 
   constructor(
     public dialog: MatDialog
@@ -107,6 +120,7 @@ export class DieEditorComponent implements OnInit {
       name: this.addressForm.controls['name'].value!,
       dieData: this.addressForm.controls['dieData'].value!,
       data: this.addressForm.controls['data'].value,
+      aliases: this.aliases,
       customer: this.addressForm.controls['customer'].value!
     };
 
@@ -122,5 +136,43 @@ export class DieEditorComponent implements OnInit {
         console.log("COMPLETE!");
       }
     });
+  }
+
+  add(event: MatChipInputEvent): void {
+    const value = (event.value || '').trim();
+
+    // Add our fruit
+    if (value) {
+      this.aliases.push(value);
+    }
+
+    // Clear the input value
+    event.chipInput!.clear();
+  }
+
+  remove(alias: string): void {
+    const index = this.aliases.indexOf(alias);
+
+    if (index >= 0) {
+      this.aliases.splice(index, 1);
+
+      this.announcer.announce(`Removed ${alias}`);
+    }
+  }
+
+  edit(alias: string, event: MatChipEditedEvent) {
+    const value = event.value.trim();
+
+    // Remove fruit if it no longer has a name
+    if (!value) {
+      this.remove(alias);
+      return;
+    }
+
+    // Edit existing fruit
+    const index = this.aliases.indexOf(alias);
+    if (index >= 0) {
+      this.aliases[index] = value;
+    }
   }
 }

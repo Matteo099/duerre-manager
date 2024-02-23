@@ -45,7 +45,21 @@
             </mat-form-field>
 
             <mat-form-field class="full-width">
-              <input matInput placeholder="Alias" formControlName="alias">
+              <mat-label>Alias</mat-label>
+              <mat-chip-grid #chipGrid aria-label="Inserisci un alias">
+                @for (alias of aliases; track alias) {
+                <mat-chip-row (removed)="remove(alias)" [editable]="true" (edited)="edit(alias, $event)"
+                  [aria-description]="'premi invio per modificare ' + alias">
+                  {{alias}}
+                  <button matChipRemove [attr.aria-label]="'elimina ' + alias">
+                    <mat-icon>cancel</mat-icon>
+                  </button>
+                </mat-chip-row>
+                }
+                <input placeholder="Nuovo alias..." formControlName="alias" [matChipInputFor]="chipGrid"
+                  [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="addOnBlur"
+                  (matChipInputTokenEnd)="add($event)" />
+              </mat-chip-grid>
             </mat-form-field>
           </div>
         </div>
@@ -54,7 +68,7 @@
           <mat-form-field class="col">
             <mat-label>Cliente</mat-label>
             <input type="text" placeholder="Seleziona un cliente" aria-label="Customer" matInput
-            formControlName="customer" [matAutocomplete]="auto">
+              formControlName="customer" [matAutocomplete]="auto">
             <mat-autocomplete #auto="matAutocomplete">
               @for (customer of filteredCustomers | async; track customer) {
               <mat-option [value]="customer">{{customer}}</mat-option>
