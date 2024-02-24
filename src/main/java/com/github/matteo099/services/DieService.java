@@ -1,6 +1,7 @@
 package com.github.matteo099.services;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.github.matteo099.exceptions.MalformedDieException;
 import com.github.matteo099.model.dao.DieSimilarSearchDao;
@@ -39,5 +40,9 @@ public class DieService {
         List<SimilarDieSearchResult> results = dieMatcher.searchSimilarDies(dieSimilarSearchDao.getDieData(), threshold);
         // save the research...
         return results;
+    }
+
+    public Optional<Die> findDie(Long id) {
+        return Die.findByIdOptional(id);
     }
 }

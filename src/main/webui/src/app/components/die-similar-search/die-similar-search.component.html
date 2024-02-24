@@ -1,4 +1,4 @@
-<div class="container m-3">
+<div class="m-3">
     <form class="m-2" [formGroup]="addressForm" novalidate (ngSubmit)="onSubmit()">
         <div class="row justify-content-center align-items-center">
             <div class="col-auto">
@@ -14,10 +14,12 @@
                             <img style="width: -webkit-fill-available;" [src]="imageURL">
 
                             @if (addressForm.controls['dieData'].hasError('required')) {
-                            <mat-error style="color:red">Il disegno dello stampo è <strong>obbligatorio</strong></mat-error>
+                            <mat-error style="color:red">Il disegno dello stampo è
+                                <strong>obbligatorio</strong></mat-error>
                             }
                             @else if(addressForm.controls['dieData'].hasError('validDie')) {
-                            <mat-error style="color:red">Il disegno dello stampo non è <strong>completo</strong></mat-error>
+                            <mat-error style="color:red">Il disegno dello stampo non è
+                                <strong>completo</strong></mat-error>
                             }
                         </div>
                     </mat-card-content>
@@ -32,18 +34,27 @@
     </form>
 
     @if (similarDies) {
-    <mat-grid-list cols="2">
-        @for (die of similarDies | async; track die.dieId) {
+    <mat-grid-list class="mt-2" cols="2" rowHeight="400px">
+        @for (die of similarDies; track die.dieId) {
         <mat-grid-tile colspan="1" rowspan="1">
             <mat-card>
                 <mat-card-header>
+                    <div mat-card-avatar class="example-header-image"></div>
                     <mat-card-title>
                         {{ die.dieId }}
-                        {{ die.matchScore }}
                     </mat-card-title>
+                    <mat-card-subtitle class="d-flex flex-column">
+                        <span>Punteggio: {{ die.matchScore.toFixed(2) }}</span>
+                        <div class="progress flex-fill" role="progressbar">
+                            <div class="progress-bar progress-bar-striped" [ngClass]="getProgressbarColor(die)"
+                                [ngStyle]="{'width': getProgressbarWidth(die)+'%'}">
+                                {{ getProgressbarWidth(die).toFixed(1) }}%
+                            </div>
+                        </div>
+                    </mat-card-subtitle>
                 </mat-card-header>
                 <mat-card-content>
-                    <a [routerLink]="'/die/' + die.dieId"><img style="width: 100%;" [src]="die.dieId"></a>
+                    <a [routerLink]="'/die/' + die.dieId"><img style="width: 100%;" [src]="die.img"></a>
                 </mat-card-content>
             </mat-card>
         </mat-grid-tile>

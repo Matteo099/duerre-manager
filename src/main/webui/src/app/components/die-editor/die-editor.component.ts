@@ -23,6 +23,7 @@ import { AsyncPipe } from '@angular/common';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { MatChipEditedEvent, MatChipInputEvent, MatChipsModule } from '@angular/material/chips';
+import { NotifyService } from '../../services/notify.service';
 
 @Component({
   selector: 'app-die-editor',
@@ -49,8 +50,8 @@ export class DieEditorComponent implements OnInit {
   private router = inject(Router);
   private dieService = inject(DieService);
   private customerService = inject(CustomerService);
+  private notifyService = inject(NotifyService);
   public dialog = inject(MatDialog);
-  announcer = inject(LiveAnnouncer);
 
   addressForm = this.fb.group({
     name: [null as (string | null), Validators.required],
@@ -121,14 +122,7 @@ export class DieEditorComponent implements OnInit {
 
     this.dieService.create(die).subscribe({
       next: (idW) => {
-        console.log(idW);
         if (idW.id !== undefined) this.router.navigate(['/die/' + idW.id])
-      },
-      error: (erW) => {
-        console.log(erW);
-      },
-      complete: () => {
-        console.log("COMPLETE!");
       }
     });
   }
@@ -151,7 +145,7 @@ export class DieEditorComponent implements OnInit {
     if (index >= 0) {
       this.aliases.splice(index, 1);
 
-      this.announcer.announce(`Removed ${alias}`);
+      this.notifyService.show(`Alias '${alias}' rimosso`);
     }
   }
 

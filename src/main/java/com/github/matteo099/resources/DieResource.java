@@ -14,6 +14,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
@@ -66,6 +67,19 @@ public class DieResource {
             var dies = dieService.listDies();
             logger.info(dies.size());
             return Response.ok().entity(dies).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.serverError().entity(ErrorWrapper.of(e)).build();
+        }
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/die/{id}")
+    public Response getDie(@PathParam("id") Long id) {
+        try {
+            logger.info("finding die with id " + id);
+            return Response.ok().entity(dieService.findDie(id).orElseThrow()).build();
         } catch (Exception e) {
             e.printStackTrace();
             return Response.serverError().entity(ErrorWrapper.of(e)).build();

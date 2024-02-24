@@ -1,4 +1,4 @@
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, NgClass, NgStyle } from '@angular/common';
 import { Component, Inject, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -16,6 +16,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { DieSimilarSearchDao } from '../../models/dao/die-similar-search-dao';
 import { SimilarDieSearchResult } from '../../models/projections/similar-die-search-result';
 import { Observable, tap } from 'rxjs';
+import { Die } from '../../models/entities/die';
 
 @Component({
   selector: 'app-die-similar-search',
@@ -29,7 +30,9 @@ import { Observable, tap } from 'rxjs';
     MatCardModule,
     RouterModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    NgStyle,
+    NgClass
   ],
   templateUrl: './die-similar-search.component.html',
   styleUrl: './die-similar-search.component.scss'
@@ -42,11 +45,11 @@ export class DieSimilarSearchComponent implements OnInit {
 
   addressForm = this.fb.group({
     dieData: [null as (DieDataDao | null), [Validators.required, validDieValidator()]],
-    name: [null as (string | null), Validators.required],
+    name: [null as (string | null)],
   });
   imageURL: string = "/assets/images/milling.png";
 
-  similarDies?: Observable<SimilarDieSearchResult[]>;
+  similarDies?: (SimilarDieSearchResult & { img?: string })[];
   searching = false;
 
   ngOnInit(): void {
@@ -95,11 +98,51 @@ export class DieSimilarSearchComponent implements OnInit {
     };
 
     // Search similar shapes!
-    this.similarDies = this.dieService.searchSimilarDies(dieSearch).pipe(
-      tap({
-        complete: () => this.searching = false
-      })
-    );
+    this.dieService.searchSimilarDies(dieSearch).subscribe(
+      {
+        next: (arr: SimilarDieSearchResult[]) => {
+          this.similarDies = arr;
+          this.similarDies.forEach(d => {
+            this.dieService.get(d.dieId).subscribe({
+              next: (die?: Die) => {
+                if (!die) return;
+                d.img = KonvaUtils.exportImage(die.dieData.state);
+              }
+            });
+          })
+        },
+        complete: () => {
+          this.searching = false;
+        }
+      });
+  }
+
+  getProgressbarColor(die: SimilarDieSearchResult): string {
+    if (die.matchScore <= 0) {
+      return "bg-success";
+    } else if (die.matchScore < 1) {
+      return "";
+    } else if (die.matchScore < 5) {
+      return "bg-info text-dark";
+    } else if (die.matchScore < 10) {
+      return "bg-warning text-dark";
+    } else {
+      return "bg-danger";
+    }
+  }
+
+  getProgressbarWidth(die: SimilarDieSearchResult): number {
+    if (die.matchScore <= 0) {
+      return 100;
+    } else if (die.matchScore < 1) {
+      return 90 + (1 - die.matchScore) * 10;
+    } else if (die.matchScore < 5) {
+      return 75 + (die.matchScore - 1) * 15 / 4;
+    } else if (die.matchScore < 10) {
+      return 50 + (die.matchScore - 5) * 25 / 5;
+    } else {
+      return 25;
+    }
   }
 }
 

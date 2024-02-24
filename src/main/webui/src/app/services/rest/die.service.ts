@@ -31,6 +31,12 @@ export class DieService extends BaseRestService {
     );
   }
 
+  get(dieId: number): Observable<Die | undefined> {
+    return this.http.get<Die>(DieService.DIE_URL + "/die/" + dieId).pipe(
+      catchError(this.handleError<Die | undefined>('getDie', undefined))
+    );
+  }
+
   searchSimilarDies(dieSimilarSearch: DieSimilarSearchDao): Observable<SimilarDieSearchResult[]> {
     return this.http.put<SimilarDieSearchResult[]>(DieService.DIE_URL + "/search-similar-dies", dieSimilarSearch, {
       headers: LoadingService.generateHeader("Ricerca stampi simili in corso")
