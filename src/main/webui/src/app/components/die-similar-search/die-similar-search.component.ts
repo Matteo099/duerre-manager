@@ -49,7 +49,7 @@ export class DieSimilarSearchComponent implements OnInit {
   });
   imageURL: string = "/assets/images/milling.png";
 
-  similarDies?: (SimilarDieSearchResult & { img?: string })[];
+  similarDies?: (SimilarDieSearchResult & { name?: string, img?: string })[];
   searching = false;
 
   ngOnInit(): void {
@@ -106,6 +106,7 @@ export class DieSimilarSearchComponent implements OnInit {
             this.dieService.get(d.dieId).subscribe({
               next: (die?: Die) => {
                 if (!die) return;
+                d.name = die.name;
                 d.img = KonvaUtils.exportImage(die.dieData.state);
               }
             });
