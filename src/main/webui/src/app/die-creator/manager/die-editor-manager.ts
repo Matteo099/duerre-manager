@@ -22,6 +22,7 @@ import { MoveToolHandler } from "./tools/move-tool-handler";
 import { Tool } from "./tools/tool";
 import { ToolHandler } from "./tools/tool-handler";
 import { GRID_ELEMENT } from "./constants";
+import { KonvaEditableText } from "./shape-ext/konva-editable-text";
 
 export class DieEditorManager implements IDieEditor {
 

@@ -1,6 +1,6 @@
 import { EventEmitter } from "@angular/core";
 import Konva from "konva";
-import { ERASABLE } from "../constants";
+import { ERASABLE, UPDATE_UNSCALE } from "../constants";
 import { IDieEditor } from "../idie-editor";
 import { KonvaUtils } from "../konva-utils";
 import { ExtendedShape } from "./extended-shape";
@@ -43,6 +43,7 @@ export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurabl
             align: 'center'
         });
         text.text.setAttr("MEASUREMENT", true);
+        text.text.setAttr(UPDATE_UNSCALE, (scale: number) => this.updateText());
         text.onDeleteTextarea = (v: string) => this.onDeleteTextarea(v);
         text.beforeCreateTextarea = () => { this.text.text.text(this.extShape.calculateLength().toFixed(2).toString()); }
         return text;
@@ -77,7 +78,7 @@ export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurabl
     public destroy() {
         UnscaleManager.instance?.unregisterObject(this.text.text);
         UnscaleManager.instance?.unregisterObject(this.extShape.shape);
-        
+
         this.group.destroy();
     }
 

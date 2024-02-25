@@ -3,6 +3,7 @@ import { GetSet } from "konva/lib/types";
 import { IDieEditor } from "../idie-editor";
 import { ZoomManager } from "./zoom-manager";
 import { Expansion } from "@angular/compiler";
+import { UPDATE_UNSCALE } from "../constants";
 
 export type UnscaleFnc<T extends Konva.Shape> = () => UnscaleFunction<T, any>;
 
@@ -155,6 +156,7 @@ export class UnscaleManager {
             this.registeredObjects.get(object)?.forEach(fnc => {
                 fnc.apply(object, scale);
             });
+            object.getAttr(UPDATE_UNSCALE)?.(scale);
             return;
         }
 
@@ -162,6 +164,7 @@ export class UnscaleManager {
             value.forEach(fnc => {
                 fnc.apply(key, scale);
             });
+            key.getAttr(UPDATE_UNSCALE)?.(scale);
         }
 
         console.log("Updated " + this.registeredObjects.size);
