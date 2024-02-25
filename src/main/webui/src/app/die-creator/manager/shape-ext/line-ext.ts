@@ -1,7 +1,8 @@
 import Konva from "konva";
+import { DieDataShapeDao } from "../../../models/dao/die-data-shape-dao";
 import { KonvaUtils } from "../konva-utils";
 import { ExtendedShape } from "./extended-shape";
-import { DieDataShapeDao } from "../../../models/dao/die-data-shape-dao";
+import { UnscaleManager } from "../managers/unscale-manager";
 
 export class LineExt extends ExtendedShape<Konva.Line> {
 
@@ -17,6 +18,7 @@ export class LineExt extends ExtendedShape<Konva.Line> {
             // add point twice, so we have some drawings even on a simple click
             points: [position.x, position.y, position.x, position.y],
         });
+        UnscaleManager.instance?.registerShape(line);
         return line;
     }
 

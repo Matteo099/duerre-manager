@@ -1,8 +1,9 @@
+import { EventEmitter } from "@angular/core";
 import Konva from "konva";
-import { IDieEditor } from "../idie-editor";
 import { KonvaEventObject } from "konva/lib/Node";
 import { EDITABLE_TEXT } from "../constants";
-import { EventEmitter } from "@angular/core";
+import { IDieEditor } from "../idie-editor";
+import { UnscaleManager } from "../managers/unscale-manager";
 
 export class KonvaEditableText {
 
@@ -31,6 +32,7 @@ export class KonvaEditableText {
         this.editor = editor;
         this.text = new Konva.Text(opts);
         this.text.setAttr(EDITABLE_TEXT, true);
+        UnscaleManager.instance?.registerShape(this.text);
         this.text.on('dblclick dbltap', event => this.handleDoubleTap(event));
     }
 

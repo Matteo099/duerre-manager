@@ -3,6 +3,7 @@ import { KonvaHelper } from "../konva-helper";
 import { IDieEditor } from "../idie-editor";
 import Konva from "konva";
 import { Subscription } from "rxjs";
+import { UnscaleManager } from "../managers/unscale-manager";
 
 export type LayerFn = (layer?: Konva.Layer) => boolean | void;
 
@@ -42,7 +43,10 @@ export abstract class ToolHandler {
     }
 
     clear() {
-        this.layers.forEach(l => l.removeChildren());
+        this.layers.forEach(l => {
+            UnscaleManager.instance?.unregisterLayer(l);
+            l.removeChildren()
+        });
     }
 
 

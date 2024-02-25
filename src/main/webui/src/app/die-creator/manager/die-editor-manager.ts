@@ -4,25 +4,26 @@ import { KonvaEventObject } from "konva/lib/Node";
 import { DieDataDao } from "../../models/dao/die-data-dao";
 import { DieDataShapeDao } from "../../models/dao/die-data-shape-dao";
 import { DieState } from "./die-state";
-import { GuidelinesManager } from "./guidelines-manager";
 import { IDieEditor } from "./idie-editor";
 import { KonvaHelper } from "./konva-helper";
 import { KonvaUtils } from "./konva-utils";
+import { GridManager } from "./managers/grid-manager";
+import { GuidelinesManager } from "./managers/guidelines-manager";
+import { UnscaleManager } from "./managers/unscale-manager";
+import { ZoomManager } from "./managers/zoom-manager";
 import { BezierLineExt } from "./shape-ext/bezier-line-ext";
+import { ExtendedShape } from "./shape-ext/extended-shape";
 import { LineExt } from "./shape-ext/line-ext";
 import { MeasurableShape } from "./shape-ext/measurable-shape";
 import { DrawToolHandler } from "./tools/draw-tool-handler";
 import { EditToolHandler } from "./tools/edit-tool-handler";
 import { EraserToolHandler } from "./tools/eraser-tool-handler";
-import { GridManager } from "./tools/grid-manager";
 import { MoveToolHandler } from "./tools/move-tool-handler";
 import { Tool } from "./tools/tool";
 import { ToolHandler } from "./tools/tool-handler";
-import { ExtendedShape } from "./shape-ext/extended-shape";
+import { GRID_ELEMENT } from "./constants";
 
 export class DieEditorManager implements IDieEditor {
-
-    public static readonly SCALES = [5, 4, 3, 2.5, 2, 1.5, 1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3]
 
     private _stage!: Konva.Stage;
     private _layer!: Konva.Layer;
@@ -35,10 +36,11 @@ export class DieEditorManager implements IDieEditor {
     private drawHandler!: DrawToolHandler;
     private eraserHandler!: EraserToolHandler;
     private moveHandler!: MoveToolHandler;
+    private zoomManager!: ZoomManager;
     private gridManager!: GridManager;
+    private unscaleManager!: UnscaleManager;
     private guidlinesManager!: GuidelinesManager;
 
-    private currentScale = 6;
 
     public get stage(): Konva.Stage { return this._stage; }
     public get layer(): Konva.Layer { return this._layer; }
@@ -54,7 +56,7 @@ export class DieEditorManager implements IDieEditor {
         this.createState();
         this.createTools();
         this.setupListeners();
-        this.createGrid();
+        this.createManagers();
 
         this._state = new DieState();
         this.stage.add(this.layer);
@@ -82,10 +84,12 @@ export class DieEditorManager implements IDieEditor {
         this.drawHandler = new DrawToolHandler(this);
         this.eraserHandler = new EraserToolHandler(this);
         this.moveHandler = new MoveToolHandler(this);
-        this.guidlinesManager = new GuidelinesManager(this);
     }
 
-    private createGrid() {
+    private createManagers() {
+        this.guidlinesManager = new GuidelinesManager(this);
+        this.zoomManager = new ZoomManager(this);
+        this.unscaleManager = new UnscaleManager(this, this.zoomManager);
         this.gridManager = new GridManager(this);
         this.gridManager.draw();
     }
@@ -124,7 +128,7 @@ export class DieEditorManager implements IDieEditor {
         const pointer = this.stage.getRelativePointerPosition()!;
 
         // find nearest grid point
-        const gridPoint = KonvaUtils.snapToGrid(pointer);
+        const gridPoint = this.gridManager.snapToGrid(pointer);
         let nearestPoint = gridPoint;
 
         if (points) {
@@ -189,45 +193,24 @@ export class DieEditorManager implements IDieEditor {
     }
 
     private zoom(opts: { direction?: number, event?: KonvaEventObject<any> }) {
-        // stop default scrolling
-        opts.event?.evt.preventDefault();
-
-        const oldScale = this._stage.scaleX();
-        const pointer = this._stage.getPointerPosition() || { x: 0, y: 0 };
-
-        const mousePointTo = {
-            x: (pointer.x - this._stage.x()) / oldScale,
-            y: (pointer.y - this._stage.y()) / oldScale,
-        };
-
-        // how to scale? Zoom in? Or zoom out?
-        let direction = opts.direction === undefined ? (opts.event?.evt.deltaY > 0 ? 1 : -1) : opts.direction;
-
-        // when we zoom on trackpad, e.evt.ctrlKey is true
-        // in that case lets revert direction
-        if (opts.event?.evt.ctrlKey) {
-            direction = -direction;
-        }
-
-        if (direction > 0) {
-            this.currentScale = this.currentScale > 0 ? this.currentScale - 1 : this.currentScale;
-        }
-        else {
-            this.currentScale = this.currentScale < DieEditorManager.SCALES.length - 1 ? this.currentScale + 1 : this.currentScale;
-        }
-
-        const newScale = DieEditorManager.SCALES[this.currentScale];
-
-        this._stage.scale({ x: newScale, y: newScale });
-
-        const newPos = {
-            x: pointer.x - mousePointTo.x * newScale,
-            y: pointer.y - mousePointTo.y * newScale,
-        };
-
-        this._stage.position(newPos);
-        this._stage.draw();
+        this.zoomManager.zoom(opts);
         this.gridManager.draw();
+        this.unscaleManager.update();
+
+        // this.getAllChildren().filter(c => c.getAttr(UNSCALE_OBJECT)).forEach(c => {
+        //     if (c.getAttr(DEFAULT_STROKE) != undefined) {
+        //         const defaultStrokeWidth = c.getAttr(DEFAULT_STROKE);
+        //         (c as any).strokeWidth(defaultStrokeWidth / this.zoomManager.currentScale)
+        //     }
+        //     if (c.getAttr(DEFAULT_RADIUS) != undefined) {
+        //         const defaultRadius = c.getAttr(DEFAULT_RADIUS);
+        //         (c as any).radius(defaultRadius / this.zoomManager.currentScale)
+        //     }
+        //     if (c.getAttr(DEFAULT_FONTSIZE) != undefined) {
+        //         const defaultFontSize = c.getAttr(DEFAULT_FONTSIZE);
+        //         (c as any).fontSize(defaultFontSize / this.zoomManager.currentScale)
+        //     }
+        // });
     }
 
     public clear() {
@@ -235,6 +218,8 @@ export class DieEditorManager implements IDieEditor {
         this.editHandler.clear();
         this.drawHandler.clear();
         this.eraserHandler.clear();
+
+        this.unscaleManager.unregisterObjectsIf(o => !o.getAttr(GRID_ELEMENT));
     }
 
     public setData(data: DieDataDao) {
@@ -263,7 +248,7 @@ export class DieEditorManager implements IDieEditor {
         this.stage.destroy();
     }
 
-    public exportImage(width: number= 300, height: number = 300, border: number = 10): string {
+    public exportImage(width: number = 300, height: number = 300, border: number = 10): string {
         const container = document.createElement("div");
         container.style.display = "none";
         const crpStage = new Konva.Stage({
@@ -334,5 +319,25 @@ export class DieEditorManager implements IDieEditor {
         const dataURL = crpStage.toDataURL();
         container.remove();
         return dataURL;
+    }
+
+    public getAllChildren(): Konva.Node[] {
+        const recursiveSearch = function (node: Konva.Node): Konva.Node[] {
+            const nodeChildren: Konva.Node[] = [];
+            if (node.hasChildren()) {
+                const nestedChildren: Konva.Node[] = (node as any).children;
+                for (const nestedNode of nestedChildren) {
+                    nodeChildren.push(...recursiveSearch(nestedNode));
+                }
+            } else {
+                nodeChildren.push(node);
+            }
+            return nodeChildren;
+        }
+        const children: Konva.Node[] = [];
+        this._stage.children.forEach(layer => {
+            layer.children.forEach(o => children.push(...recursiveSearch(o)));
+        });
+        return children;
     }
 }

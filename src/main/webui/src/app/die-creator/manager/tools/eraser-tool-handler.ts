@@ -4,6 +4,7 @@ import { ToolHandler } from "./tool-handler";
 import { ERASABLE } from "../constants";
 import Konva from "konva";
 import { IFrame } from "konva/lib/types";
+import { UnscaleManager } from "../managers/unscale-manager";
 
 const FADE_DURATION = 0.5; // in seconds
 const FRAME_RATE = 60; // Frames per second
@@ -32,6 +33,7 @@ export class EraserToolHandler extends ToolHandler {
             lineJoin: 'round',
             points: [],
         });
+        UnscaleManager.instance?.registerShape(trail);
         this.editor.layer.add(trail);
 
         let acc = 0;
@@ -100,6 +102,7 @@ export class EraserToolHandler extends ToolHandler {
 
         this.shapesToDelete.forEach(s => {
             this.editor.state.remove(s);
+            UnscaleManager.instance?.unregisterObject(s as any);
         });
     }
 

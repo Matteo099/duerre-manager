@@ -6,6 +6,7 @@ import { KonvaUtils } from "../konva-utils";
 import { ExtendedShape } from "./extended-shape";
 import { IMeasurableShape, LengthChanged } from "./imeasurable-shape";
 import { KonvaEditableText } from "./konva-editable-text";
+import { UnscaleManager } from "../managers/unscale-manager";
 
 export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurableShape {
 
@@ -74,6 +75,9 @@ export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurabl
     }
 
     public destroy() {
+        UnscaleManager.instance?.unregisterObject(this.text.text);
+        UnscaleManager.instance?.unregisterObject(this.extShape.shape);
+        
         this.group.destroy();
     }
 

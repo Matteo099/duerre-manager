@@ -2,12 +2,13 @@ import Konva from "konva";
 import { KonvaEventObject } from "konva/lib/Node";
 import { IFrame } from "konva/lib/types";
 import { IDieEditor } from "../idie-editor";
+import { UnscaleManager } from "../managers/unscale-manager";
+import { BezierLineExt } from "../shape-ext/bezier-line-ext";
 import { KonvaEditableText } from "../shape-ext/konva-editable-text";
+import { LineExt } from "../shape-ext/line-ext";
+import { MeasurableShape } from "../shape-ext/measurable-shape";
 import { Tool } from "./tool";
 import { ToolHandler } from "./tool-handler";
-import { LineExt } from "../shape-ext/line-ext";
-import { BezierLineExt } from "../shape-ext/bezier-line-ext";
-import { MeasurableShape } from "../shape-ext/measurable-shape";
 
 export class DrawToolHandler extends ToolHandler {
 
@@ -112,13 +113,17 @@ export class DrawToolHandler extends ToolHandler {
     private startAnimationAvailablePoints(): void {
         this.stopAnimationAvailablePoints();
 
-        const endpoints = this.editor.state.getEndPoints().map(e => new Konva.Circle({
-            x: e.x,
-            y: e.y,
-            radius: 10,
-            stroke: '#00ff00',
-            strokeWidth: 2,
-        }));
+        const endpoints = this.editor.state.getEndPoints().map(e => {
+            const circle = new Konva.Circle({
+                x: e.x,
+                y: e.y,
+                radius: 20,
+                stroke: '#00ff00',
+                strokeWidth: 2,
+            });
+            UnscaleManager.instance?.registerShape(circle);
+            return circle;
+        });
         this.animationLayer?.add(...endpoints);
         const period = 750;
         this.anim = new Konva.Animation((frame?: IFrame) => {
@@ -138,22 +143,27 @@ export class DrawToolHandler extends ToolHandler {
         this.animationTimer = undefined;
         this.anim?.stop();
         this.anim = undefined;
+        UnscaleManager.instance?.unregisterLayer(this.animationLayer);
         this.animationLayer?.clear();
         this.animationLayer?.destroyChildren();
     }
 
     private showGitzmoOnPointer(pos: Konva.Vector2d) {
         this.clearGitzmos();
-        this.gizmoLayer?.add(new Konva.Circle({
+        const pointerCircle = new Konva.Circle({
             x: pos.x,
             y: pos.y,
-            radius: 10,
+            radius: 20,
             stroke: '#0000ff',
-            strokeWidth: 2,
-        }));
+            strokeWidth: 3,
+        });
+        this.gizmoLayer?.add(pointerCircle);
+        UnscaleManager.instance?.registerShape(pointerCircle);
     }
 
     private clearGitzmos() {
+        UnscaleManager.instance?.unregisterLayer(this.gizmoLayer);
+
         this.gizmoLayer?.clear();
         this.gizmoLayer?.destroyChildren();
     }

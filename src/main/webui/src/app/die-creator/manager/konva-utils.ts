@@ -1,7 +1,7 @@
 import Konva from "konva";
 import { Vector2d } from "konva/lib/types";
 import { DieDataShapeDao } from "../../models/dao/die-data-shape-dao";
-import { GridManager } from "./tools/grid-manager";
+import { GridManager } from "./managers/grid-manager";
 import { MeasurableShape } from "./shape-ext/measurable-shape";
 import { ExtendedShape } from "./shape-ext/extended-shape";
 import { LineExt } from "./shape-ext/line-ext";

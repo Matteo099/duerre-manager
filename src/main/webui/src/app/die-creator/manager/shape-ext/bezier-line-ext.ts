@@ -4,6 +4,7 @@ import { DieDataShapeDao } from "../../../models/dao/die-data-shape-dao";
 import { REMOVE_ONLY } from "../constants";
 import { ExtendedShape } from "./extended-shape";
 import { Quad } from "./quad";
+import { UnscaleFunction, UnscaleManager } from "../managers/unscale-manager";
 
 export class BezierLineExt extends ExtendedShape<Konva.Shape> {
 
@@ -37,6 +38,7 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
                 ctx.fillStrokeShape(shape);
             }
         });
+        UnscaleManager.instance?.registerShape(bezierLine);
 
         this.quadLinePath = new Konva.Line({
             dash: [10, 10, 0, 10],
@@ -48,6 +50,8 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
             points: [0, 0],
         });
         this.quadLinePath.setAttr(REMOVE_ONLY, true);
+        UnscaleManager.instance?.registerShape(this.quadLinePath, UnscaleFunction.unscaleDash);
+
         return bezierLine;
     }
 

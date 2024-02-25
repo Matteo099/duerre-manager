@@ -1,3 +1,6 @@
+<div class="position-absolute w-100 h-100" #stageContainer>
+</div>
+
 <div class="container-fluid h-100">
     <div class="row h-100">
         <!-- Left column -->
@@ -6,10 +9,12 @@
                 <button mat-mini-fab [color]="getColor(Tool.EDIT)" (click)="useEditTool()" class="mb-2">
                     <mat-icon>drag_indicator</mat-icon>
                 </button>
-                <button mat-mini-fab [color]="getColor(Tool.DRAW_LINE)" (click)="useDrawTool(Tool.DRAW_LINE)" class="mb-2">
+                <button mat-mini-fab [color]="getColor(Tool.DRAW_LINE)" (click)="useDrawTool(Tool.DRAW_LINE)"
+                    class="mb-2">
                     <mat-icon>timeline</mat-icon>
                 </button>
-                <button mat-mini-fab [color]="getColor(Tool.DRAW_CURVE)" (click)="useDrawTool(Tool.DRAW_CURVE)" class="mb-2">
+                <button mat-mini-fab [color]="getColor(Tool.DRAW_CURVE)" (click)="useDrawTool(Tool.DRAW_CURVE)"
+                    class="mb-2">
                     <mat-icon>gesture</mat-icon>
                 </button>
                 <button mat-mini-fab [color]="getColor(Tool.ERASER)" (click)="useEraserTool()" class="mb-2">
@@ -33,8 +38,7 @@
 
         <!-- Central column -->
         <div class="col m-2 p-0">
-            <div class="w-100 h-100" #stageContainer>
-            </div>
+
         </div>
 
         <div class="col-auto m-2">

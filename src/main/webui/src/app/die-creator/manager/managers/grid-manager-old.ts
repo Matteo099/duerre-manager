@@ -1,7 +1,7 @@
 import Konva from "konva";
 import { IDieEditor } from "../idie-editor";
 
-export class GridManager {
+export class GridManagerOld {
 
     public static readonly STEP_SIZE = 10;
 
@@ -27,7 +27,7 @@ export class GridManager {
         const helper = this.editor.helper;
         const width = stage.width();
         const height = stage.height();
-        const stepSize = GridManager.STEP_SIZE;
+        const stepSize = GridManagerOld.STEP_SIZE;
 
         const stageRect = {
             x1: 0,

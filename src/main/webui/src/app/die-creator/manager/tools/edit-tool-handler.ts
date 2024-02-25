@@ -5,6 +5,7 @@ import { IDieEditor } from "../idie-editor";
 import { BezierLineExt } from "../shape-ext/bezier-line-ext";
 import { IMeasurableShape } from "../shape-ext/imeasurable-shape";
 import { ToolHandler } from "./tool-handler";
+import { UnscaleManager } from "../managers/unscale-manager";
 
 export class EditToolHandler extends ToolHandler {
 
@@ -32,6 +33,7 @@ export class EditToolHandler extends ToolHandler {
 
     override onToolDeselected(): void {
         super.onToolDeselected();
+        UnscaleManager.instance?.unregisterLayer(this.gizmoLayer);
         this.gizmoLayer.removeChildren();
         this.tempSubscriptions.forEach(s => s.unsubscribe());
         this.tempSubscriptions = [];
@@ -84,12 +86,13 @@ export class EditToolHandler extends ToolHandler {
         const anchor = new Konva.Circle({
             x: vector.x,
             y: vector.y,
-            radius: 20,
+            radius: 10,
             stroke: '#666',
             fill: '#ddd',
             strokeWidth: 2,
             draggable: true,
         });
+        UnscaleManager.instance?.registerShape(anchor);
         this.gizmoLayer.add(anchor);
 
         // add hover styling
@@ -124,7 +127,7 @@ export class EditToolHandler extends ToolHandler {
 
             shapes.forEach(s => {
                 s.updateEndpoint(lastPosition, currentPosition);
-                console.log(s.extShape.shape, lastPosition, currentPosition);
+                // console.log(s.extShape.shape, lastPosition, currentPosition);
                 // this.updateDottedLines();
             });
             lastPosition = anchor.position();
