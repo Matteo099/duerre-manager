@@ -149,6 +149,96 @@ export class DieEditorManager implements IDieEditor {
         };
     }
 
+    /*
+    public getSnappedToNearObject(useEndpoint?: boolean | any): { v: Konva.Vector2d, obj: "grid" | "vertex" } {
+        const pointer = this.stage.getRelativePointerPosition()!;
+
+        let pointFrom: 'grid' | 'vertex' = 'grid';
+        // find nearest grid point
+        const gridPoint = this.gridManager.snapToGrid(pointer);
+        let nearestPoint = gridPoint;
+
+        const endpoints: (Konva.Vector2d & { source: 'grid' | 'vertex' })[] = this.state.getEndPoints().map(v => { return { ...v, source: 'vertex' } });
+        const points: (Konva.Vector2d & { source: 'grid' | 'vertex' })[] = [
+            { ...gridPoint, source: 'grid' },
+            ...endpoints
+        ];
+        const vertex = this.state.getVertices();
+        if (vertex) {
+            let nearX = Infinity;
+            let nearY = Infinity;
+            let vX = 0;
+            let vY = 0;
+            vertex.forEach(v => {
+                if (Math.abs(v.x - pointer.x) < nearX) {
+                    nearX = Math.abs(v.x - pointer.x);
+                    vX = v.x;
+                }
+                if (Math.abs(v.y - pointer.y) < nearY) {
+                    nearY = Math.abs(v.y - pointer.y);
+                    vY = v.y;
+                }
+            });
+
+            points.push({ x: vX, y: pointer.y, source: 'grid' });
+            points.push({ x: pointer.x, y: vY, source: 'grid' });
+            if (vertex.find(v => v.x == vX && v.y == vY) == undefined) {
+                points.push({ x: vX, y: vY, source: 'grid' });
+            }
+        }
+
+        if (useEndpoint) {
+            nearestPoint = points.reduce((nearest: Konva.Vector2d & { source: 'grid' | 'vertex' }, current: Konva.Vector2d & { source: 'grid' | 'vertex' }) => {
+                const distanceToCurrent = KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: current.x, y2: current.y });
+                const distanceToNearest = nearest ? KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: nearest.x, y2: nearest.y }) : Infinity;
+
+                return distanceToCurrent < distanceToNearest ? current : nearest;
+            });
+            if (nearestPoint.x != gridPoint.x && nearestPoint.y != gridPoint.y) pointFrom = 'vertex';
+        }
+
+        // if (nearHPoint && nearVPoint) {
+        //     let nestedNearestPoint = { x: nearestPoint.x, y: nearestPoint.y };
+
+        //     const distanceToH = KonvaUtils.calculateDistance({ x1: nearHPoint.x, y1: pointer.y, x2: nearestPoint.x, y2: nearestPoint.y });
+        //     const distanceToV = KonvaUtils.calculateDistance({ x1: pointer.x, y1: nearVPoint.y, x2: nearestPoint.x, y2: nearestPoint.y });
+        //     const distanceToHV = nearHVPoint ? KonvaUtils.calculateDistance({ x1: nearHVPoint.x, y1: nearHVPoint.y, x2: nearestPoint.x, y2: nearestPoint.y }) : Infinity;
+        //     const distanceToNear = KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: nearestPoint.x, y2: nearestPoint.y });
+
+        //     let minDistance = distanceToH;
+
+        //     if (distanceToV < minDistance) {
+        //         minDistance = distanceToV;
+        //     }
+
+        //     if (distanceToHV < minDistance) {
+        //         minDistance = distanceToHV;
+        //     }
+
+        //     if (distanceToNear < minDistance) {
+        //         minDistance = distanceToNear;
+        //     }
+
+        //     if (minDistance === distanceToH) {
+        //         nestedNearestPoint = { x: nearHPoint.x, y: nearestPoint.y };
+        //     } else if (minDistance === distanceToV) {
+        //         nestedNearestPoint = { x: nearestPoint.x, y: nearVPoint.y };
+        //     } else if (nearHVPoint != undefined && minDistance === distanceToHV) {
+        //         nestedNearestPoint = { x: nearHVPoint.x, y: nearHVPoint.y };
+        //     }
+
+        //     if (nestedNearestPoint.x != nearestPoint.x && nestedNearestPoint.y != nearestPoint.y) pointFrom = 'grid';
+        //     nearestPoint = nestedNearestPoint;
+        // }
+
+        console.log(pointFrom);
+
+        return {
+            v: nearestPoint,
+            obj: pointFrom
+        };
+    }*/
+
     public useTool(tool: Tool) {
         this._selectedTool = tool;
 

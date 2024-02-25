@@ -126,6 +126,19 @@ export class GuidelinesManager {
         });
     }
 
+    public onMouseMove(event: KonvaEventObject<any>) {
+        // clear all previous lines on the screen        
+        this.deleteGuides();
+
+        const pointer = this.editor.stage.getRelativePointerPosition();
+        if (!pointer) return;
+
+        // find possible snapping lines
+        const lineGuideStops = this.getLineGuideStops(pointer);
+        // now find where can we snap current object
+        const guides = this.getGuides(lineGuideStops, pointer);
+    }
+
     public onDragMove(event: KonvaEventObject<any>) {
         // clear all previous lines on the screen        
         this.deleteGuides();
