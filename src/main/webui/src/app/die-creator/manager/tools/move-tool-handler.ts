@@ -5,7 +5,7 @@ import { ToolHandler } from "./tool-handler";
 export class MoveToolHandler extends ToolHandler {
 
     constructor(editor: IDieEditor) {
-        super(editor);
+        super(editor, false);
     }
 
     override onToolSelected(): void {
@@ -14,17 +14,5 @@ export class MoveToolHandler extends ToolHandler {
 
     override onToolDeselected(): void {
         this.editor.stage.draggable(false);
-    }
-
-    override onMouseDown(event: KonvaEventObject<any>): void {
-        
-    }
-
-    override onMouseMove(event: KonvaEventObject<any>): void {
-
-    }
-
-    override onMouseUp(event: KonvaEventObject<any>): void {
-
     }
 }

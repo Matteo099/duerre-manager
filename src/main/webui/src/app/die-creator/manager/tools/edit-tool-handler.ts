@@ -15,7 +15,7 @@ export class EditToolHandler extends ToolHandler {
     private tempSubscriptions: Subscription[] = [];
 
     constructor(editor: IDieEditor) {
-        super(editor);
+        super(editor, false);
     }
 
     protected override createLayers(): void {
@@ -110,10 +110,12 @@ export class EditToolHandler extends ToolHandler {
         anchor.on('mousedown touchstart', (event) => {
             lastPosition = anchor.position();
             this.highlightShapes(true, shapes);
+            this.editor.guidelinesManager.activate();
         });
 
         anchor.on('mouseup touchend', (event) => {
             this.highlightShapes(false, shapes);
+            this.editor.guidelinesManager.deactivate();
         });
 
         anchor.on('dragmove', (event) => {
@@ -131,6 +133,8 @@ export class EditToolHandler extends ToolHandler {
                 // this.updateDottedLines();
             });
             lastPosition = anchor.position();
+
+            this.editor.guidelinesManager.update();
         });
 
         anchor.on('dragend', (event) => {
@@ -146,17 +150,5 @@ export class EditToolHandler extends ToolHandler {
             //shape.dashEnabled(active);
             shape.stroke(active ? "#26df48" : "#df4b26" );
         });
-    }
-
-    override onMouseDown(event: KonvaEventObject<any>): void {
-
-    }
-
-    override onMouseMove(event: KonvaEventObject<any>): void {
-
-    }
-
-    override onMouseUp(event: KonvaEventObject<any>): void {
-
     }
 }

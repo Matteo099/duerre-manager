@@ -31,7 +31,7 @@ export class DrawToolHandler extends ToolHandler {
     private unit: string = "mm";
 
     constructor(editor: IDieEditor) {
-        super(editor);
+        super(editor, true);
         this.subscriptions.push(KonvaEditableText.onEdit.subscribe(() => {
             this.stopAnimationAvailablePoints();
             this.clearGitzmos();
@@ -76,6 +76,8 @@ export class DrawToolHandler extends ToolHandler {
         this.isDrawing = true;
         this.drawingLine = new MeasurableShape<any>(this.editor, pos, this.isDrawingLine ? LineExt : BezierLineExt);
         this.editor.layer.add(this.drawingLine.group);
+        
+        super.onMouseDown(event);
     }
 
     override onMouseMove(event: KonvaEventObject<any>): void {
@@ -89,9 +91,13 @@ export class DrawToolHandler extends ToolHandler {
         const newPoints = [this.startingPoint!.x, this.startingPoint!.y, pos.x, pos.y];
         this.drawingLine!.updatePoints(newPoints);
         pos.source == 'grid' ? this.clearGitzmos() : this.showGitzmoOnPointer(pos);
+
+        super.onMouseMove(event);
     }
 
     override onMouseUp(event: KonvaEventObject<any>): void {
+        super.onMouseUp(event);
+
         this.isDrawing = false;
         if (!this.drawingLine) return;
 

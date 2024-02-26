@@ -70,7 +70,6 @@ export class GridManager {
 
         const scale = stage.scale()?.x || 1;
         const stepSize = GridManager.SCALES.find(o => o.scale == scale)?.step || 10;
-        console.log(scale, stepSize);
 
         // stageRect represet the RECT of the stage (the initial view). It is constant (0, 0, width, height)
         const stageRect = {

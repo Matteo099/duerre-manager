@@ -1,9 +1,8 @@
 import Konva from "konva";
-import { IDieEditor } from "../idie-editor";
-import { KonvaEventObject } from "konva/lib/Node";
 import { ExtVector2d } from "../die-editor-manager";
+import { IDieEditor } from "../idie-editor";
 import { KonvaUtils } from "../konva-utils";
-import { UnscaleManager } from "./unscale-manager";
+import { UnscaleFunction, UnscaleManager } from "./unscale-manager";
 
 export interface Guide {
     lineGuide: number,
@@ -24,15 +23,15 @@ export class GuidelinesManager {
         this.editor.stage.add(this.layer);
     }
 
-    public onMouseDown(event: KonvaEventObject<any>): void {
+    public activate() {
         this.active = true;
         this.deleteGuides();
     }
 
-    public onMouseMove(event: KonvaEventObject<any>): void {
+    public update(optPointer?: Konva.Vector2d): void {
         if (!this.active) return;
 
-        const pointer = this.editor.getSnapToNearest({ useEndpoints: true }); //this.editor.stage.getRelativePointerPosition();
+        const pointer = this.editor.getSnapToNearest({ useEndpoints: true, pointer: optPointer }); //this.editor.stage.getRelativePointerPosition();
         if (!pointer || KonvaUtils.v2Equals(this.lastPointerPosition, pointer)) return;
 
         // clear all previous lines on the screen        
@@ -43,9 +42,10 @@ export class GuidelinesManager {
         const guides = this.getGuideLines(pointer);
         // draw guidelines
         this.drawGuides(pointer, guides);
+        console.log("drawGuides", pointer, guides);
     }
-
-    public onMouseUp(event: KonvaEventObject<any>): void {
+    
+    public deactivate() {
         this.active = false;
         this.deleteGuides();
     }
@@ -74,13 +74,13 @@ export class GuidelinesManager {
                     stroke: 'rgb(0, 161, 255)',
                     strokeWidth: 2,
                     name: 'guid-line',
-                    dash: [4, 6],
+                    dash: [10, 15],
                 });
                 line.absolutePosition({
                     x: pointer.x,
                     y: lg.lineGuide,
                 });
-                UnscaleManager.instance?.registerShape(line);
+                UnscaleManager.instance?.registerShape(line, UnscaleFunction.unscaleDash);
                 this.layer.add(line);
             } else if (lg.orientation === 'V') {
                 const line = new Konva.Line({
@@ -88,13 +88,13 @@ export class GuidelinesManager {
                     stroke: 'rgb(0, 161, 255)',
                     strokeWidth: 2,
                     name: 'guid-line',
-                    dash: [4, 6],
+                    dash: [10, 15],
                 });
                 line.absolutePosition({
                     x: lg.lineGuide,
                     y: pointer.y,
                 });
-                UnscaleManager.instance?.registerShape(line);
+                UnscaleManager.instance?.registerShape(line, UnscaleFunction.unscaleDash);
                 this.layer.add(line);
             }
         });

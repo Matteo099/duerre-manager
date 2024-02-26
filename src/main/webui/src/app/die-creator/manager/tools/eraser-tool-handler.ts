@@ -17,7 +17,7 @@ export class EraserToolHandler extends ToolHandler {
     private mouseDown = false;
 
     constructor(editor: IDieEditor) {
-        super(editor);
+        super(editor, false);
 
         const objs = this.createObjects();
         this.trail = objs.trail;

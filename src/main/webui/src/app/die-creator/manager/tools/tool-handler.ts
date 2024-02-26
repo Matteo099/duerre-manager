@@ -12,9 +12,11 @@ export abstract class ToolHandler {
     public readonly editor: IDieEditor;
     protected readonly layers: Konva.Layer[] = [];
     protected subscriptions: Subscription[] = [];
+    protected enableGuidelines: boolean;
 
-    constructor(editor: IDieEditor) {
+    constructor(editor: IDieEditor, enableGuidelines: boolean) {
         this.editor = editor;
+        this.enableGuidelines = enableGuidelines;
         this.createLayers();
         this.layers.forEach(l => this.editor.stage.add(l));
     }
@@ -50,7 +52,13 @@ export abstract class ToolHandler {
     }
 
 
-    abstract onMouseDown(event: KonvaEventObject<any>): void;
-    abstract onMouseMove(event: KonvaEventObject<any>): void;
-    abstract onMouseUp(event: KonvaEventObject<any>): void;
+    public onMouseDown(event: KonvaEventObject<any>): void {
+        if(this.enableGuidelines) this.editor.guidelinesManager.activate();
+    }
+    public onMouseMove(event: KonvaEventObject<any>): void {
+        if(this.enableGuidelines) this.editor.guidelinesManager.update();
+    }
+    public onMouseUp(event: KonvaEventObject<any>): void {
+        if(this.enableGuidelines) this.editor.guidelinesManager.deactivate();
+    }
 } 

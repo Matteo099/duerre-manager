@@ -29,6 +29,7 @@ export interface ExtVector2d extends Konva.Vector2d {
 export const DefaultExtVector2d: ExtVector2d = { x: 0, y: 0, source: 'grid' };
 export interface SnapConfig {
     useEndpoints: boolean;
+    pointer?: Konva.Vector2d;
 }
 
 export class DieEditorManager implements IDieEditor {
@@ -47,7 +48,7 @@ export class DieEditorManager implements IDieEditor {
     private zoomManager!: ZoomManager;
     private gridManager!: GridManager;
     private unscaleManager!: UnscaleManager;
-    private guidlinesManager!: GuidelinesManager;
+    private _guidlinesManager!: GuidelinesManager;
 
 
     public get stage(): Konva.Stage { return this._stage; }
@@ -57,6 +58,7 @@ export class DieEditorManager implements IDieEditor {
     public get selectedTool(): Tool | undefined { return this._selectedTool; }
     public get state(): DieState { return this._state; }
     public get helper(): KonvaHelper { return this._konvaHelper; }
+    public get guidelinesManager(): GuidelinesManager { return this._guidlinesManager; }
 
 
     constructor(stageContainer: ElementRef) {
@@ -95,7 +97,7 @@ export class DieEditorManager implements IDieEditor {
     }
 
     private createManagers() {
-        this.guidlinesManager = new GuidelinesManager(this);
+        this._guidlinesManager = new GuidelinesManager(this);
         this.zoomManager = new ZoomManager(this);
         this.unscaleManager = new UnscaleManager(this, this.zoomManager);
         this.gridManager = new GridManager(this);
@@ -120,23 +122,21 @@ export class DieEditorManager implements IDieEditor {
 
     private handleMouseDown(event: KonvaEventObject<any>) {
         this._selectedToolHandler?.onMouseDown(event);
-        this.guidlinesManager.onMouseDown(event);
     }
 
     private handleMouseMove(event: KonvaEventObject<any>) {
         this._selectedToolHandler?.onMouseMove(event);
-        this.guidlinesManager.onMouseMove(event);
     }
 
     private handleMouseUp(event: KonvaEventObject<any>) {
         this._selectedToolHandler?.onMouseUp(event);
-        this.guidlinesManager.onMouseUp(event);
     }
 
+    private lastPointerPosition: ExtVector2d = DefaultExtVector2d;
     public getSnapToNearest(config?: SnapConfig): ExtVector2d {
         // get the mouse position
-        const pointer = this.stage.getRelativePointerPosition();
-        if (!pointer) return DefaultExtVector2d;
+        const pointer = config?.pointer ?? this.stage.getRelativePointerPosition();
+        if (!pointer) return this.lastPointerPosition;
 
         const points: ExtVector2d[] = [];
 
@@ -172,11 +172,12 @@ export class DieEditorManager implements IDieEditor {
         }
 
         // find the nearest point (in the points array) to the pointer
-        return this.findNearestPoint(pointer, points);
+        this.lastPointerPosition= this.findNearestPoint(pointer, points);
+        return this.lastPointerPosition;
     }
 
     private findNearestPoint(pointer: Konva.Vector2d, points: ExtVector2d[]): ExtVector2d {
-        if (points.length == 0) return DefaultExtVector2d;
+        if (points.length == 0) return this.lastPointerPosition;
         return points.reduce((nearest: Konva.Vector2d & { source: 'grid' | 'vertex' }, current: Konva.Vector2d & { source: 'grid' | 'vertex' }) => {
             const distanceToCurrent = KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: current.x, y2: current.y });
             const distanceToNearest = nearest ? KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: nearest.x, y2: nearest.y }) : Infinity;
