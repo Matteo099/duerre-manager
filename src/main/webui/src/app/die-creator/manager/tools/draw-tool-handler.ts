@@ -63,7 +63,7 @@ export class DrawToolHandler extends ToolHandler {
     override onMouseDown(event: KonvaEventObject<any>): void {
         if (KonvaEditableText.editing) return;
 
-        const pos = this.getSnappingPoint().v;
+        const pos = this.getSnappingPoint();
         const hoverEndpoints = this.editor.state.canDrawNewLine(pos);
         if (!hoverEndpoints) {
             this.startAnimationAvailablePoints();
@@ -86,9 +86,9 @@ export class DrawToolHandler extends ToolHandler {
         // prevent scrolling on touch devices
         event.evt.preventDefault();
         const pos = this.getSnappingPoint();
-        const newPoints = [this.startingPoint!.x, this.startingPoint!.y, pos.v.x, pos.v.y];
+        const newPoints = [this.startingPoint!.x, this.startingPoint!.y, pos.x, pos.y];
         this.drawingLine!.updatePoints(newPoints);
-        pos.obj == "grid" ? this.clearGitzmos() : this.showGitzmoOnPointer(pos.v);
+        pos.source == 'grid' ? this.clearGitzmos() : this.showGitzmoOnPointer(pos);
     }
 
     override onMouseUp(event: KonvaEventObject<any>): void {
@@ -96,7 +96,7 @@ export class DrawToolHandler extends ToolHandler {
         if (!this.drawingLine) return;
 
         this.clearGitzmos();
-        const pos = this.getSnappingPoint().v;
+        const pos = this.getSnappingPoint();
         //const newPoints = [this.startingPoint!.x, this.startingPoint!.y, pos.x, pos.y];
         //this.drawingLine.updatePoints(newPoints);
         this.drawingLine.updateEndpoint('end', pos);

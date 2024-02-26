@@ -2,6 +2,7 @@ import Konva from 'konva';
 import { DieState } from './die-state';
 import { KonvaHelper } from './konva-helper';
 import { Tool } from './tools/tool';
+import { ExtVector2d, SnapConfig } from './die-editor-manager';
 
 export interface IDieEditor {
     get stage(): Konva.Stage;
@@ -13,5 +14,7 @@ export interface IDieEditor {
     get helper(): KonvaHelper;
 
 
-    getSnappedToNearObject(points?: Konva.Vector2d[]): { v: Konva.Vector2d, obj: "grid" | "vertex" };
+    //getSnappedToNearObject(points?: Konva.Vector2d[]): { v: Konva.Vector2d, obj: "grid" | "vertex" };
+
+    getSnapToNearest(config?: SnapConfig): ExtVector2d;
 }

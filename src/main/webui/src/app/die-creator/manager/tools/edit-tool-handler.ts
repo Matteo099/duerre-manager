@@ -119,7 +119,7 @@ export class EditToolHandler extends ToolHandler {
         anchor.on('dragmove', (event) => {
             //currentPosition = anchor.position();
             if (!controlPoint) {
-                currentPosition = this.editor.getSnappedToNearObject().v;
+                currentPosition = this.editor.getSnapToNearest();
                 anchor.position(currentPosition);
             } else {
                 currentPosition = anchor.position();

@@ -145,7 +145,7 @@ export class GuidelinesManager {
 
         console.log(event);
 
-        const pointer = this.editor.getSnappedToNearObject().v;
+        const pointer = this.editor.getSnapToNearest();
 
         // find possible snapping lines
         const lineGuideStops = this.getLineGuideStops(pointer);

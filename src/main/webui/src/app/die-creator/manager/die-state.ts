@@ -81,6 +81,20 @@ export class DieState {
         });
     }
 
+    public getVerticesExceptEndpoints() {
+        const endpoints = this.getEndPoints();
+        return this.lines.flatMap(l => {
+            const points = l.extShape.getPoints();
+            const vertices: Konva.Vector2d[] = [];
+            for (let i = 0; i < points.length - 1; i += 2) {
+                const v = { x: points[i], y: points[i + 1] };
+                if(!endpoints.find(e => e.x == v.x && e.y == v.y))
+                    vertices.push(v);
+            }
+            return vertices;
+        });
+    }
+
     public getEndPoints(): Konva.Vector2d[] {
         const vectors = this.lines.flatMap(l => l.getEndPoints());
         const vectorCountMap: Record<string, number> = {};

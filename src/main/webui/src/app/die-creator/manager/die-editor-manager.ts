@@ -3,6 +3,7 @@ import Konva from "konva";
 import { KonvaEventObject } from "konva/lib/Node";
 import { DieDataDao } from "../../models/dao/die-data-dao";
 import { DieDataShapeDao } from "../../models/dao/die-data-shape-dao";
+import { GRID_ELEMENT } from "./constants";
 import { DieState } from "./die-state";
 import { IDieEditor } from "./idie-editor";
 import { KonvaHelper } from "./konva-helper";
@@ -21,8 +22,11 @@ import { EraserToolHandler } from "./tools/eraser-tool-handler";
 import { MoveToolHandler } from "./tools/move-tool-handler";
 import { Tool } from "./tools/tool";
 import { ToolHandler } from "./tools/tool-handler";
-import { GRID_ELEMENT } from "./constants";
-import { KonvaEditableText } from "./shape-ext/konva-editable-text";
+
+export interface ExtVector2d extends Konva.Vector2d { source: 'grid' | 'vertex' };
+export interface SnapConfig {
+    useEndpoints: boolean;
+}
 
 export class DieEditorManager implements IDieEditor {
 
@@ -124,8 +128,7 @@ export class DieEditorManager implements IDieEditor {
         this.guidlinesManager.onDragEnd(event);
     }
 
-
-    public getSnappedToNearObject(points?: Konva.Vector2d[]): { v: Konva.Vector2d, obj: "grid" | "vertex" } {
+    /*public getSnappedToNearObject(points?: Konva.Vector2d[]): { v: Konva.Vector2d, obj: "grid" | "vertex" } {
         const pointer = this.stage.getRelativePointerPosition()!;
 
         // find nearest grid point
@@ -147,97 +150,81 @@ export class DieEditorManager implements IDieEditor {
             v: nearestPoint,
             obj: nearestPoint == gridPoint ? "grid" : "vertex"
         };
-    }
+    }*/
 
-    /*
-    public getSnappedToNearObject(useEndpoint?: boolean | any): { v: Konva.Vector2d, obj: "grid" | "vertex" } {
+    public getSnapToNearest(config?: SnapConfig): ExtVector2d {
+        // get the mouse position
         const pointer = this.stage.getRelativePointerPosition()!;
+        const points: ExtVector2d[] = [];
 
-        let pointFrom: 'grid' | 'vertex' = 'grid';
-        // find nearest grid point
-        const gridPoint = this.gridManager.snapToGrid(pointer);
-        let nearestPoint = gridPoint;
+        // find nearest grid point => push to points array
+        const gridPoint: ExtVector2d = { ...this.gridManager.snapToGrid(pointer), source: 'grid' };
+        points.push(gridPoint);
 
-        const endpoints: (Konva.Vector2d & { source: 'grid' | 'vertex' })[] = this.state.getEndPoints().map(v => { return { ...v, source: 'vertex' } });
-        const points: (Konva.Vector2d & { source: 'grid' | 'vertex' })[] = [
-            { ...gridPoint, source: 'grid' },
-            ...endpoints
-        ];
-        const vertex = this.state.getVertices();
-        if (vertex) {
-            let nearX = Infinity;
-            let nearY = Infinity;
-            let vX = 0;
-            let vY = 0;
-            vertex.forEach(v => {
-                if (Math.abs(v.x - pointer.x) < nearX) {
-                    nearX = Math.abs(v.x - pointer.x);
-                    vX = v.x;
-                }
-                if (Math.abs(v.y - pointer.y) < nearY) {
-                    nearY = Math.abs(v.y - pointer.y);
-                    vY = v.y;
-                }
-            });
+        if (config?.useEndpoints) {
+            // get the shape endpoints => push to points array
+            const endpoints: ExtVector2d[] = this.state.getEndPoints().map(v => { return { ...v, source: 'vertex' } });
+            points.push(...endpoints);
+        }
 
-            points.push({ x: vX, y: pointer.y, source: 'grid' });
-            points.push({ x: pointer.x, y: vY, source: 'grid' });
-            if (vertex.find(v => v.x == vX && v.y == vY) == undefined) {
-                points.push({ x: vX, y: vY, source: 'grid' });
+        // find the nearest point (grid & endpoints)
+        let nearestPoint = this.findNearestPoint(pointer, points);
+
+        // find nearest Horizontal, Vertical and VH points
+        const vhPoints = this.getVHPoints(pointer);
+        vhPoints.forEach(v => {
+            if (v.orientation == 'H') v.y = nearestPoint.y;
+            else if (v.orientation == 'V') v.x = nearestPoint.x;
+        });
+
+        // remove all points that are vertex excluding the endpoints => push to points array
+        points.splice(0, points.length);
+        const tmpPoints = [nearestPoint, ...vhPoints];
+        const vertexExceptEndpoints = this.state.getVerticesExceptEndpoints();
+        for (let i = 0; i < tmpPoints.length; i++) {
+            const vertex = tmpPoints[i];
+            if (!vertexExceptEndpoints.find(v => v.x == vertex.x && v.y == vertex.y)) {
+                points.push(vertex);
             }
         }
 
-        if (useEndpoint) {
-            nearestPoint = points.reduce((nearest: Konva.Vector2d & { source: 'grid' | 'vertex' }, current: Konva.Vector2d & { source: 'grid' | 'vertex' }) => {
-                const distanceToCurrent = KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: current.x, y2: current.y });
-                const distanceToNearest = nearest ? KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: nearest.x, y2: nearest.y }) : Infinity;
+        // find the nearest point (in the points array) to the pointer
+        return this.findNearestPoint(pointer, points);
+    }
 
-                return distanceToCurrent < distanceToNearest ? current : nearest;
-            });
-            if (nearestPoint.x != gridPoint.x && nearestPoint.y != gridPoint.y) pointFrom = 'vertex';
-        }
+    private findNearestPoint(pointer: Konva.Vector2d, points: ExtVector2d[]): ExtVector2d {
+        return points.reduce((nearest: Konva.Vector2d & { source: 'grid' | 'vertex' }, current: Konva.Vector2d & { source: 'grid' | 'vertex' }) => {
+            const distanceToCurrent = KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: current.x, y2: current.y });
+            const distanceToNearest = nearest ? KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: nearest.x, y2: nearest.y }) : Infinity;
 
-        // if (nearHPoint && nearVPoint) {
-        //     let nestedNearestPoint = { x: nearestPoint.x, y: nearestPoint.y };
+            if (distanceToCurrent == distanceToNearest)
+                return current.source == 'vertex' ? current : nearest;
+            return distanceToCurrent < distanceToNearest ? current : nearest;
+        });
+    }
 
-        //     const distanceToH = KonvaUtils.calculateDistance({ x1: nearHPoint.x, y1: pointer.y, x2: nearestPoint.x, y2: nearestPoint.y });
-        //     const distanceToV = KonvaUtils.calculateDistance({ x1: pointer.x, y1: nearVPoint.y, x2: nearestPoint.x, y2: nearestPoint.y });
-        //     const distanceToHV = nearHVPoint ? KonvaUtils.calculateDistance({ x1: nearHVPoint.x, y1: nearHVPoint.y, x2: nearestPoint.x, y2: nearestPoint.y }) : Infinity;
-        //     const distanceToNear = KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: nearestPoint.x, y2: nearestPoint.y });
-
-        //     let minDistance = distanceToH;
-
-        //     if (distanceToV < minDistance) {
-        //         minDistance = distanceToV;
-        //     }
-
-        //     if (distanceToHV < minDistance) {
-        //         minDistance = distanceToHV;
-        //     }
-
-        //     if (distanceToNear < minDistance) {
-        //         minDistance = distanceToNear;
-        //     }
-
-        //     if (minDistance === distanceToH) {
-        //         nestedNearestPoint = { x: nearHPoint.x, y: nearestPoint.y };
-        //     } else if (minDistance === distanceToV) {
-        //         nestedNearestPoint = { x: nearestPoint.x, y: nearVPoint.y };
-        //     } else if (nearHVPoint != undefined && minDistance === distanceToHV) {
-        //         nestedNearestPoint = { x: nearHVPoint.x, y: nearHVPoint.y };
-        //     }
-
-        //     if (nestedNearestPoint.x != nearestPoint.x && nestedNearestPoint.y != nearestPoint.y) pointFrom = 'grid';
-        //     nearestPoint = nestedNearestPoint;
-        // }
-
-        console.log(pointFrom);
-
-        return {
-            v: nearestPoint,
-            obj: pointFrom
-        };
-    }*/
+    private getVHPoints(pointer: Konva.Vector2d): (ExtVector2d & { orientation: 'H' | 'V' | 'HV' })[] {
+        const points: (ExtVector2d & { orientation: 'H' | 'V' | 'HV' })[] = [];
+        const vertex = this.state.getVertices();
+        let nearX = Infinity,
+            nearY = Infinity,
+            vX = 0,
+            vY = 0;
+        vertex.forEach(v => {
+            if (Math.abs(v.x - pointer.x) < nearX) {
+                nearX = Math.abs(v.x - pointer.x);
+                vX = v.x;
+            }
+            if (Math.abs(v.y - pointer.y) < nearY) {
+                nearY = Math.abs(v.y - pointer.y);
+                vY = v.y;
+            }
+        });
+        points.push({ x: vX, y: pointer.y, source: 'grid', orientation: 'H' });
+        points.push({ x: pointer.x, y: vY, source: 'grid', orientation: 'V' });
+        points.push({ x: vX, y: vY, source: 'grid', orientation: 'HV' });
+        return points;
+    }
 
     public useTool(tool: Tool) {
         this._selectedTool = tool;
