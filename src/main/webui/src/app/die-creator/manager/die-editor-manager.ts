@@ -23,7 +23,10 @@ import { MoveToolHandler } from "./tools/move-tool-handler";
 import { Tool } from "./tools/tool";
 import { ToolHandler } from "./tools/tool-handler";
 
-export interface ExtVector2d extends Konva.Vector2d { source: 'grid' | 'vertex' };
+export interface ExtVector2d extends Konva.Vector2d {
+    source: 'grid' | 'vertex';
+}
+export const DefaultExtVector2d: ExtVector2d = { x: 0, y: 0, source: 'grid' };
 export interface SnapConfig {
     useEndpoints: boolean;
 }
@@ -117,44 +120,24 @@ export class DieEditorManager implements IDieEditor {
 
     private handleMouseDown(event: KonvaEventObject<any>) {
         this._selectedToolHandler?.onMouseDown(event);
+        this.guidlinesManager.onMouseDown(event);
     }
 
     private handleMouseMove(event: KonvaEventObject<any>) {
         this._selectedToolHandler?.onMouseMove(event);
+        this.guidlinesManager.onMouseMove(event);
     }
 
     private handleMouseUp(event: KonvaEventObject<any>) {
         this._selectedToolHandler?.onMouseUp(event);
-        this.guidlinesManager.onDragEnd(event);
+        this.guidlinesManager.onMouseUp(event);
     }
-
-    /*public getSnappedToNearObject(points?: Konva.Vector2d[]): { v: Konva.Vector2d, obj: "grid" | "vertex" } {
-        const pointer = this.stage.getRelativePointerPosition()!;
-
-        // find nearest grid point
-        const gridPoint = this.gridManager.snapToGrid(pointer);
-        let nearestPoint = gridPoint;
-
-        if (points) {
-            // find nearest point
-            points.push(gridPoint)
-            nearestPoint = points.reduce((nearest: Konva.Vector2d, current: Konva.Vector2d) => {
-                const distanceToCurrent = KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: current.x, y2: current.y });
-                const distanceToNearest = nearest ? KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: nearest.x, y2: nearest.y }) : Infinity;
-
-                return distanceToCurrent < distanceToNearest ? current : nearest;
-            });
-        }
-
-        return {
-            v: nearestPoint,
-            obj: nearestPoint == gridPoint ? "grid" : "vertex"
-        };
-    }*/
 
     public getSnapToNearest(config?: SnapConfig): ExtVector2d {
         // get the mouse position
-        const pointer = this.stage.getRelativePointerPosition()!;
+        const pointer = this.stage.getRelativePointerPosition();
+        if (!pointer) return DefaultExtVector2d;
+
         const points: ExtVector2d[] = [];
 
         // find nearest grid point => push to points array
@@ -183,7 +166,7 @@ export class DieEditorManager implements IDieEditor {
         const vertexExceptEndpoints = this.state.getVerticesExceptEndpoints();
         for (let i = 0; i < tmpPoints.length; i++) {
             const vertex = tmpPoints[i];
-            if (!vertexExceptEndpoints.find(v => v.x == vertex.x && v.y == vertex.y)) {
+            if (!vertexExceptEndpoints.find(v => KonvaUtils.v2Equals(v, vertex))) {
                 points.push(vertex);
             }
         }
@@ -193,6 +176,7 @@ export class DieEditorManager implements IDieEditor {
     }
 
     private findNearestPoint(pointer: Konva.Vector2d, points: ExtVector2d[]): ExtVector2d {
+        if (points.length == 0) return DefaultExtVector2d;
         return points.reduce((nearest: Konva.Vector2d & { source: 'grid' | 'vertex' }, current: Konva.Vector2d & { source: 'grid' | 'vertex' }) => {
             const distanceToCurrent = KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: current.x, y2: current.y });
             const distanceToNearest = nearest ? KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: nearest.x, y2: nearest.y }) : Infinity;

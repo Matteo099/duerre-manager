@@ -6,6 +6,7 @@ import { MeasurableShape } from "./shape-ext/measurable-shape";
 import { ExtendedShape } from "./shape-ext/extended-shape";
 import { LineExt } from "./shape-ext/line-ext";
 import { BezierLineExt } from "./shape-ext/bezier-line-ext";
+import { ExtVector2d } from "./die-editor-manager";
 
 export class KonvaUtils {
 
@@ -21,6 +22,10 @@ export class KonvaUtils {
             x: gridOffset.x,
             y: gridOffset.y,
         };
+    }
+
+    public static v2Equals(v1: Konva.Vector2d | undefined, v2: Konva.Vector2d | undefined): boolean {
+        return v1 == undefined || v2 == undefined ? false : (v1?.x == v2?.x && v1?.y == v2?.y);
     }
 
     public static lineToCoords(line: Konva.Line): { x1: number, y1: number, x2: number, y2: number } {

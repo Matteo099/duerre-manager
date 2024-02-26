@@ -1,11 +1,9 @@
 import Konva from "konva";
 import { IDieEditor } from "../idie-editor";
 import { KonvaEventObject } from "konva/lib/Node";
-
-export interface LineGuideStop {
-    vertical: number[];
-    horizontal: number[];
-}
+import { ExtVector2d } from "../die-editor-manager";
+import { KonvaUtils } from "../konva-utils";
+import { UnscaleManager } from "./unscale-manager";
 
 export interface Guide {
     lineGuide: number,
@@ -14,175 +12,96 @@ export interface Guide {
 
 export class GuidelinesManager {
 
-    public static readonly GUIDELINE_OFFSET = 5;
-
     private readonly layer: Konva.Layer;
     private readonly editor: IDieEditor;
+    private lastPointerPosition?: ExtVector2d;
+
+    private active = false;
 
     constructor(editor: IDieEditor) {
         this.editor = editor;
-        this.layer = this.editor.layer;
+        this.layer = new Konva.Layer();
+        this.editor.stage.add(this.layer);
     }
 
-    // This method should be replaced by the vertex available from this.editor.state.getVertices()
-    public getLineGuideStops(skipPoint: Konva.Vector2d): LineGuideStop {
-        const stage = this.editor.stage;
+    public onMouseDown(event: KonvaEventObject<any>): void {
+        this.active = true;
+        this.deleteGuides();
+    }
+
+    public onMouseMove(event: KonvaEventObject<any>): void {
+        if (!this.active) return;
+
+        const pointer = this.editor.getSnapToNearest({ useEndpoints: true }); //this.editor.stage.getRelativePointerPosition();
+        if (!pointer || KonvaUtils.v2Equals(this.lastPointerPosition, pointer)) return;
+
+        // clear all previous lines on the screen        
+        this.deleteGuides();
+        this.lastPointerPosition = pointer;
+
+        // find possible snapping vertices - guidelines
+        const guides = this.getGuideLines(pointer);
+        // draw guidelines
+        this.drawGuides(pointer, guides);
+    }
+
+    public onMouseUp(event: KonvaEventObject<any>): void {
+        this.active = false;
+        this.deleteGuides();
+    }
+
+    private getGuideLines(pointer: Konva.Vector2d): Guide[] {
         const vertices = this.editor.state.getVertices();
-
-        // we can snap to stage borders and the center of the stage
-        const vertical: number[][] = [[0, stage.width() / 2, stage.width()]];
-        const horizontal: number[][] = [[0, stage.height() / 2, stage.height()]];
-
-        // and we snap over edges and center of each object on the canvas
-        vertices.forEach((guideItem) => {
-            if (guideItem === skipPoint) {
-                return;
-            }
-
-            // and we can snap to all edges of shapes
-            vertical.push([guideItem.x]);
-            horizontal.push([guideItem.y]);
-        });
-        return {
-            vertical: vertical.flat(),
-            horizontal: horizontal.flat(),
-        };
-    }
-
-    public getGuides(lineGuideStops: LineGuideStop, pointer: Konva.Vector2d): Guide[] {
-        const resultV: { lineGuide: number, diff: number }[] = [];
-        const resultH: { lineGuide: number, diff: number }[] = [];
-
-        lineGuideStops.vertical.forEach((lineGuide) => {
-            const diff = Math.abs(lineGuide - pointer.y);
-            // if the distance between guild line and object snap point is close we can consider this for snapping
-            if (diff < GuidelinesManager.GUIDELINE_OFFSET) {
-                resultV.push({
-                    lineGuide: lineGuide,
-                    diff: diff
-                });
-            }
-        });
-
-        lineGuideStops.horizontal.forEach((lineGuide) => {
-            const diff = Math.abs(lineGuide - pointer.x);
-            if (diff < GuidelinesManager.GUIDELINE_OFFSET) {
-                resultH.push({
-                    lineGuide: lineGuide,
-                    diff: diff,
-                });
-            }
-        });
-
         const guides: Guide[] = [];
 
-        // find closest snap
-        const minV = resultV.sort((a, b) => a.diff - b.diff)[0];
-        const minH = resultH.sort((a, b) => a.diff - b.diff)[0];
-        if (minV) {
-            guides.push({
-                lineGuide: minV.lineGuide!,
-                orientation: 'V',
-            });
-        }
-        if (minH) {
-            guides.push({
-                lineGuide: minH.lineGuide!,
-                orientation: 'H',
-            });
-        }
+        vertices.forEach(v => {
+            if (!KonvaUtils.v2Equals(v, pointer)) {
+                if (v.x == pointer.x && !guides.find(g => g.orientation == 'V'))
+                    guides.push({ lineGuide: v.x, orientation: 'V' });
+                if (v.y == pointer.y && !guides.find(g => g.orientation == 'H'))
+                    guides.push({ lineGuide: v.y, orientation: 'H' });
+            }
+        });
+
         return guides;
     }
 
-    public drawGuides(guides: Guide[]) {
+    private drawGuides(pointer: Konva.Vector2d, guides: Guide[]) {
         guides.forEach((lg) => {
             if (lg.orientation === 'H') {
-                var line = new Konva.Line({
+                const line = new Konva.Line({
                     points: [-6000, 0, 6000, 0],
                     stroke: 'rgb(0, 161, 255)',
-                    strokeWidth: 1,
+                    strokeWidth: 2,
                     name: 'guid-line',
                     dash: [4, 6],
                 });
-                this.layer.add(line);
                 line.absolutePosition({
-                    x: 0,
+                    x: pointer.x,
                     y: lg.lineGuide,
                 });
+                UnscaleManager.instance?.registerShape(line);
+                this.layer.add(line);
             } else if (lg.orientation === 'V') {
-                var line = new Konva.Line({
+                const line = new Konva.Line({
                     points: [0, -6000, 0, 6000],
                     stroke: 'rgb(0, 161, 255)',
-                    strokeWidth: 1,
+                    strokeWidth: 2,
                     name: 'guid-line',
                     dash: [4, 6],
                 });
-                this.layer.add(line);
                 line.absolutePosition({
                     x: lg.lineGuide,
-                    y: 0,
+                    y: pointer.y,
                 });
+                UnscaleManager.instance?.registerShape(line);
+                this.layer.add(line);
             }
         });
-    }
-
-    public onMouseMove(event: KonvaEventObject<any>) {
-        // clear all previous lines on the screen        
-        this.deleteGuides();
-
-        const pointer = this.editor.stage.getRelativePointerPosition();
-        if (!pointer) return;
-
-        // find possible snapping lines
-        const lineGuideStops = this.getLineGuideStops(pointer);
-        // now find where can we snap current object
-        const guides = this.getGuides(lineGuideStops, pointer);
-    }
-
-    public onDragMove(event: KonvaEventObject<any>) {
-        // clear all previous lines on the screen        
-        this.deleteGuides();
-
-        console.log(event);
-
-        const pointer = this.editor.getSnapToNearest();
-
-        // find possible snapping lines
-        const lineGuideStops = this.getLineGuideStops(pointer);
-        // now find where can we snap current object
-        const guides = this.getGuides(lineGuideStops, pointer);
-
-        // do nothing of no snapping
-        if (!guides.length) {
-            return;
-        }
-
-        this.drawGuides(guides);
-
-        const absPos = event.target.absolutePosition();
-        // now force object position
-        guides.forEach((lg) => {
-
-            switch (lg.orientation) {
-                case 'V': {
-                    absPos.x = lg.lineGuide;
-                    break;
-                }
-                case 'H': {
-                    absPos.y = lg.lineGuide;
-                    break;
-                }
-            }
-        });
-        event.target.absolutePosition(absPos);
-    }
-
-    public onDragEnd(event: KonvaEventObject<any>) {
-        // clear all previous lines on the screen
-        this.deleteGuides();
     }
 
     private deleteGuides() {
-        this.layer.find('.guid-line').forEach((l) => l.destroy());
+        UnscaleManager.instance?.unregisterLayer(this.layer);
+        this.layer.destroyChildren();
     }
 }
