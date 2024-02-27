@@ -2,28 +2,28 @@ import Konva from "konva";
 import { IDieEditor } from "../idie-editor";
 import { GRID_ELEMENT, GRID_LINE } from "../constants";
 import { UnscaleManager } from "./unscale-manager";
+import { ZoomManager } from "./zoom-manager";
 
 export class GridManager {
 
     public static readonly STEP_SIZE = 10;
 
-    public static readonly SCALES = [
-        { scale: 5, step: 10, strokeWidth: 1 },
-        { scale: 4, step: 10, strokeWidth: 5 },
-        { scale: 3, step: 20, strokeWidth: 5 },
-        { scale: 2.5, step: 20, strokeWidth: 5 },
-        { scale: 2, step: 30, strokeWidth: 5 },
-        { scale: 1.5, step: 30, strokeWidth: 5 },
-        { scale: 1, step: 40, strokeWidth: 5 },
-        { scale: 0.9, step: 50, strokeWidth: 5 },
-        { scale: 0.8, step: 50, strokeWidth: 5 },
-        { scale: 0.7, step: 60, strokeWidth: 5 },
-        { scale: 0.6, step: 60, strokeWidth: 5 },
-        { scale: 0.5, step: 70, strokeWidth: 5 },
-        { scale: 0.4, step: 80, strokeWidth: 5 },
-        { scale: 0.3, step: 100, strokeWidth: 10 }
-    ];
-
+    // public static readonly SCALES = [
+    //     { scale: 5, step: 10, strokeWidth: 1 },
+    //     { scale: 4, step: 10, strokeWidth: 5 },
+    //     { scale: 3, step: 20, strokeWidth: 5 },
+    //     { scale: 2.5, step: 20, strokeWidth: 5 },
+    //     { scale: 2, step: 30, strokeWidth: 5 },
+    //     { scale: 1.5, step: 30, strokeWidth: 5 },
+    //     { scale: 1, step: 40, strokeWidth: 5 },
+    //     { scale: 0.9, step: 50, strokeWidth: 5 },
+    //     { scale: 0.8, step: 50, strokeWidth: 5 },
+    //     { scale: 0.7, step: 60, strokeWidth: 5 },
+    //     { scale: 0.6, step: 60, strokeWidth: 5 },
+    //     { scale: 0.5, step: 70, strokeWidth: 5 },
+    //     { scale: 0.4, step: 80, strokeWidth: 5 },
+    //     { scale: 0.3, step: 100, strokeWidth: 10 }
+    // ];
     private readonly editor: IDieEditor;
     private readonly layer: Konva.Layer;
 
@@ -41,7 +41,7 @@ export class GridManager {
 
 
         const scale = this.editor.stage.scale()?.x || 1;
-        const stepSize = GridManager.SCALES.find(o => o.scale == scale)?.step || 10;
+        const stepSize = ZoomManager.SCALES.find(o => o.scale == scale)?.step || 10;
 
         // Calculate the offset based on the grid step size
         const gridOffset = {
@@ -69,7 +69,7 @@ export class GridManager {
         const height = stage.height();
 
         const scale = stage.scale()?.x || 1;
-        const stepSize = GridManager.SCALES.find(o => o.scale == scale)?.step || 10;
+        const stepSize = ZoomManager.SCALES.find(o => o.scale == scale)?.step || 10;
 
         // stageRect represet the RECT of the stage (the initial view). It is constant (0, 0, width, height)
         const stageRect = {

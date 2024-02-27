@@ -3,13 +3,19 @@ import { KonvaEventObject } from "konva/lib/Node";
 import { IDieEditor } from "../idie-editor";
 
 export class ZoomManager {
-    public static readonly SCALES = [5, 4, 3, 2.5, 2, 1.5, 1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3]
+    public static readonly SCALES = [
+        { scale: 10, step: 10 },    // 0.1 mm
+        { scale: 1, step: 100 },    //   1 mm
+        { scale: 0.1, step: 1000 }  //  10 mm
+    ];
+
+    //public static readonly SCALES = [5, 4, 3, 2.5, 2, 1.5, 1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3]
 
     private editor: IDieEditor;
-    private currentScaleIndex = 6;
+    private currentScaleIndex = 1;
 
     public get currentScale() : number {
-        return ZoomManager.SCALES[this.currentScaleIndex];
+        return ZoomManager.SCALES[this.currentScaleIndex].scale;
     }
     
 
@@ -45,7 +51,7 @@ export class ZoomManager {
             this.currentScaleIndex = this.currentScaleIndex < ZoomManager.SCALES.length - 1 ? this.currentScaleIndex + 1 : this.currentScaleIndex;
         }
 
-        const newScale = ZoomManager.SCALES[this.currentScaleIndex];
+        const newScale = ZoomManager.SCALES[this.currentScaleIndex].scale;
 
         stage.scale({ x: newScale, y: newScale });
 

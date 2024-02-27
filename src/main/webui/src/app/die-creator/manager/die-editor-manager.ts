@@ -53,8 +53,6 @@ export class DieEditorManager implements IDieEditor {
 
     public get stage(): Konva.Stage { return this._stage; }
     public get layer(): Konva.Layer { return this._layer; }
-    public get gridSize(): number { return 10; }
-    public get zoomStep(): number { return 1; }
     public get selectedTool(): Tool | undefined { return this._selectedTool; }
     public get state(): DieState { return this._state; }
     public get helper(): KonvaHelper { return this._konvaHelper; }

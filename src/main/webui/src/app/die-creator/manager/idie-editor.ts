@@ -8,8 +8,6 @@ import { GuidelinesManager } from './managers/guidelines-manager';
 export interface IDieEditor {
     get stage(): Konva.Stage;
     get layer(): Konva.Layer;
-    get gridSize(): number;
-    get zoomStep(): number;
     get selectedTool(): Tool | undefined;
     get state(): DieState;
     get helper(): KonvaHelper;
