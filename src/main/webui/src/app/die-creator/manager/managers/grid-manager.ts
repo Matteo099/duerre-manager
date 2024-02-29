@@ -1,7 +1,7 @@
 import Konva from "konva";
 import { IDieEditor } from "../idie-editor";
-import { GRID_ELEMENT, GRID_LINE } from "../constants";
-import { UnscaleManager } from "./unscale-manager";
+import { GRID_ELEMENT, GRID_LINE, UPDATE_UNSCALE } from "../constants";
+import { UnscaleFunction, UnscaleManager } from "./unscale-manager";
 import { ZoomManager } from "./zoom-manager";
 
 export class GridManager {
@@ -69,7 +69,9 @@ export class GridManager {
         const height = stage.height();
 
         const scale = stage.scale()?.x || 1;
-        const stepSize = ZoomManager.SCALES.find(o => o.scale == scale)?.step || 10;
+        const scaleObj = ZoomManager.SCALES.find(o => o.scale == scale);
+        const stepSize = scaleObj?.step ?? 100;
+        const lineMode = scaleObj?.lineMode ?? 1;
 
         // stageRect represet the RECT of the stage (the initial view). It is constant (0, 0, width, height)
         const stageRect = {
@@ -123,8 +125,7 @@ export class GridManager {
             xSteps = Math.round(xSize / stepSize),
             ySteps = Math.round(ySize / stepSize);
 
-
-
+        let j = 0;
         // draw vertical lines
         for (let i = 0; i <= xSteps; i++) {
             const line = new Konva.Line({
@@ -132,13 +133,14 @@ export class GridManager {
                 y: gridFullRect.y1,
                 points: [0, 0, 0, ySize],
                 stroke: 'rgba(0, 0, 0, 0.2)',
-                strokeWidth: 1,
+                strokeWidth: (++j) % lineMode == 0 ? 2 : 0.5,
             });
             line.setAttr(GRID_LINE, true);
             line.setAttr(GRID_ELEMENT, true);
             UnscaleManager.instance?.registerShape(line);
             this.layer.add(line);
         }
+        j = 0;
         //draw Horizontal lines
         for (let i = 0; i <= ySteps; i++) {
             const line = new Konva.Line({
@@ -146,13 +148,15 @@ export class GridManager {
                 y: gridFullRect.y1 + i * stepSize,
                 points: [0, 0, xSize, 0],
                 stroke: 'rgba(0, 0, 0, 0.2)',
-                strokeWidth: 1,
+                strokeWidth: (++j) % lineMode == 0 ? 2 : 0.5,
             });
             line.setAttr(GRID_LINE, true);
             line.setAttr(GRID_ELEMENT, true);
             UnscaleManager.instance?.registerShape(line);
             this.layer.add(line);
         }
+
+        console.log(viewRect);
 
         // Draw a border around the viewport
         const rect = new Konva.Rect({
@@ -164,6 +168,13 @@ export class GridManager {
             stroke: 'blue'
         });
         rect.setAttr(GRID_ELEMENT, true);
+        rect.setAttr(UPDATE_UNSCALE, (scale: number) => {
+            const sw = rect.strokeWidth();
+            rect.x(viewRect.x1 + sw / 2);
+            rect.y(viewRect.y1 + sw / 2);
+            rect.width(viewRect.x2 - viewRect.x1 - sw);
+            rect.height(viewRect.y2 - viewRect.y1 - sw);
+        });
         UnscaleManager.instance?.registerShape(rect);
         this.layer.add(rect);
 
