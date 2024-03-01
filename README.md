@@ -43,3 +43,5 @@
 - mentre tracci la line scrivere la misura (solo testo, senza info freccia etc)
 - zoom: in centimetri quadrati enormi, man mano che zoommi quadrati più piccoli
 - label sui lati di uno stapo (possibilità di aggiungere delle annotazioni sui lati)
+
+- Angular dynamic baseUrl: https://www.technouz.com/5125/changing-angular-environment-variables-at-runtime/
