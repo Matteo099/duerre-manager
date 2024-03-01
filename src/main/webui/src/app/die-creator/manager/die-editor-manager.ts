@@ -45,7 +45,7 @@ export class DieEditorManager implements IDieEditor {
     private drawHandler!: DrawToolHandler;
     private eraserHandler!: EraserToolHandler;
     private moveHandler!: MoveToolHandler;
-    private zoomManager!: ZoomManager;
+    private _zoomManager!: ZoomManager;
     private gridManager!: GridManager;
     private unscaleManager!: UnscaleManager;
     private _guidlinesManager!: GuidelinesManager;
@@ -57,6 +57,7 @@ export class DieEditorManager implements IDieEditor {
     public get state(): DieState { return this._state; }
     public get helper(): KonvaHelper { return this._konvaHelper; }
     public get guidelinesManager(): GuidelinesManager { return this._guidlinesManager; }
+    public get zoomManager(): ZoomManager { return this._zoomManager; }
 
 
     constructor(stageContainer: ElementRef) {
@@ -68,6 +69,7 @@ export class DieEditorManager implements IDieEditor {
 
         this._state = new DieState();
         this.stage.add(this.layer);
+        this.zoom({});
     }
 
     private createCanvas(stageContainer: ElementRef) {
@@ -96,8 +98,8 @@ export class DieEditorManager implements IDieEditor {
 
     private createManagers() {
         this._guidlinesManager = new GuidelinesManager(this);
-        this.zoomManager = new ZoomManager(this);
-        this.unscaleManager = new UnscaleManager(this, this.zoomManager);
+        this._zoomManager = new ZoomManager(this);
+        this.unscaleManager = new UnscaleManager(this, this._zoomManager);
         this.gridManager = new GridManager(this);
         this.gridManager.draw();
     }
@@ -170,7 +172,7 @@ export class DieEditorManager implements IDieEditor {
         }
 
         // find the nearest point (in the points array) to the pointer
-        this.lastPointerPosition= this.findNearestPoint(pointer, points);
+        this.lastPointerPosition = this.findNearestPoint(pointer, points);
         return this.lastPointerPosition;
     }
 
@@ -254,7 +256,7 @@ export class DieEditorManager implements IDieEditor {
     }
 
     private zoom(opts: { direction?: number, event?: KonvaEventObject<any> }) {
-        this.zoomManager.zoom(opts);
+        this._zoomManager.zoom(opts);
         this.gridManager.draw();
         this.unscaleManager.update();
 

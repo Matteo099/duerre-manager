@@ -101,4 +101,8 @@ export class DieCreatorComponent implements AfterViewInit, OnDestroy {
     const dieDataDao = this.editor?.getData();
     this.dialogRef.close(dieDataDao);
   }
+
+  getCurrentZoom(): number {
+    return this.editor?.zoomManager.currentScale || 1;
+  }
 }
