@@ -89,3 +89,6 @@ nb-configuration.xml
 # System files
 /src/main/webui/.DS_Store
 /src/main/webui/Thumbs.db
+
+# Deploy Tool Folder
+/deploy/bundle/*

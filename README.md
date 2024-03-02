@@ -45,3 +45,18 @@
 - label sui lati di uno stapo (possibilità di aggiungere delle annotazioni sui lati)
 
 - Angular dynamic baseUrl: https://www.technouz.com/5125/changing-angular-environment-variables-at-runtime/
+
+
+## PRIORITA'
+- nome stampo univoco
+- (NON opz, 1 selezione) monocolore, bicolore, tricolore
+- (NON opz, multi selezione) TPU / PVC / TR / POLIETILENE
+- (NON opz) altezza, larghezza totale, larghezza solo scarpetta, larghezza cresta
+- ricerca per h x w + ricerca combinata con disegno
+- possibilità di tracciare linee (rette) interne allo stampo (per delimitare le fasi dello stampo / i colori)
+- vista dettagliata dello stampo
+
+## FEATURES
+- eliminare bezier line & line => creare un unico strumento linea che internamente crea una curva di bezier retta
+- aggiungere bevel sui vertici
+
