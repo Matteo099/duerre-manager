@@ -48,11 +48,12 @@
 
 
 ## PRIORITA'
-- nome stampo univoco
-- (NON opz, 1 selezione) monocolore, bicolore, tricolore
-- (NON opz, multi selezione) TPU / PVC / TR / POLIETILENE
-- (NON opz) altezza, larghezza totale, larghezza solo scarpetta, larghezza cresta
+- [x] nome stampo univoco
+- [x] (NON opz, 1 selezione) monocolore, bicolore, tricolore
+- [x] (NON opz, multi selezione) TPU / PVC / TR / POLIETILENE
+- [x] (NON opz) altezza, larghezza totale, larghezza solo scarpetta, larghezza cresta
 - ricerca per h x w + ricerca combinata con disegno
+- implementare la ricerca
 - possibilità di tracciare linee (rette) interne allo stampo (per delimitare le fasi dello stampo / i colori)
 - vista dettagliata dello stampo
 

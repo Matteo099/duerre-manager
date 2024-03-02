@@ -4,15 +4,15 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 
 @RegisterForReflection
 public class SimilarDieSearchResult implements Comparable<SimilarDieSearchResult> {
-    private Long dieId;
+    private String dieId;
     private double matchScore;
 
-    public SimilarDieSearchResult(Long dieId, double similarityScore) {
+    public SimilarDieSearchResult(String dieId, double similarityScore) {
         this.dieId = dieId;
         this.matchScore = similarityScore;
     }
 
-    public Long getDieId() {
+    public String getDieId() {
         return dieId;
     }
 

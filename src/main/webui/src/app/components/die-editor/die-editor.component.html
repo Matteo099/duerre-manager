@@ -6,15 +6,10 @@
       </mat-card-header>
       <mat-card-content>
 
-        <div class="row mt-2 mb-3 align-items-center">
-          <div class="col-auto">
+        <div class="row mt-2 mb-3 align-items-center justify-content-center">
+          <div class="col-auto mb-3">
             <div class="image">
               <mat-card style="max-width: 200px;">
-                <!-- <mat-card-header>
-                  <mat-card-title>Immagine</mat-card-title>
-                </mat-card-header>
-                <img mat-card-image src="https://material.angular.io/assets/img/examples/shiba2.jpg"
-                  alt="Photo of a Shiba Inu"> -->
                 <mat-card-content>
                   <div class="position-relative">
                     <div class="position-absolute top-50 start-50 translate-middle">
@@ -36,6 +31,7 @@
               </mat-card>
             </div>
           </div>
+
           <div class="col">
             <mat-form-field class="full-width">
               <input matInput placeholder="Nome Stampo" formControlName="name">
@@ -61,119 +57,108 @@
                   (matChipInputTokenEnd)="add($event)" />
               </mat-chip-grid>
             </mat-form-field>
+
+            <mat-form-field class="full-width">
+              <mat-label>Cliente</mat-label>
+              <input type="text" placeholder="Seleziona un cliente" aria-label="Customer" matInput
+                formControlName="customer" [matAutocomplete]="auto">
+              <mat-autocomplete #auto="matAutocomplete">
+                @for (customer of filteredCustomers | async; track customer) {
+                <mat-option [value]="customer">{{customer}}</mat-option>
+                }
+              </mat-autocomplete>
+              @if (addressForm.controls['customer'].hasError('required')) {
+              <mat-error>Il nome del cliente è <strong>obbligatorio</strong></mat-error>
+              }
+              @else if (addressForm.controls['customer'].hasError('minlength')) {
+              <mat-error>Il nome del cliente deve essere lungo almeno 2 caratteri</mat-error>
+              }
+            </mat-form-field>
           </div>
         </div>
 
-        <div class="row">
+        <div class="row mt-4">
           <mat-form-field class="col">
-            <mat-label>Cliente</mat-label>
-            <input type="text" placeholder="Seleziona un cliente" aria-label="Customer" matInput
-              formControlName="customer" [matAutocomplete]="auto">
-            <mat-autocomplete #auto="matAutocomplete">
-              @for (customer of filteredCustomers | async; track customer) {
-              <mat-option [value]="customer">{{customer}}</mat-option>
+            <mat-label>Tipo Stampo</mat-label>
+            <mat-select formControlName="dieType">
+              @for (dt of DieTypeHelper.getValues(); track dt) {
+                <mat-option [value]="dt">{{dt}}</mat-option>
               }
-            </mat-autocomplete>
-            @if (addressForm.controls['customer'].hasError('required')) {
-            <mat-error>Il nome del cliente è <strong>obbligatorio</strong></mat-error>
+            </mat-select>
+            @if (addressForm.controls['dieType'].hasError('required')) {
+            <mat-error>Il tipo dello stampo è <strong>obbligatorio</strong></mat-error>
             }
-            @else if (addressForm.controls['customer'].hasError('minlength')) {
-            <mat-error>Il nome del cliente deve essere lungo almeno 2 caratteri</mat-error>
+          </mat-form-field>
+
+          <mat-form-field class="col" multiple>
+            <mat-label>Materiale</mat-label>
+            <mat-select formControlName="material">
+              @for (mat of MaterialTypeHelper.getValues(); track mat) {
+                <mat-option [value]="mat">{{mat}}</mat-option>
+              }
+            </mat-select>
+            @if (addressForm.controls['material'].hasError('required')) {
+            <mat-error>Il materiale è <strong>obbligatorio</strong></mat-error>
             }
           </mat-form-field>
         </div>
 
-        <div class="row">
-          <div class="col">
-            <mat-form-field class="full-width">
-              <input matInput placeholder="Altri dati..." formControlName="data">
-            </mat-form-field>
-          </div>
-        </div>
-        <!-- <div class="row">
-          <div class="col">
-            <mat-form-field class="full-width">
-              <input matInput placeholder="First name" formControlName="firstName">
-              @if (addressForm.controls['firstName'].hasError('required')) {
-              <mat-error>First name is <strong>required</strong></mat-error>
-              }
-            </mat-form-field>
-          </div>
-          <div class="col">
-            <mat-form-field class="full-width">
-              <input matInput placeholder="Last name" formControlName="lastName">
-              @if (addressForm.controls['lastName'].hasError('required')) {
-              <mat-error>Last name is <strong>required</strong></mat-error>
-              }
-            </mat-form-field>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <mat-form-field class="full-width">
-              <textarea matInput placeholder="Address" formControlName="address"></textarea>
-              @if (addressForm.controls['address'].hasError('required')) {
-              <mat-error>Address is <strong>required</strong></mat-error>
-              }
-            </mat-form-field>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            @if (hasUnitNumber) {
-            <mat-form-field class="full-width">
-              <textarea matInput placeholder="Address 2" formControlName="address2"></textarea>
-            </mat-form-field>
-            } @else {
-            <button mat-button type="button" (click)="hasUnitNumber = !hasUnitNumber">
-              + Add C/O, Apt, Suite, Unit
-            </button>
-            }
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <mat-form-field class="full-width">
-              <input matInput placeholder="City" formControlName="city">
-              @if (addressForm.controls['city'].hasError('required')) {
-              <mat-error>City is <strong>required</strong></mat-error>
-              }
-            </mat-form-field>
-          </div>
-          <div class="col">
-            <mat-form-field class="full-width">
-              <mat-select placeholder="State" formControlName="state">
-                @for (state of states; track state) {
-                <mat-option [value]="state.abbreviation">{{ state.name }}</mat-option>
+        <mat-card class="mt-2">
+          <mat-card-header>
+            <mat-card-title style="font-size: 1rem;">Dimensioni Generali</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="row mt-2">
+              <mat-form-field class="col">
+                <mat-label>Altezza</mat-label>
+                <input type="number" matInput formControlName="totalHeight">
+                @if (addressForm.controls['totalHeight'].hasError('required')) {
+                <mat-error>L'altezza è <strong>obbligatoria</strong></mat-error>
                 }
-              </mat-select>
-              @if (addressForm.controls['state'].hasError('required')) {
-              <mat-error>State is <strong>required</strong></mat-error>
-              }
-            </mat-form-field>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <mat-form-field class="full-width">
-              <input matInput #postalCode maxlength="5" placeholder="Postal Code" type="number"
-                formControlName="postalCode">
-              <mat-hint align="end">{{postalCode.value.length}} / 5</mat-hint>
-            </mat-form-field>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <mat-radio-group formControlName="shipping">
-              <mat-radio-button value="free">Free Shipping</mat-radio-button>
-              <mat-radio-button value="priority">Priority Shipping</mat-radio-button>
-              <mat-radio-button value="nextday">Next Day Shipping</mat-radio-button>
-            </mat-radio-group>
-          </div>
-        </div> -->
+                @else if (addressForm.controls['totalHeight'].hasError('min')) {
+                <mat-error>L'altezza non può essere <strong>negativa</strong></mat-error>
+                }
+              </mat-form-field>
+              <mat-form-field class="col">
+                <mat-label>Larghezza</mat-label>
+                <input type="number" matInput formControlName="totalWidth">
+                @if (addressForm.controls['totalWidth'].hasError('required')) {
+                <mat-error>La larghezza è <strong>obbligatoria</strong></mat-error>
+                }
+                @else if (addressForm.controls['totalWidth'].hasError('min')) {
+                <mat-error>La larghezza non può essere <strong>negativa</strong></mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <div class="row">
+              <mat-form-field class="col">
+                <mat-label>Larghezza Scarpetta</mat-label>
+                <input type="number" matInput formControlName="shoeWidth">
+                @if (addressForm.controls['shoeWidth'].hasError('required')) {
+                <mat-error>La larghezza della scarpetta è <strong>obbligatoria</strong></mat-error>
+                }
+                @else if (addressForm.controls['shoeWidth'].hasError('min')) {
+                <mat-error>La larghezza della scarpetta non può essere <strong>negativa</strong></mat-error>
+                }
+              </mat-form-field>
+              <mat-form-field class="col">
+                <mat-label>Larghezza Cresta</mat-label>
+                <input type="number" matInput formControlName="crestWidth">
+                @if (addressForm.controls['crestWidth'].hasError('required')) {
+                <mat-error>La larghezza della cresta è <strong>obbligatoria</strong></mat-error>
+                }
+                @else if (addressForm.controls['crestWidth'].hasError('min')) {
+                <mat-error>La larghezza della cresta non può essere <strong>negativa</strong></mat-error>
+                }
+              </mat-form-field>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
       </mat-card-content>
       <mat-card-actions style="flex-direction: row-reverse;">
-        <button mat-raised-button color="primary" type="submit">Crea</button>
+        <button class="mt-2" mat-raised-button color="primary" type="submit">Crea</button>
       </mat-card-actions>
     </mat-card>
   </form>

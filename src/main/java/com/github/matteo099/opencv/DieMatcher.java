@@ -42,10 +42,10 @@ public class DieMatcher {
         logger.info("Found " + savedDies.size() + " dies");
 
         for (Die die : savedDies) {
-            logger.debug("Comparing die " + die.id);
+            logger.debug("Comparing die " + die.getName());
             var savedDieContourn = extractContourn(die.getDieData());
             if (savedDieContourn.isEmpty()) {
-                logger.warn("Die malformed, skipping; id=" + die.id);
+                logger.warn("Die malformed, skipping; id=" + die.getName());
                 continue;
             }
 
@@ -56,7 +56,7 @@ public class DieMatcher {
             // You can adjust the threshold based on your requirements
             if (matchScore < threshold) {
                 // Shapes are considered similar (you can adjust the threshold)
-                similarDies.add(new SimilarDieSearchResult(die.id, matchScore));
+                similarDies.add(new SimilarDieSearchResult(die.getName(), matchScore));
             }
         }
 

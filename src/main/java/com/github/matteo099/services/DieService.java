@@ -3,6 +3,7 @@ package com.github.matteo099.services;
 import java.util.List;
 import java.util.Optional;
 
+import com.github.matteo099.exceptions.DieAlreadyExists;
 import com.github.matteo099.exceptions.MalformedDieException;
 import com.github.matteo099.model.dao.DieSimilarSearchDao;
 import com.github.matteo099.model.entities.Customer;
@@ -25,20 +26,24 @@ public class DieService {
     DieMatcher dieMatcher;
 
     @Transactional
-    public Long createDie(IDie iDie) {
+    public String createDie(IDie iDie) throws DieAlreadyExists {
+        Die.findByIdOptional(iDie.getName()).orElseThrow(() -> new DieAlreadyExists(
+                String.format("Lo stampo '%s' esiste già! Utilizzare un nome diverso.", iDie.getName())));
         Customer customer = customerService.findByIdOrCreate(iDie.getCustomer());
         var die = new Die(iDie, customer);
         die.persist();
-        return die.id;
+        return die.getName();
     }
 
     public List<Die> listDies() {
-        return Die.listAll();    
+        return Die.listAll();
     }
 
-    public List<SimilarDieSearchResult> searchSimilarDies(DieSimilarSearchDao dieSimilarSearchDao, Float threshold) throws MalformedDieException {
-        List<SimilarDieSearchResult> results = dieMatcher.searchSimilarDies(dieSimilarSearchDao.getDieData(), threshold);
-        // save the research...
+    public List<SimilarDieSearchResult> searchSimilarDies(DieSimilarSearchDao dieSimilarSearchDao, Float threshold)
+            throws MalformedDieException {
+        List<SimilarDieSearchResult> results = dieMatcher.searchSimilarDies(dieSimilarSearchDao.getDieData(),
+                threshold);
+        // TODO: save the research...
         return results;
     }
 

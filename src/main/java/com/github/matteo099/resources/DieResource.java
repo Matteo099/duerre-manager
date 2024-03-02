@@ -50,7 +50,7 @@ public class DieResource {
     public Response createDie(DieDao die) {
         try {
             logger.info("creating die");
-            Long id = dieService.createDie(die);
+            String id = dieService.createDie(die);
             return Response.ok().entity(IdWrapper.of(id)).build();
         } catch (Exception e) {
             e.printStackTrace();

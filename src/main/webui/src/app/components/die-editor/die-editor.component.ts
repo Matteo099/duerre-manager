@@ -24,6 +24,8 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { MatChipEditedEvent, MatChipInputEvent, MatChipsModule } from '@angular/material/chips';
 import { NotifyService } from '../../services/notify.service';
+import { DieType, DieTypeHelper } from '../../models/entities/die.type';
+import { MaterialType, MaterialTypeHelper } from '../../models/entities/material-type';
 
 @Component({
   selector: 'app-die-editor',
@@ -58,7 +60,12 @@ export class DieEditorComponent implements OnInit {
     dieData: [null as (DieDataDao | null), [Validators.required, validDieValidator()]],
     alias: [],
     customer: [null as (string | null), [Validators.required, Validators.minLength(2)]],
-    data: null as (string | null),
+    dieType: [null as (string | DieType | null), Validators.required],
+    material: [null as (string | MaterialType | null), Validators.required],
+    totalHeight: [null as (number | null), [Validators.required, Validators.min(0)]],
+    totalWidth: [null as (number | null), [Validators.required, Validators.min(0)]],
+    shoeWidth: [null as (number | null), [Validators.required, Validators.min(0)]],
+    crestWidth: [null as (number | null), [Validators.required, Validators.min(0)]],
   });
   imageURL: string = "/assets/images/milling.png";
 
@@ -66,6 +73,10 @@ export class DieEditorComponent implements OnInit {
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   aliases: string[] = [];
 
+  DieType = DieType;
+  MaterialType = MaterialType;
+  MaterialTypeHelper = MaterialTypeHelper;
+  DieTypeHelper = DieTypeHelper;
 
   customers: Customer[] = [];
   filteredCustomers?: Observable<string[]>;
@@ -103,7 +114,7 @@ export class DieEditorComponent implements OnInit {
     dialogRef.afterClosed().subscribe((result: DieDataDao | null) => {
       console.log('The dialog was closed', result);
       this.addressForm.controls['dieData'].setValue(result);
-      if(result?.state) this.imageURL = KonvaUtils.exportImage(result.state);
+      if (result?.state) this.imageURL = KonvaUtils.exportImage(result.state);
     });
   }
 
@@ -115,9 +126,14 @@ export class DieEditorComponent implements OnInit {
     const die: DieDao = {
       name: this.addressForm.controls['name'].value!,
       dieData: this.addressForm.controls['dieData'].value!,
-      data: this.addressForm.controls['data'].value,
       aliases: this.aliases,
-      customer: this.addressForm.controls['customer'].value!
+      customer: this.addressForm.controls['customer'].value!,
+      dieType: this.addressForm.controls['dieType'].value! as DieType,
+      material: this.addressForm.controls['material'].value! as MaterialType,
+      totalHeight: this.addressForm.controls['totalHeight'].value!,
+      totalWidth: this.addressForm.controls['totalWidth'].value!,
+      shoeWidth: this.addressForm.controls['shoeWidth'].value!,
+      crestWidth: this.addressForm.controls['crestWidth'].value!,
     };
 
     this.dieService.create(die).subscribe({
