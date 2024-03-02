@@ -100,10 +100,10 @@ export class DieEditorComponent implements OnInit {
       maxWidth: "100vw"
     });
 
-    dialogRef.afterClosed().subscribe((result: DieDataDao) => {
+    dialogRef.afterClosed().subscribe((result: DieDataDao | null) => {
       console.log('The dialog was closed', result);
       this.addressForm.controls['dieData'].setValue(result);
-      this.imageURL = KonvaUtils.exportImage(result.state);
+      if(result?.state) this.imageURL = KonvaUtils.exportImage(result.state);
     });
   }
 

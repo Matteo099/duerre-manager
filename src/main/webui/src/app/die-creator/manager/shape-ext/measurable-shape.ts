@@ -10,8 +10,12 @@ import { UnscaleManager } from "../managers/unscale-manager";
 
 export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurableShape {
 
-    public static readonly UNIT_MM_MINUS_1 = "mm⁻¹";
-    public static readonly UNIT_MM = "mm";
+    public static readonly UNITS = [
+        { exp: 100, name: "mm" },
+        { exp: 10, name: "mm⁻¹" },
+    ];
+    
+    private currentUnit = MeasurableShape.UNITS[0];
 
     private readonly editor: IDieEditor;
     public readonly group: Konva.Group;
@@ -65,10 +69,10 @@ export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurabl
         const width = this.text.text.width() || 0;
         const height = this.text.text.height() || 0;
         const middlePoint = this.extShape.calculateMiddlePoint();
-        const length = (this.extShape.calculateLength() / 10).toFixed(1);
+        const length = (this.extShape.calculateLength() / (this.currentUnit.exp)).toFixed(1);
         this.text.text.x(middlePoint.x - width / 2);
         this.text.text.y(middlePoint.y - height / 2);
-        this.text.text.text(length + " " + MeasurableShape.UNIT_MM);
+        this.text.text.text(length + " " + this.currentUnit.name);
     }
 
     public getLength(): number {
