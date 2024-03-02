@@ -27,8 +27,9 @@ public class DieService {
 
     @Transactional
     public String createDie(IDie iDie) throws DieAlreadyExists {
-        Die.findByIdOptional(iDie.getName()).orElseThrow(() -> new DieAlreadyExists(
-                String.format("Lo stampo '%s' esiste già! Utilizzare un nome diverso.", iDie.getName())));
+        if(existsDie(iDie.getName())) 
+            throw new DieAlreadyExists(String.format("Lo stampo '%s' esiste già! Utilizzare un nome diverso.", iDie.getName()));
+
         Customer customer = customerService.findByIdOrCreate(iDie.getCustomer());
         var die = new Die(iDie, customer);
         die.persist();
@@ -37,6 +38,10 @@ public class DieService {
 
     public List<Die> listDies() {
         return Die.listAll();
+    }
+
+    public boolean existsDie(String name) {
+        return Die.findByIdOptional(name).isPresent();
     }
 
     public List<SimilarDieSearchResult> searchSimilarDies(DieSimilarSearchDao dieSimilarSearchDao, Float threshold)

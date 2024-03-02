@@ -38,7 +38,34 @@
   </div>
 
   @if (gridView) {
-  <mat-grid-list cols="2">
+  <div class="container">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4">
+      @for (die of dies | async; track die.id) {
+      <div class="col">
+        <mat-card class="m-2">
+          <mat-card-header>
+            <mat-card-title>
+              {{ die.name }}
+              <button mat-icon-button class="more-button" [matMenuTriggerFor]="menu" aria-label="Toggle menu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu" xPosition="before">
+                <button mat-menu-item>Expand</button>
+                <button mat-menu-item>Remove</button>
+              </mat-menu>
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <a [routerLink]="'/die/' + die.id"><img style="width: 100%;" [src]="die.img"></a>
+          </mat-card-content>
+        </mat-card>
+      </div>
+      }
+    </div>
+  </div>
+  }
+
+  <!-- <mat-grid-list cols="2">
     @for (die of dies | async; track die.id) {
     <mat-grid-tile colspan="1" rowspan="1">
       <mat-card>
@@ -61,7 +88,7 @@
     </mat-grid-tile>
     }
   </mat-grid-list>
-  }
+  } -->
 
   <div class="fab">
     <button class="m-2" mat-fab color="primary" [routerLink]="['/die-similar-search']">
