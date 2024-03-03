@@ -4,34 +4,23 @@ import java.util.List;
 
 import com.github.matteo099.model.interfaces.IDieDataShape;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import io.quarkus.runtime.annotations.RegisterForReflection;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Entity
 @RegisterForReflection
-public class DieDataShape extends PanacheEntity implements IDieDataShape {
+@Setter
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class DieDataShape implements IDieDataShape {
 
     private String type;
-    @ElementCollection(fetch = FetchType.EAGER)
     private List<Double> points;
-
-    protected DieDataShape() { }
 
     public DieDataShape(IDieDataShape dieDataShape) {
         this.type = dieDataShape.getType();
         this.points = dieDataShape.getPoints();
     }
-
-    @Override
-    public String getType() {
-        return type;
-    }
-
-    @Override
-    public List<Double> getPoints() {
-        return points;
-    }    
 }

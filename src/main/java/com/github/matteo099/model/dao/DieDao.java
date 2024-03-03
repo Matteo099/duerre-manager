@@ -7,7 +7,10 @@ import com.github.matteo099.model.entities.MaterialType;
 import com.github.matteo099.model.interfaces.ICustomer;
 import com.github.matteo099.model.interfaces.IDie;
 
-public class DieDao implements IDie {
+import lombok.Getter;
+
+@Getter
+public class DieDao implements IDie<DieDataDao, ICustomer> {
     public String name;
     public DieDataDao dieData;
     public String customer;
@@ -20,16 +23,6 @@ public class DieDao implements IDie {
     public Double crestWidth;
 
     @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public DieDataDao getDieData() {
-        return dieData;
-    }
-
-    @Override
     public ICustomer getCustomer() {
         return new ICustomer() {
             @Override
@@ -37,40 +30,5 @@ public class DieDao implements IDie {
                 return customer;
             }
         };
-    }
-
-    @Override
-    public List<String> getAliases() {
-        return aliases;
-    }
-
-    @Override
-    public DieType getDieType() {
-        return dieType;
-    }
-
-    @Override
-    public MaterialType getMaterial() {
-        return material;
-    }
-
-    @Override
-    public Double getTotalHeight() {
-        return totalHeight;
-    }
-
-    @Override
-    public Double getTotalWidth() {
-        return totalWidth;
-    }
-
-    @Override
-    public Double getShoeWidth() {
-        return shoeWidth;
-    }
-
-    @Override
-    public Double getCrestWidth() {
-        return crestWidth;
     }
 }

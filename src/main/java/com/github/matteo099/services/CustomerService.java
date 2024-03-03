@@ -7,7 +7,6 @@ import com.github.matteo099.model.entities.Customer;
 import com.github.matteo099.model.interfaces.ICustomer;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.transaction.Transactional;
 
 @ApplicationScoped
 public class CustomerService {
@@ -16,7 +15,6 @@ public class CustomerService {
         return Customer.listAll();
     }
 
-    @Transactional
     public Customer findByIdOrCreate(ICustomer customer) {
         Optional<Customer> optCustomer = Customer.findByIdOptional(customer.getName());
         if (optCustomer.isPresent())

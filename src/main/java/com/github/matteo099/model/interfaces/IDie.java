@@ -5,11 +5,11 @@ import java.util.List;
 import com.github.matteo099.model.entities.DieType;
 import com.github.matteo099.model.entities.MaterialType;
 
-public interface IDie {
+public interface IDie<D extends IDieData<?>, C extends ICustomer> {
     String getName();
     List<String> getAliases();
-    IDieData getDieData();
-    ICustomer getCustomer();
+    D getDieData();
+    C getCustomer();
 
     DieType getDieType();
     MaterialType getMaterial();

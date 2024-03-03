@@ -52,6 +52,7 @@ export class DieDashboardComponent implements OnInit {
   ngOnInit(): void {
     this.dies = this.dieService.list().pipe(
       map((val, i) => {
+        console.log(val);
         return val.map((die: Die) => {
           return { ...die, img: KonvaUtils.exportImage(die.dieData.state) };
         });

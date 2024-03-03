@@ -14,7 +14,6 @@ import com.github.matteo099.opencv.DieMatcher;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 
 @ApplicationScoped
 public class DieService {
@@ -25,8 +24,7 @@ public class DieService {
     @Inject
     DieMatcher dieMatcher;
 
-    @Transactional
-    public String createDie(IDie iDie) throws DieAlreadyExists {
+    public String createDie(IDie<?,?> iDie) throws DieAlreadyExists {
         if(existsDie(iDie.getName())) 
             throw new DieAlreadyExists(String.format("Lo stampo '%s' esiste già! Utilizzare un nome diverso.", iDie.getName()));
 

@@ -30,7 +30,7 @@ public class DieMatcher {
         OpenCV.loadLocally();
     }
 
-    public List<SimilarDieSearchResult> searchSimilarDies(IDieData dieData, float threshold)
+    public List<SimilarDieSearchResult> searchSimilarDies(IDieData<?> dieData, float threshold)
             throws MalformedDieException {
         var dieDrawContour = extractContourn(dieData);
         if (dieDrawContour.isEmpty()) {
@@ -63,7 +63,7 @@ public class DieMatcher {
         return similarDies.stream().sorted().toList();
     }
 
-    public static Optional<MatOfPoint> extractContourn(IDieData dieData) {
+    public static Optional<MatOfPoint> extractContourn(IDieData<?> dieData) {
         var finalPoints = new LinkedList<Point>();
         double minX = Double.POSITIVE_INFINITY;
         double minY = Double.POSITIVE_INFINITY;
