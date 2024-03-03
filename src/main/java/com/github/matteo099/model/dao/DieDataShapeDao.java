@@ -8,7 +8,6 @@ import lombok.Getter;
 
 @Getter
 public class DieDataShapeDao implements IDieDataShape {
-
     public String type;
     public List<Double> points;
 }

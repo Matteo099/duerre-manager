@@ -1,41 +1,132 @@
 <div class="grid-container">
 
-  <div class="row align-items-center">
-    <mat-form-field class="col">
-      <mat-label>Nome/Codice stampo</mat-label>
-      <input matInput>
-    </mat-form-field>
+  <form class="row mb-4" [formGroup]="serachForm" novalidate (ngSubmit)="performSearch()">
 
-    <mat-form-field class="col">
-      <mat-label>Clienti</mat-label>
-      <mat-select [formControl]="customers" multiple>
-        <mat-select-trigger>
-          {{customers.value?.[0] || ''}}
-          @if ((customers.value?.length || 0) > 1) {
-          <span class="example-additional-selection">
-            (+{{(customers.value?.length || 0) - 1}} {{customers.value?.length === 2 ? 'altro' : 'altri'}})
-          </span>
-          }
-        </mat-select-trigger>
-        @for (topping of customerList; track topping) {
-        <mat-option [value]="topping">{{topping}}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
-
-    <div class="col-auto">
-      <button mat-icon-button (click)="gridView=!gridView">
-        @if (gridView) {
-        <mat-icon>view_list</mat-icon>
-        }
-        @else {
-        <mat-icon>view_module</mat-icon>
-        }
-      </button>
-      <div class="mat-mdc-form-field-subscript-wrapper mat-mdc-form-field-bottom-align"></div>
+    <div class="row">
+      <mat-form-field class="col">
+        <mat-label>Codice stampo o alias</mat-label>
+        <input matInput placeholder="Stampo1 aliasA aliasB..." formControlName="names">
+        <button mat-icon-button matSuffix color="primary" (click)="advancedSearch = !advancedSearch">
+          <mat-icon>{{ advancedSearch ? "expand_less" : "expand_more" }}</mat-icon>
+        </button>
+      </mat-form-field>
     </div>
 
-  </div>
+    @if (advancedSearch) {
+    <mat-card @advancedSearchTrigger>
+      <mat-card-content>
+        <div class="row justify-content-center align-items-center">
+          <div class="col-auto mb-2">
+            <mat-card style="max-width: 150px;">
+              <mat-card-content>
+                <div class="position-relative">
+                  <div class="position-absolute top-50 start-50 translate-middle">
+                    <button mat-fab color="primary" [disabled]="serachForm.controls['dieData'].disabled"
+                      (click)="openDialog()">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                  </div>
+                  <img style="width: -webkit-fill-available;" [src]="imageURL">
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+          <div class="col">
+            <div class="row justify-content-center">
+              <mat-form-field class="col-md-4">
+                <mat-label>Clienti</mat-label>
+                <mat-select formControlName="customers" multiple>
+                  <mat-select-trigger>
+                    {{serachForm.controls["customers"].value?.[0] || ''}}
+                    @if ((serachForm.controls["customers"].value?.length || 0) > 1) {
+                    <span class="example-additional-selection">
+                      (+{{(serachForm.controls["customers"].value?.length || 0) - 1}}
+                      {{serachForm.controls["customers"].value?.length === 2 ? 'altro' : 'altri'}})
+                    </span>
+                    }
+                  </mat-select-trigger>
+                  @for (customer of customerList; track customer) {
+                  <mat-option [value]="customer">{{customer}}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field class="col-md-4">
+                <mat-label>Materiale</mat-label>
+                <mat-select formControlName="materials" multiple>
+                  <mat-select-trigger>
+                    {{serachForm.controls["materials"].value?.[0] || ''}}
+                    @if ((serachForm.controls["materials"].value?.length || 0) > 1) {
+                    <span class="example-additional-selection">
+                      (+{{(serachForm.controls["materials"].value?.length || 0) - 1}}
+                      {{serachForm.controls["materials"].value?.length === 2 ? 'altro' : 'altri'}})
+                    </span>
+                    }
+                  </mat-select-trigger>
+                  @for (material of MaterialTypeHelper.getValues(); track material) {
+                  <mat-option [value]="material">{{material}}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field class="col-md-4">
+                <mat-label>Tipo Stampo</mat-label>
+                <mat-select formControlName="dieTypes" multiple>
+                  <mat-select-trigger>
+                    {{serachForm.controls["dieTypes"].value?.[0] || ''}}
+                    @if ((serachForm.controls["dieTypes"].value?.length || 0) > 1) {
+                    <span class="example-additional-selection">
+                      (+{{(serachForm.controls["dieTypes"].value?.length || 0) - 1}}
+                      {{serachForm.controls["dieTypes"].value?.length === 2 ? 'altro' : 'altri'}})
+                    </span>
+                    }
+                  </mat-select-trigger>
+                  @for (dieType of DieTypeHelper.getValues(); track dieType) {
+                  <mat-option [value]="dieType">{{dieType}}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="mt-2 row justify-content-center">
+              <mat-form-field class="col-sm-5 col-md-3">
+                <mat-label>Altezza</mat-label>
+                <input type="number" matInput formControlName="totalHeight">
+              </mat-form-field>
+
+              <mat-form-field class="col-sm-5 col-md-3">
+                <mat-label>Larghezza Totale</mat-label>
+                <input type="number" matInput formControlName="totalWidth">
+              </mat-form-field>
+
+              <mat-form-field class="col-sm-5 col-md-3">
+                <mat-label>Larghezza scarpetta</mat-label>
+                <input type="number" matInput formControlName="shoeWidth">
+              </mat-form-field>
+
+              <mat-form-field class="col-sm-5 col-md-3">
+                <mat-label>Larghezza cresta</mat-label>
+                <input type="number" matInput formControlName="crestWidth">
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+
+      </mat-card-content>
+    </mat-card>
+    }
+
+    <div class="d-flex justify-content-center mt-3">
+      @if (serachForm.dirty) {
+      <button class="m-1" mat-raised-button color="warn" (click)="clearSearch()">
+        <mat-icon class="m-0">clear</mat-icon>
+      </button>
+      }
+      <button class="m-1" mat-raised-button color="primary" type="submit">
+        <mat-icon class="m-0">search</mat-icon>
+      </button>
+    </div>
+  </form>
 
   @if (gridView) {
   <div class="container">

@@ -9,6 +9,8 @@ import { Die } from '../../models/entities/die';
 import { BaseRestService } from './base-rest.service';
 import { DieSimilarSearchDao } from '../../models/dao/die-similar-search-dao';
 import { SimilarDieSearchResult } from '../../models/projections/similar-die-search-result';
+import { DieSearchDao } from '../../models/dao/die-search-dao';
+import { DieSearchResult } from '../../models/projections/die-search-result';
 
 @Injectable({
   providedIn: 'root'
@@ -34,6 +36,14 @@ export class DieService extends BaseRestService {
   get(dieId: number): Observable<Die | undefined> {
     return this.http.get<Die>(DieService.DIE_URL + "/die/" + dieId).pipe(
       catchError(this.handleError<Die | undefined>('getDie', undefined))
+    );
+  }
+
+  searchDies(dieSearch: DieSearchDao): Observable<DieSearchResult[]> {
+    return this.http.put<DieSearchResult[]>(DieService.DIE_URL + "/search-dies", dieSearch, {
+      headers: LoadingService.generateHeader("Ricerca stampi in corso")
+    }).pipe(
+      catchError(this.handleError<DieSearchResult[]>('searchDies', []))
     );
   }
 
