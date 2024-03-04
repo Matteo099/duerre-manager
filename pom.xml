@@ -115,6 +115,12 @@
               <artifactId>quarkus-panache-common</artifactId>
               <version>${quarkus.platform.version}</version>
             </path>
+
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>1.18.30</version>
+            </path>
           </annotationProcessorPaths>
         </configuration>
       </plugin>
