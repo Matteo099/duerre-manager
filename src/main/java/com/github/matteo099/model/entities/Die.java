@@ -14,11 +14,13 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @MongoEntity(collection = "dies")
 @RegisterForReflection
 @Setter
 @Getter
+@ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Die extends PanacheMongoEntityBase implements IDie<DieData, Customer> {
 

@@ -129,7 +129,7 @@ export class DieDashboardComponent implements OnInit {
 
   performSearch() {
     const dieSearch: DieSearchDao = {
-      names: this.serachForm.controls["names"].value,
+      text: this.serachForm.controls["names"].value,
       dieData: this.serachForm.controls["dieData"].value,
       customers: this.serachForm.controls["customers"].value,
       dieTypes: this.serachForm.controls["dieTypes"].value,
@@ -139,6 +139,7 @@ export class DieDashboardComponent implements OnInit {
       shoeWidth: this.serachForm.controls["shoeWidth"].value,
       crestWidth: this.serachForm.controls["crestWidth"].value,
     };
+    console.log("Perform search ", dieSearch);
     this.dieService.searchDies(dieSearch).subscribe({
       next: (result: DieSearchResult[]) => {
         

@@ -94,7 +94,7 @@ public class DieResource {
             @QueryParam("threshold") @DefaultValue("1000.0") Float threshold) {
         try {
             logger.info("searching dies (with threshold " + threshold + ")");
-            var dies = dieService.searchDies(searchDieDao, threshold);
+            var dies = dieService.searchDies2(searchDieDao, threshold);
             return Response.ok().entity(dies).build();
         } catch (Exception e) {
             e.printStackTrace();

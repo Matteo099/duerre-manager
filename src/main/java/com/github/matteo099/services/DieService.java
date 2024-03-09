@@ -1,7 +1,11 @@
 package com.github.matteo099.services;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+
+import org.bson.conversions.Bson;
 
 import com.github.matteo099.exceptions.DieAlreadyExists;
 import com.github.matteo099.exceptions.MalformedDieException;
@@ -13,7 +17,13 @@ import com.github.matteo099.model.interfaces.IDie;
 import com.github.matteo099.model.projections.DieSearchResult;
 import com.github.matteo099.model.projections.SimilarDieSearchResult;
 import com.github.matteo099.opencv.DieMatcher;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Indexes;
+import com.mongodb.client.model.TextSearchOptions;
 
+import io.quarkus.mongodb.panache.PanacheMongoEntityBase;
 import io.quarkus.panache.common.Parameters;
 import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -61,10 +71,10 @@ public class DieService {
         Parameters params = new Parameters();
         Sort sort = Sort.by("name");
 
-        if (!dieSearchDao.getNames().isEmpty()) {
+        if (!dieSearchDao.getText().isEmpty()) {
             queryBuilder.append("name IN :names");
             queryBuilder.append(" AND aliases IN :names");
-            params.and("names", dieSearchDao.getNames());
+            params.and("names", dieSearchDao.getText());
         }
         if (!dieSearchDao.getCustomers().isEmpty()) {
             queryBuilder.append(" AND customer IN :customers");
@@ -103,6 +113,20 @@ public class DieService {
         // dieMatcher.searchSimilarDies(dieSearchDao.getDieData(),
         // threshold);
         return Die.stream(queryBuilder.toString(), sort, params).map(e -> new DieSearchResult((Die) e)).toList();
+    }
+
+    public List<DieSearchResult> searchDies2(DieSearchDao dieSearchDao, Float threshold)
+            throws MalformedDieException {
+        MongoCollection<PanacheMongoEntityBase> diesCollection = Die.mongoCollection();
+
+        var filter = Filters.and(dieSearchDao.getAllFilters());
+        FindIterable<PanacheMongoEntityBase> results = diesCollection.find(filter);
+
+        for (PanacheMongoEntityBase panacheMongoEntityBase : results) {
+            System.out.println(panacheMongoEntityBase);
+        }
+
+        return List.of();
     }
 
     public Optional<Die> findDie(Long id) {

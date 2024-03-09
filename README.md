@@ -1,5 +1,15 @@
 # Duerre Manager
 
+
+## BUILD
+1. accendere docker
+2. aprire 'x64 Native Tools Command Prompt for VS 2022' come **amministratore** (C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Visual Studio 2022\Visual Studio Tools\VC)
+3. navigare nella cartella del progetto quarkus che si vuole buildare (cd D:\Desktop\Matteo\QuarkusWorkspace\duerre-manager)
+4. quarkus build --native
+5. l'eseguibile è disponibile nella cartella target (\target\duerre-manager-1.0.0.exe)
+
+[link guida](https://quarkus.io/guides/building-native-image#producing-a-native-executable)
+
 ## TODO
 
 - 2D CAD js library:
@@ -53,7 +63,7 @@
 - [x] (NON opz, multi selezione) TPU / PVC / TR / POLIETILENE
 - [x] (NON opz) altezza, larghezza totale, larghezza solo scarpetta, larghezza cresta
 - ricerca per h x w + ricerca combinata con disegno
-- implementare la ricerca
+- implementare la ricerca (https://www.mongodb.com/docs/manual/core/link-text-indexes/)
 - possibilità di tracciare linee (rette) interne allo stampo (per delimitare le fasi dello stampo / i colori)
 - vista dettagliata dello stampo
 
