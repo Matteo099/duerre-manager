@@ -142,7 +142,7 @@ export class DieDashboardComponent implements OnInit {
     console.log("Perform search ", dieSearch);
     this.dieService.searchDies(dieSearch).subscribe({
       next: (result: DieSearchResult[]) => {
-        
+        console.log(result);
       }
     });
   }

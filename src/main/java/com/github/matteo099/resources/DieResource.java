@@ -3,7 +3,6 @@ package com.github.matteo099.resources;
 import org.jboss.logging.Logger;
 
 import com.github.matteo099.model.dao.DieDao;
-import com.github.matteo099.model.dao.DieSimilarSearchDao;
 import com.github.matteo099.model.dao.DieSearchDao;
 import com.github.matteo099.model.wrappers.ErrorWrapper;
 import com.github.matteo099.model.wrappers.IdWrapper;
@@ -72,20 +71,20 @@ public class DieResource {
         }
     }
 
-    @PUT
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/search-similar-dies")
-    public Response searchSimilarDies(DieSimilarSearchDao dieSimilarSearchDao,
-            @QueryParam("threshold") @DefaultValue("1000.0") Float threshold) {
-        try {
-            logger.info("searching similar dies " + threshold);
-            var similarDies = dieService.searchSimilarDies(dieSimilarSearchDao, threshold);
-            return Response.ok().entity(similarDies).build();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Response.serverError().entity(ErrorWrapper.of(e)).build();
-        }
-    }
+    // @PUT
+    // @Produces(MediaType.APPLICATION_JSON)
+    // @Path("/search-similar-dies")
+    // public Response searchSimilarDies(DieSimilarSearchDao dieSimilarSearchDao,
+    //         @QueryParam("threshold") @DefaultValue("1000.0") Float threshold) {
+    //     try {
+    //         logger.info("searching similar dies " + threshold);
+    //         var similarDies = dieService.searchSimilarDies(dieSimilarSearchDao, threshold);
+    //         return Response.ok().entity(similarDies).build();
+    //     } catch (Exception e) {
+    //         e.printStackTrace();
+    //         return Response.serverError().entity(ErrorWrapper.of(e)).build();
+    //     }
+    // }
 
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
@@ -94,7 +93,7 @@ public class DieResource {
             @QueryParam("threshold") @DefaultValue("1000.0") Float threshold) {
         try {
             logger.info("searching dies (with threshold " + threshold + ")");
-            var dies = dieService.searchDies2(searchDieDao, threshold);
+            var dies = dieService.searchDies(searchDieDao, threshold);
             return Response.ok().entity(dies).build();
         } catch (Exception e) {
             e.printStackTrace();

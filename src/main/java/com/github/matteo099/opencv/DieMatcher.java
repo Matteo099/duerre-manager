@@ -13,8 +13,9 @@ import org.opencv.imgproc.Imgproc;
 
 import com.github.matteo099.exceptions.MalformedDieException;
 import com.github.matteo099.model.entities.Die;
+import com.github.matteo099.model.interfaces.IDie;
 import com.github.matteo099.model.interfaces.IDieData;
-import com.github.matteo099.model.projections.SimilarDieSearchResult;
+import com.github.matteo099.model.projections.DieSearchResult;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -30,18 +31,21 @@ public class DieMatcher {
         OpenCV.loadLocally();
     }
 
-    public List<SimilarDieSearchResult> searchSimilarDies(IDieData<?> dieData, float threshold)
+    public List<DieSearchResult> searchSimilarDiesFrom(IDieData<?> dieData, float threshold, List<? extends IDie<?, ?>> savedDies)
             throws MalformedDieException {
+        if (dieData == null) {
+            return savedDies.stream().map(e -> new DieSearchResult(e)).toList();
+        }
+
         var dieDrawContour = extractContourn(dieData);
         if (dieDrawContour.isEmpty()) {
             throw new MalformedDieException("Malformed Die");
         }
 
-        List<SimilarDieSearchResult> similarDies = new ArrayList<SimilarDieSearchResult>();
-        List<Die> savedDies = Die.listAll();
+        List<DieSearchResult> similarDies = new ArrayList<>();
         logger.info("Found " + savedDies.size() + " dies");
 
-        for (Die die : savedDies) {
+        for (var die : savedDies) {
             logger.debug("Comparing die " + die.getName());
             var savedDieContourn = extractContourn(die.getDieData());
             if (savedDieContourn.isEmpty()) {
@@ -56,11 +60,16 @@ public class DieMatcher {
             // You can adjust the threshold based on your requirements
             if (matchScore < threshold) {
                 // Shapes are considered similar (you can adjust the threshold)
-                similarDies.add(new SimilarDieSearchResult(die.getName(), matchScore));
+                similarDies.add(new DieSearchResult(die, matchScore));
             }
         }
 
-        return similarDies.stream().sorted().toList();
+        return similarDies;
+    }
+
+    public List<DieSearchResult> searchSimilarDies(IDieData<?> dieData, float threshold)
+            throws MalformedDieException {
+        return this.searchSimilarDiesFrom(dieData, threshold, Die.listAll());
     }
 
     public static Optional<MatOfPoint> extractContourn(IDieData<?> dieData) {

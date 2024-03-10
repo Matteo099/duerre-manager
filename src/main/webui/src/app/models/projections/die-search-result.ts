@@ -1,4 +1,6 @@
 export interface DieSearchResult {
-    dieId: number;
+    name: string;
+    textScore?: number;
+    sizeScore?: number;
     matchScore?: number;
 }

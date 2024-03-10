@@ -38,28 +38,31 @@ public class DieSearchDao {
 
     public List<Bson> getTextFilters() {
         var filters = new LinkedList<Bson>();
-        String text = this.text.replaceAll(" ", "|");
-        if (!text.isEmpty()) {
-            filters.add(Filters.regex("_id", text));
-            filters.add(Filters.regex("aliases", text));
+        if (this.text != null) {
+            String text = this.text.replaceAll(" ", "|");
+            if (!text.isEmpty()) {
+                filters.add(Filters.or(
+                        Filters.regex("_id", text),
+                        Filters.regex("aliases", text)));
+            }
         }
         return filters;
     }
 
     public List<Bson> getCustomersFilters() {
-        if (customers.isEmpty())
+        if (customers == null || customers.isEmpty())
             return List.of();
         return List.of(Filters.in("customers", customers));
     }
 
     public List<Bson> getDieTypesFilters() {
-        if (dieTypes.isEmpty())
+        if (dieTypes == null || dieTypes.isEmpty())
             return List.of();
         return List.of(Filters.in("dieTypes", dieTypes));
     }
 
     public List<Bson> getMaterialsFilters() {
-        if (materials.isEmpty())
+        if (materials == null || materials.isEmpty())
             return List.of();
         return List.of(Filters.in("materials", materials));
     }
