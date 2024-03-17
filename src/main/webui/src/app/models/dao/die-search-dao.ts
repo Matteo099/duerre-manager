@@ -3,7 +3,7 @@ import { MaterialType } from "../entities/material-type";
 import { DieDataDao } from "./die-data-dao";
 
 export interface DieSearchDao {
-    text: string[] | string | null;
+    text: string | null;
     dieData: null | DieDataDao;
     customers: null | string[];
     dieTypes: null | string[] | DieType[];

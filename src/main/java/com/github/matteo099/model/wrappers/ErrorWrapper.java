@@ -1,6 +1,9 @@
 package com.github.matteo099.model.wrappers;
 
+import jakarta.json.bind.annotation.JsonbTransient;
+
 public class ErrorWrapper<E extends Exception> {
+    @JsonbTransient
     public E exception;
     public String message;
 

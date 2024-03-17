@@ -50,6 +50,10 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-mongodb-panache</artifactId>
     </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-smallrye-openapi</artifactId>
+    </dependency>
     <!-- During development, it's often convenient to have a flexible way to load sample data during application bootstrap.
     With this extension in place, create a new file named src/main/resources/mongo/import.xml.
     This instructs the Liquibase extension to take action during the bootstrapping phase of your Quarkus application and apply the defined change set -->

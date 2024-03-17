@@ -12,7 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSelectModule } from '@angular/material/select';
 import { RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DieCreatorComponent } from '../../die-creator/die-creator.component';
 import { KonvaUtils } from '../../die-creator/manager/konva-utils';
@@ -27,6 +27,7 @@ import { DieService } from '../../services/rest/die.service';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { DieSearchDao } from '../../models/dao/die-search-dao';
 import { DieSearchResult } from '../../models/projections/die-search-result';
+import { DieImagePipe } from '../../pipes/die-image.pipe';
 
 @Component({
   selector: 'app-die-dashboard',
@@ -46,6 +47,7 @@ import { DieSearchResult } from '../../models/projections/die-search-result';
   ],
   imports: [
     AsyncPipe,
+    DieImagePipe,
     MatGridListModule,
     MatMenuModule,
     MatIconModule,
@@ -68,7 +70,8 @@ export class DieDashboardComponent implements OnInit {
   public dialog = inject(MatDialog);
 
   gridView: boolean = true;
-  dies!: Observable<(Die & { img: string })[]>;
+  dies: Die[] = [];//(Die & { img: string })[] = [];
+  dies2: Observable<Die[]> = of([]);//(Die & { img: string })[] = [];
   imageURL: string = "/assets/images/milling.png";
 
   addOnBlur = true;
@@ -76,7 +79,7 @@ export class DieDashboardComponent implements OnInit {
 
   advancedSearch = false;
   serachForm = this.fb.group({
-    names: [[] as (string[])],
+    names: [null],
     dieData: [null as (DieDataDao | null)],
     customers: [[] as (string[])],
     dieTypes: [[] as (string[] | DieType[])],
@@ -91,14 +94,19 @@ export class DieDashboardComponent implements OnInit {
   DieTypeHelper = DieTypeHelper;
 
   ngOnInit(): void {
-    this.dies = this.dieService.list().pipe(
-      map((val, i) => {
-        console.log(val);
-        return val.map((die: Die) => {
-          return { ...die, img: KonvaUtils.exportImage(die.dieData.state) };
-        });
-      })
-    );
+    this.dies2 = this.dieService.list();
+    
+    // .subscribe({
+    //   next: (dies: Die[]) => {
+    //     console.log(dies);
+    //     this.dies = dies;
+    //     /* dies.map(die => {
+    //       return { ...die, img: KonvaUtils.exportImage(die.dieData.state) };
+    //     });*/
+
+    //     // this.dieService.get(this.dies[0].name).subscribe({ next: e => console.log(e) });
+    //   }
+    // });
 
     this.customerService.list().subscribe({
       next: (c: Customer[]) => {
@@ -140,9 +148,22 @@ export class DieDashboardComponent implements OnInit {
       crestWidth: this.serachForm.controls["crestWidth"].value,
     };
     console.log("Perform search ", dieSearch);
+
+    const tmp: (Die & { img: string })[] = [];
     this.dieService.searchDies(dieSearch).subscribe({
       next: (result: DieSearchResult[]) => {
         console.log(result);
+
+        result.forEach(res => {
+          this.dieService.get(res.name).subscribe({
+            next: (die) => {
+              if (!die) return;
+              tmp.push({ ...die, img: KonvaUtils.exportImage(die.dieData.state) });
+            }
+          });
+        });
+
+        this.dies = tmp;
       }
     });
   }

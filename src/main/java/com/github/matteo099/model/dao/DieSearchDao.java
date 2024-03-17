@@ -10,8 +10,10 @@ import com.github.matteo099.model.entities.MaterialType;
 import com.mongodb.client.model.Filters;
 
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
+@ToString
 public class DieSearchDao {
     public String text;
     public DieDataDao dieData;
@@ -52,19 +54,19 @@ public class DieSearchDao {
     public List<Bson> getCustomersFilters() {
         if (customers == null || customers.isEmpty())
             return List.of();
-        return List.of(Filters.in("customers", customers));
+        return List.of(Filters.in("customer", customers));
     }
 
     public List<Bson> getDieTypesFilters() {
         if (dieTypes == null || dieTypes.isEmpty())
             return List.of();
-        return List.of(Filters.in("dieTypes", dieTypes));
+        return List.of(Filters.in("dieType", dieTypes.stream().map(t -> t.name()).toList()));
     }
 
     public List<Bson> getMaterialsFilters() {
         if (materials == null || materials.isEmpty())
             return List.of();
-        return List.of(Filters.in("materials", materials));
+        return List.of(Filters.in("material", materials.stream().map(m -> m.name()).toList()));
     }
 
     public List<Bson> getTotalHeightFilters() {

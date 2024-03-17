@@ -103,7 +103,7 @@ export class DieSimilarSearchComponent implements OnInit {
         next: (arr: SimilarDieSearchResult[]) => {
           this.similarDies = arr;
           this.similarDies.forEach(d => {
-            this.dieService.get(d.dieId).subscribe({
+            this.dieService.get(d.dieId+"").subscribe({
               next: (die?: Die) => {
                 if (!die) return;
                 d.name = die.name;
