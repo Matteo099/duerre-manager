@@ -4,6 +4,6 @@ import lombok.Getter;
 
 @Getter
 public class DieSimilarSearchDao {
-    public String name;
+    public String text;
     public DieDataDao dieData;
 }

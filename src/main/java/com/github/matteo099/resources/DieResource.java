@@ -3,7 +3,6 @@ package com.github.matteo099.resources;
 import org.jboss.logging.Logger;
 
 import com.github.matteo099.model.dao.DieDao;
-import com.github.matteo099.model.dao.DieSimilarSearchDao;
 import com.github.matteo099.model.dao.DieSearchDao;
 import com.github.matteo099.model.wrappers.ErrorWrapper;
 import com.github.matteo099.model.wrappers.IdWrapper;
@@ -15,7 +14,6 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
@@ -37,6 +35,7 @@ public class DieResource {
         try {
             logger.info("creating die");
             String id = dieService.createDie(die);
+            dieService.new RandomDieService().saveRamdonDies(1000);
             return Response.ok().entity(IdWrapper.of(id)).build();
         } catch (Exception e) {
             e.printStackTrace();
@@ -62,7 +61,7 @@ public class DieResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/die/{id}")
-    public Response getDie(@PathParam("id") Long id) {
+    public Response getDie(String id) {
         try {
             logger.info("finding die with id " + id);
             return Response.ok().entity(dieService.findDie(id).orElseThrow()).build();
@@ -72,20 +71,21 @@ public class DieResource {
         }
     }
 
-    @PUT
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/search-similar-dies")
-    public Response searchSimilarDies(DieSimilarSearchDao dieSimilarSearchDao,
-            @QueryParam("threshold") @DefaultValue("1000.0") Float threshold) {
-        try {
-            logger.info("searching similar dies " + threshold);
-            var similarDies = dieService.searchSimilarDies(dieSimilarSearchDao, threshold);
-            return Response.ok().entity(similarDies).build();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Response.serverError().entity(ErrorWrapper.of(e)).build();
-        }
-    }
+    // @PUT
+    // @Produces(MediaType.APPLICATION_JSON)
+    // @Path("/search-similar-dies")
+    // public Response searchSimilarDies(DieSimilarSearchDao dieSimilarSearchDao,
+    // @QueryParam("threshold") @DefaultValue("1000.0") Float threshold) {
+    // try {
+    // logger.info("searching similar dies " + threshold);
+    // var similarDies = dieService.searchSimilarDies(dieSimilarSearchDao,
+    // threshold);
+    // return Response.ok().entity(similarDies).build();
+    // } catch (Exception e) {
+    // e.printStackTrace();
+    // return Response.serverError().entity(ErrorWrapper.of(e)).build();
+    // }
+    // }
 
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
@@ -93,7 +93,7 @@ public class DieResource {
     public Response searchDies(DieSearchDao searchDieDao,
             @QueryParam("threshold") @DefaultValue("1000.0") Float threshold) {
         try {
-            logger.info("searching dies (with threshold " + threshold + ")");
+            logger.info("searching dies (with threshold " + threshold + "): " + searchDieDao.toString());
             var dies = dieService.searchDies(searchDieDao, threshold);
             return Response.ok().entity(dies).build();
         } catch (Exception e) {

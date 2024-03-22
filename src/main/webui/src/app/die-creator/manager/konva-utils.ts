@@ -138,7 +138,7 @@ export class KonvaUtils {
             crpLayer.add(shape);
 
             const rect = extShape.calculateClientRect();
-            console.log(rect);
+            //console.log(rect);
             minX = Math.min(minX, rect.x);
             minY = Math.min(minY, rect.y);
             maxX = Math.max(maxX, rect.x + rect.width);
@@ -157,14 +157,14 @@ export class KonvaUtils {
         maxX = -Infinity;
         maxY = -Infinity;
         shapes.forEach(s => {
-            console.log(s.getPoints());
+            //console.log(s.getPoints());
             let i = 0;
             const points = s.getPoints().map(e => {
                 if (i++ % 2 == 0) return (e - tempMinX) * scaleFactor;
                 return (e - tempMinY) * scaleFactor;
             });
             s.setPoints(points);
-            console.log(points);
+            //console.log(points);
 
             const rect = s.calculateClientRect();
             minX = Math.min(minX, rect.x);

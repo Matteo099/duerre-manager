@@ -28,12 +28,14 @@ export class DieService extends BaseRestService {
   }
 
   list(): Observable<Die[]> {
-    return this.http.get<Die[]>(DieService.DIE_URL + "/list-dies").pipe(
+    return this.http.get<Die[]>(DieService.DIE_URL + "/list-dies", {
+      headers: LoadingService.generateHeader("Ricerca stampi in corso")
+    }).pipe(
       catchError(this.handleError<Die[]>('listDies', []))
     );
   }
 
-  get(dieId: number): Observable<Die | undefined> {
+  get(dieId: string): Observable<Die | undefined> {
     return this.http.get<Die>(DieService.DIE_URL + "/die/" + dieId).pipe(
       catchError(this.handleError<Die | undefined>('getDie', undefined))
     );
