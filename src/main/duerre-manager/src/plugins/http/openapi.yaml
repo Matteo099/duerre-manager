@@ -1,0 +1,199 @@
+---
+openapi: 3.0.3
+info:
+  title: duerre-manager API
+  version: 1.0.0
+servers:
+- url: http://localhost:8080
+  description: Auto generated value
+- url: http://0.0.0.0:8080
+  description: Auto generated value
+paths:
+  /api/v1/customer-controller/list-customers:
+    get:
+      tags:
+      - Customer Resource
+      responses:
+        "200":
+          description: OK
+  /api/v1/die-controller/create-die:
+    post:
+      tags:
+      - Die Resource
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DieDao'
+      responses:
+        "200":
+          description: OK
+  /api/v1/die-controller/die/{id}:
+    get:
+      tags:
+      - Die Resource
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /api/v1/die-controller/list-dies:
+    get:
+      tags:
+      - Die Resource
+      responses:
+        "200":
+          description: OK
+  /api/v1/die-controller/search-dies:
+    put:
+      tags:
+      - Die Resource
+      parameters:
+      - name: threshold
+        in: query
+        schema:
+          format: float
+          default: "1000.0"
+          type: number
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DieSearchDao'
+      responses:
+        "200":
+          description: OK
+components:
+  schemas:
+    Bson:
+      type: object
+    DieDao:
+      type: object
+      properties:
+        name:
+          type: string
+        dieData:
+          $ref: '#/components/schemas/DieDataDao'
+        customer:
+          type: string
+        aliases:
+          type: array
+          items:
+            type: string
+        dieType:
+          $ref: '#/components/schemas/DieType'
+        material:
+          $ref: '#/components/schemas/MaterialType'
+        totalHeight:
+          format: double
+          type: number
+        totalWidth:
+          format: double
+          type: number
+        shoeWidth:
+          format: double
+          type: number
+        crestWidth:
+          format: double
+          type: number
+    DieDataDao:
+      type: object
+      properties:
+        state:
+          type: array
+          items:
+            $ref: '#/components/schemas/DieDataShapeDao'
+    DieDataShapeDao:
+      type: object
+      properties:
+        type:
+          type: string
+        points:
+          type: array
+          items:
+            format: double
+            type: number
+    DieSearchDao:
+      type: object
+      properties:
+        text:
+          type: string
+        dieData:
+          $ref: '#/components/schemas/DieDataDao'
+        customers:
+          type: array
+          items:
+            type: string
+        dieTypes:
+          type: array
+          items:
+            $ref: '#/components/schemas/DieType'
+        materials:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaterialType'
+        totalHeight:
+          format: double
+          type: number
+        totalWidth:
+          format: double
+          type: number
+        shoeWidth:
+          format: double
+          type: number
+        crestWidth:
+          format: double
+          type: number
+        allFilters:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bson'
+        textFilters:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bson'
+        customersFilters:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bson'
+        dieTypesFilters:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bson'
+        materialsFilters:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bson'
+        totalHeightFilters:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bson'
+        totalWidthFilters:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bson'
+        shoeWidthFilters:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bson'
+        crestWidthFilters:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bson'
+    DieType:
+      enum:
+      - MONOCOLORE
+      - BICOLORE
+      - TRICOLORE
+      type: string
+    MaterialType:
+      enum:
+      - TPU
+      - PVC
+      - TR
+      - POLIETILENE
+      type: string

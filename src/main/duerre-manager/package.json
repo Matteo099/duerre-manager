@@ -13,13 +13,14 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --build --force",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
-    "format": "prettier --write src/",
-    "install-with-proxy": "set HTTP_PROXY=http://srvlab:7J4zL3QHqx3U7@webproxy00.sigmaspa.lan:3128 && set HTTPS_PROXY=http://srvlab:7J4zL3QHqx3U7@webproxy00.sigmaspa.lan:3128 && set NO_PROXY='localhost,127.0.0.1,.sigmaspa.lan,10.0.0.0/8,.int.sigmaspa.com' && npm i"
+    "format": "prettier --write src/"
   },
   "dependencies": {
     "@vee-validate/yup": "^4.12.6",
     "axios": "^1.6.8",
+    "konva": "^9.3.6",
     "openapi-client-axios": "^7.5.4",
+    "openapicmd": "^2.3.1",
     "pinia": "^2.1.7",
     "vee-validate": "^4.12.6",
     "vue": "^3.4.21",

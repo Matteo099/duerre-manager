@@ -1,5 +1,5 @@
 <template>
-  <v-card :loading="loading" class="mx-auto my-12" max-width="374">
+  <v-card :loading="loading" class="mx-auto my-12">
     <template v-slot:loader="{ isActive }">
       <v-progress-linear
         :active="isActive"

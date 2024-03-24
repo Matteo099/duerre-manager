@@ -1,11 +1,10 @@
 import type { AxiosError, AxiosResponse } from "axios";
 import OpenAPIClientAxios from "openapi-client-axios";
 import type { App } from "vue";
+import type { DuerreManagerClient } from "./openapi";
 
-type GaussClient = {};
 export class GaussService {
-    public clientInstance: GaussClient & any;
-    public client!: Promise<GaussClient>;
+    public client!: Promise<DuerreManagerClient>;
     public authToken?: string
     public refToken?: string
 
@@ -13,15 +12,15 @@ export class GaussService {
         this.client = this.createClientAsync();
     }
 
-    private async createClientAsync(): Promise<GaussClient> {
+    private async createClientAsync(): Promise<DuerreManagerClient> {
         const api = new OpenAPIClientAxios({
             definition: import.meta.env.VITE_VUE_APP_OPENAPI_URL
         })
         api.withServer({
             url: import.meta.env.VITE_VUE_APP_REST_API_URL,
-            description: 'Gauss backend'
+            description: 'Duerre Manager Backend'
         })
-        const client = await api.getClient<GaussClient & any>()
+        const client = await api.getClient<DuerreManagerClient>()
 
         // **** REQUEST
         // Authorization header
@@ -34,7 +33,6 @@ export class GaussService {
         // **** RESPONSE
         // Unauthorized response
         client.interceptors.response.use(this.handleResponseOk, this.handleResponseError)
-        this.clientInstance = client;
         return client;
     }
 

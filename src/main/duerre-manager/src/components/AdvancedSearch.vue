@@ -25,12 +25,12 @@
         ></v-progress-linear>
       </template>
       <template v-slot:append>
-        <v-btn type="submit" icon="mdi-send" variant="text"></v-btn>
+        <v-btn type="submit" icon="mdi-flip-h mdi-magnify" variant="text"></v-btn>
       </template>
     </v-text-field>
 
     <v-expand-transition>
-      <v-container v-show="more" fluid>
+      <v-container class="py-0" v-show="more" fluid>
         <v-row align="center" no-glutters>
           <v-col cols="auto">
             <DieEditCard :editable="true" />
