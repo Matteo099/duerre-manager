@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.bson.conversions.Bson;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import com.github.matteo099.model.entities.DieType;
 import com.github.matteo099.model.entities.MaterialType;
@@ -25,6 +26,7 @@ public class DieSearchDao {
     public Double shoeWidth;
     public Double crestWidth;
 
+    @Schema(hidden = true)
     public List<Bson> getAllFilters() {
         var filters = new LinkedList<Bson>();
         filters.addAll(getTextFilters());
@@ -38,6 +40,7 @@ public class DieSearchDao {
         return filters;
     }
 
+    @Schema(hidden = true)
     public List<Bson> getTextFilters() {
         var filters = new LinkedList<Bson>();
         if (this.text != null) {
@@ -51,42 +54,49 @@ public class DieSearchDao {
         return filters;
     }
 
+    @Schema(hidden = true)
     public List<Bson> getCustomersFilters() {
         if (customers == null || customers.isEmpty())
             return List.of();
         return List.of(Filters.in("customer", customers));
     }
 
+    @Schema(hidden = true)
     public List<Bson> getDieTypesFilters() {
         if (dieTypes == null || dieTypes.isEmpty())
             return List.of();
         return List.of(Filters.in("dieType", dieTypes.stream().map(t -> t.name()).toList()));
     }
 
+    @Schema(hidden = true)
     public List<Bson> getMaterialsFilters() {
         if (materials == null || materials.isEmpty())
             return List.of();
         return List.of(Filters.in("material", materials.stream().map(m -> m.name()).toList()));
     }
 
+    @Schema(hidden = true)
     public List<Bson> getTotalHeightFilters() {
         if (totalHeight == null)
             return List.of();
         return getNumericFilter("totalHeight", totalHeight);
     }
 
+    @Schema(hidden = true)
     public List<Bson> getTotalWidthFilters() {
         if (totalWidth == null)
             return List.of();
         return getNumericFilter("totalWidth", totalWidth);
     }
 
+    @Schema(hidden = true)
     public List<Bson> getShoeWidthFilters() {
         if (shoeWidth == null)
             return List.of();
         return getNumericFilter("shoeWidth", shoeWidth);
     }
 
+    @Schema(hidden = true)
     public List<Bson> getCrestWidthFilters() {
         if (crestWidth == null)
             return List.of();

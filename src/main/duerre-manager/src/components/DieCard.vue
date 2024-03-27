@@ -51,11 +51,9 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { ref } from 'vue'
+import { FncWorker } from '@/model/fnc-worker'
 import { useHttp } from '@/plugins/http'
-import { useExts } from '@/plugins/extensions'
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 export interface DieCardProp {
   name: string
@@ -64,36 +62,41 @@ export interface DieCardProp {
   aliases?: string[]
 }
 const http = useHttp()
-const { fnc } = useExts()
 
 const loading = ref(true)
 const props = defineProps<DieCardProp>()
 const image = ref(props.imageSrc)
 const alias = computed(() => {
-  return props.aliases?.join(", ") || ""
+  return props.aliases?.join(', ') || ''
 })
+let worker: FncWorker
 
 function loadImage() {
   let now = new Date().getTime()
-  const target = now + Math.floor(Math.random() * 1000)
+  const target = now + Math.floor(Math.random() * 3000)
   let s = target - now
   let c = 0
-  console.log(s)
+  // console.log(s)
   while (target - now > 0) {
     now = new Date().getTime()
     // some computation...
     for (let index = 0; index < Math.random() * 10000; index++) {
-      c += index ^ 2 * Math.random()
+      c += index ^ (2 * Math.random())
     }
   }
+  // console.log('before return')
   return { s, c, v: 'https://cdn.vuetifyjs.com/images/cards/cooking.png' }
 }
 
 onMounted(() => {
-  fnc.callAsWorker(loadImage).then((res) => {
+  worker = new FncWorker(loadImage)
+  worker.promise.then((res) => {
     loading.value = false
     image.value = res.v
-    console.log(res)
+    // console.log(res)
   })
+})
+onBeforeUnmount(() => {
+  worker?.terminate()
 })
 </script>

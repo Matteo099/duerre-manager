@@ -15,9 +15,30 @@
     "/api/v1/customer-controller/list-customers" : {
       "get" : {
         "tags" : [ "Customer Resource" ],
+        "operationId" : "listCustomers",
         "responses" : {
           "200" : {
-            "description" : "OK"
+            "description" : "List customers",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Customer"
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Unable to list customers",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorWrapper"
+                }
+              }
+            }
           }
         }
       }
@@ -25,6 +46,7 @@
     "/api/v1/die-controller/create-die" : {
       "post" : {
         "tags" : [ "Die Resource" ],
+        "operationId" : "createDie",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -36,7 +58,24 @@
         },
         "responses" : {
           "200" : {
-            "description" : "OK"
+            "description" : "Die created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/IdWrapper"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Unable to create die",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorWrapper"
+                }
+              }
+            }
           }
         }
       }
@@ -44,6 +83,7 @@
     "/api/v1/die-controller/die/{id}" : {
       "get" : {
         "tags" : [ "Die Resource" ],
+        "operationId" : "getDie",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -54,7 +94,24 @@
         } ],
         "responses" : {
           "200" : {
-            "description" : "OK"
+            "description" : "Get die",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Die"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Unable to get die",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorWrapper"
+                }
+              }
+            }
           }
         }
       }
@@ -62,9 +119,30 @@
     "/api/v1/die-controller/list-dies" : {
       "get" : {
         "tags" : [ "Die Resource" ],
+        "operationId" : "listDies",
         "responses" : {
           "200" : {
-            "description" : "OK"
+            "description" : "List dies",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Die"
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Unable to list dies",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorWrapper"
+                }
+              }
+            }
           }
         }
       }
@@ -72,6 +150,7 @@
     "/api/v1/die-controller/search-dies" : {
       "put" : {
         "tags" : [ "Die Resource" ],
+        "operationId" : "searchDies",
         "parameters" : [ {
           "name" : "threshold",
           "in" : "query",
@@ -92,7 +171,27 @@
         },
         "responses" : {
           "200" : {
-            "description" : "OK"
+            "description" : "Search dies",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/DieSearchResult"
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Unable to search dies",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorWrapper"
+                }
+              }
+            }
           }
         }
       }
@@ -100,8 +199,58 @@
   },
   "components" : {
     "schemas" : {
-      "Bson" : {
-        "type" : "object"
+      "Customer" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Die" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "aliases" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "dieData" : {
+            "$ref" : "#/components/schemas/DieData"
+          },
+          "customer" : {
+            "$ref" : "#/components/schemas/Customer"
+          },
+          "dieType" : {
+            "$ref" : "#/components/schemas/DieType"
+          },
+          "material" : {
+            "$ref" : "#/components/schemas/MaterialType"
+          },
+          "totalHeight" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "totalWidth" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "shoeWidth" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "crestWidth" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "creationDate" : {
+            "$ref" : "#/components/schemas/LocalDateTime"
+          }
+        }
       },
       "DieDao" : {
         "type" : "object",
@@ -145,6 +294,17 @@
           }
         }
       },
+      "DieData" : {
+        "type" : "object",
+        "properties" : {
+          "state" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DieDataShape"
+            }
+          }
+        }
+      },
       "DieDataDao" : {
         "type" : "object",
         "properties" : {
@@ -152,6 +312,21 @@
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/DieDataShapeDao"
+            }
+          }
+        }
+      },
+      "DieDataShape" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string"
+          },
+          "points" : {
+            "type" : "array",
+            "items" : {
+              "format" : "double",
+              "type" : "number"
             }
           }
         }
@@ -213,66 +388,51 @@
           "crestWidth" : {
             "format" : "double",
             "type" : "number"
+          }
+        }
+      },
+      "DieSearchResult" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
           },
-          "allFilters" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/Bson"
-            }
+          "textScore" : {
+            "format" : "double",
+            "type" : "number"
           },
-          "textFilters" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/Bson"
-            }
+          "sizeScore" : {
+            "format" : "double",
+            "type" : "number"
           },
-          "customersFilters" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/Bson"
-            }
-          },
-          "dieTypesFilters" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/Bson"
-            }
-          },
-          "materialsFilters" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/Bson"
-            }
-          },
-          "totalHeightFilters" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/Bson"
-            }
-          },
-          "totalWidthFilters" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/Bson"
-            }
-          },
-          "shoeWidthFilters" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/Bson"
-            }
-          },
-          "crestWidthFilters" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/Bson"
-            }
+          "matchScore" : {
+            "format" : "double",
+            "type" : "number"
           }
         }
       },
       "DieType" : {
         "enum" : [ "MONOCOLORE", "BICOLORE", "TRICOLORE" ],
         "type" : "string"
+      },
+      "ErrorWrapper" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string"
+          }
+        }
+      },
+      "IdWrapper" : {
+        "type" : "object",
+        "properties" : {
+          "id" : { }
+        }
+      },
+      "LocalDateTime" : {
+        "format" : "date-time",
+        "type" : "string",
+        "example" : "2022-03-10T12:15:50"
       },
       "MaterialType" : {
         "enum" : [ "TPU", "PVC", "TR", "POLIETILENE" ],

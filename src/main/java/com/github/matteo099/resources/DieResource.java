@@ -1,9 +1,16 @@
 package com.github.matteo099.resources;
 
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.jboss.logging.Logger;
 
 import com.github.matteo099.model.dao.DieDao;
 import com.github.matteo099.model.dao.DieSearchDao;
+import com.github.matteo099.model.entities.Die;
+import com.github.matteo099.model.projections.DieSearchResult;
 import com.github.matteo099.model.wrappers.ErrorWrapper;
 import com.github.matteo099.model.wrappers.IdWrapper;
 import com.github.matteo099.services.DieService;
@@ -31,11 +38,15 @@ public class DieResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/create-die")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Die created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = IdWrapper.class))),
+            @APIResponse(responseCode = "500", description = "Unable to create die", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorWrapper.class)))
+    })
     public Response createDie(DieDao die) {
         try {
             logger.info("creating die");
             String id = dieService.createDie(die);
-            dieService.new RandomDieService().saveRamdonDies(1000);
+            dieService.new RandomDieService().saveRamdonDies(20);
             return Response.ok().entity(IdWrapper.of(id)).build();
         } catch (Exception e) {
             e.printStackTrace();
@@ -46,6 +57,10 @@ public class DieResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/list-dies")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "List dies", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(type = SchemaType.ARRAY, implementation = Die.class))),
+            @APIResponse(responseCode = "500", description = "Unable to list dies", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorWrapper.class)))
+    })
     public Response listDies() {
         try {
             logger.info("listing dies");
@@ -61,6 +76,10 @@ public class DieResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/die/{id}")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Get die", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Die.class))),
+            @APIResponse(responseCode = "500", description = "Unable to get die", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorWrapper.class)))
+    })
     public Response getDie(String id) {
         try {
             logger.info("finding die with id " + id);
@@ -90,6 +109,10 @@ public class DieResource {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/search-dies")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Search dies", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(type = SchemaType.ARRAY, implementation = DieSearchResult.class))),
+            @APIResponse(responseCode = "500", description = "Unable to search dies", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorWrapper.class)))
+    })
     public Response searchDies(DieSearchDao searchDieDao,
             @QueryParam("threshold") @DefaultValue("1000.0") Float threshold) {
         try {

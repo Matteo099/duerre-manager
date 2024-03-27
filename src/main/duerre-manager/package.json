@@ -13,7 +13,8 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --build --force",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "apigen": "npx openapicmd typegen ./src/plugins/http/openapi.yaml > ./src/plugins/http/openapi.d.ts"
   },
   "dependencies": {
     "@vee-validate/yup": "^4.12.6",
@@ -25,6 +26,7 @@
     "vee-validate": "^4.12.6",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0",
+    "vue3-toastify": "^0.2.1",
     "vuetify": "^3.5.11"
   },
   "devDependencies": {

@@ -1,7 +1,9 @@
 import type { AxiosError, AxiosResponse } from "axios";
 import OpenAPIClientAxios from "openapi-client-axios";
 import type { App } from "vue";
-import type { DuerreManagerClient } from "./openapi";
+import type { Client as DuerreManagerClient } from "./openapi";
+import Client from "./openapi";
+import { toast } from "vue3-toastify";
 
 export class GaussService {
     public client!: Promise<DuerreManagerClient>;
@@ -37,13 +39,14 @@ export class GaussService {
     }
 
     private handleResponseOk(response: AxiosResponse) {
-        console.log('axios response ok', response)
+        // console.log('axios response ok', response)
         return response
     }
 
     private async handleResponseError(error: AxiosError) {
         console.error('axios response error', error)
-        console.log('axios response error.response?.status = ', error.response?.status)
+        // console.log('axios response error.response?.status = ', error.response?.status)
+        toast.error((error.response?.data as Client.Components.Schemas.ErrorWrapper)?.message || "Generic error");
 
         if (error.response?.status === 401 || error.response?.status === 403) {
             // const store = useAuthStore()

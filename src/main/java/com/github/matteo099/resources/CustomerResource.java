@@ -1,7 +1,13 @@
 package com.github.matteo099.resources;
 
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.jboss.logging.Logger;
 
+import com.github.matteo099.model.entities.Customer;
 import com.github.matteo099.model.wrappers.ErrorWrapper;
 import com.github.matteo099.services.CustomerService;
 
@@ -21,10 +27,13 @@ public class CustomerResource {
     @Inject
     Logger logger;
 
-
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/list-customers")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "List customers", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(type = SchemaType.ARRAY, implementation = Customer.class))),
+            @APIResponse(responseCode = "500", description = "Unable to list customers", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorWrapper.class)))
+    })
     public Response listCustomers() {
         try {
             logger.info("listing customers");
