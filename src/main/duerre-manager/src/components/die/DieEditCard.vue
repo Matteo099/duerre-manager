@@ -4,8 +4,8 @@
     height="200"
     image="https://cdn.vuetifyjs.com/images/cards/docks.jpg"
     width="200"
-    link
-    @click="$emit('edit', 0)"
+    :link="editable"
+    @click="onEdit"
   >
     <v-container v-if="editable" class="h-100" fluid>
       <v-row class="h-100" align="center" no-gutters>
@@ -18,13 +18,25 @@
 </template>
 
 <script setup lang="ts">
+import Client from '@/plugins/http/openapi'
+import { inject } from 'vue'
+
+type DieEdit = string | Client.Components.Schemas.Die | Client.Components.Schemas.DieDao
 interface DieEditCardProp {
-  image?: string
+  die?: DieEdit
   editable?: boolean
 }
 
 const props = defineProps<DieEditCardProp>()
 const emit = defineEmits<{
-  edit: [id: number]
+  edit: [dieEdit?: DieEdit]
 }>()
+const edit = inject<(dieEdit?: DieEdit) => void>('edit')
+
+function onEdit() {
+  if (!props.editable) return
+
+  emit('edit', props.die)
+  edit?.(props.die)
+}
 </script>

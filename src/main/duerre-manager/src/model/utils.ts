@@ -1,3 +1,5 @@
+import Client from "@/plugins/http/openapi"
+
 export class Utils {
 
     public static generateRandomText(numParagraphs: number, numSentencesPerParagraph: number): string {

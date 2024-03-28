@@ -13,6 +13,11 @@ const router = createRouter({
       path: '/dashboard',
       name: 'dashboard',
       component: () => import('../views/DashboardView.vue')
+    },
+    {
+      path: '/create-die',
+      name: 'createDie',
+      component: () => import('../views/CreateDieView.vue')
     }
   ]
 })

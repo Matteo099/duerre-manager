@@ -30,81 +30,13 @@
     </v-text-field>
 
     <v-expand-transition>
-      <v-container class="py-0" v-show="more" fluid>
-        <v-row align="center" no-glutters>
-          <v-col cols="auto">
-            <DieEditCard :editable="true" />
-          </v-col>
-          <v-col>
-            <v-row no-glutters>
-              <v-text-field v-model="email" v-bind="emailProps" label="Email" type="email" />
-            </v-row>
-            <v-row no-glutters>
-              <v-text-field
-                v-model="password"
-                v-bind="passwordProps"
-                label="Password"
-                type="password"
-              />
-            </v-row>
-          </v-col>
-        </v-row>
-
-        <v-row no-glutters>
-          <v-col>
-            <v-text-field
-              v-model="passwordConfirm"
-              v-bind="confirmProps"
-              label="Password confirmation"
-              type="password"
-            />
-          </v-col>
-          <v-col>
-            <v-text-field />
-          </v-col>
-        </v-row>
-
-        <v-row no-glutters>
-          <v-col cols="12" sm="3">
-            <v-text-field />
-          </v-col>
-          <v-col cols="12" sm="3">
-            <v-text-field />
-          </v-col>
-          <v-col cols="12" sm="3">
-            <v-text-field />
-          </v-col>
-          <v-col cols="12" sm="3">
-            <v-text-field />
-          </v-col>
-        </v-row>
-
-        <v-checkbox v-model="terms" v-bind="termsProps" label="Do you agree?" color="primary" />
-        <v-btn color="outline" class="ml-4" @click="resetForm()"> Reset </v-btn>
-      </v-container>
+      <DieDataEdit class="py-0" v-show="more"/>
     </v-expand-transition>
   </v-form>
-
-  <!-- <v-form @submit="onSubmit" class="px-4">
-    <v-text-field v-model="name" v-bind="nameProps" label="Name" />
-    <v-text-field v-model="email" v-bind="emailProps" label="Email" type="email" />
-    <v-text-field v-model="password" v-bind="passwordProps" label="Password" type="password" />
-    <v-text-field
-      v-model="passwordConfirm"
-      v-bind="confirmProps"
-      label="Password confirmation"
-      type="password"
-    />
-
-    <v-checkbox v-model="terms" v-bind="termsProps" label="Do you agree?" color="primary" />
-
-    <v-btn color="primary" type="submit"> Submit </v-btn>
-    <v-btn color="outline" class="ml-4" @click="resetForm()"> Reset </v-btn>
-  </v-form> -->
 </template>
 
 <script setup lang="ts">
-import DieEditCard from './die/DieEditCard.vue'
+import DieDataEdit from './die/DieDataEdit.vue';
 import { useForm, type GenericObject } from 'vee-validate'
 import { ref } from 'vue'
 import * as yup from 'yup'
@@ -134,10 +66,7 @@ const vuetifyConfig = (state: any) => ({
 })
 
 const [text, textProps] = defineField('text', vuetifyConfig)
-const [email, emailProps] = defineField('email', vuetifyConfig)
-const [password, passwordProps] = defineField('password', vuetifyConfig)
-const [passwordConfirm, confirmProps] = defineField('passwordConfirm', vuetifyConfig)
-const [terms, termsProps] = defineField('terms', vuetifyConfig)
+
 const searching = ref(false)
 const more = ref(false)
 

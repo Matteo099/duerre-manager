@@ -12,6 +12,15 @@
         <!-- <v-sheet class="ma-2 pa-2">{{ generateRandomText(1, 4) }}</v-sheet> -->
       </v-col>
     </v-row>
+    <v-fab
+        color="success"
+        icon="mdi-plus"
+        size="64"
+        to="/create-die"
+        fixed
+        app
+        appear
+      ></v-fab>
   </div>
 </template>
 
