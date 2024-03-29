@@ -1,12 +1,22 @@
 <template>
   <v-container fluid>
-    <v-row align="center" no-glutters>
+    <v-row class="mt-2" align="center" no-glutters>
       <v-col cols="auto">
+        v-model="dieM" v-bind="dieMProps"
         <DieEditCard :editable="editable" :die="die" />
       </v-col>
       <v-col>
         <v-row no-glutters>
           <v-text-field v-model="code" v-bind="codeProps" label="Codice" />
+        </v-row>
+        <v-row no-glutters>
+          <v-combobox
+            clearable
+            v-model="customer"
+            v-bind="customerProps"
+            label="Cliente"
+            :items="customers"
+          ></v-combobox>
         </v-row>
         <v-row no-glutters>
           <v-combobox
@@ -18,49 +28,68 @@
             v-bind="aliasesProps"
           ></v-combobox>
         </v-row>
-        <v-row no-glutters>
-          <v-text-field v-model="customer" v-bind="customerProps" label="Cliente" />
-        </v-row>
       </v-col>
     </v-row>
 
     <v-row no-glutters>
       <v-col>
-        <v-autocomplete
-          ref="material"
-          v-model="material"
+        <v-select
           v-bind="materialProps"
-          :items="materials"
+          v-model="material"
           label="Materiale"
+          :items="materials"
           placeholder="Seleziona un materiale..."
           required
-        ></v-autocomplete>
+        ></v-select>
       </v-col>
       <v-col>
-        <v-autocomplete
-          ref="dieType"
-          v-model="dieType"
+        <v-select
           v-bind="dieTypeProps"
-          :items="dieTypes"
+          v-model="dieType"
           label="Colore"
+          :items="dieTypes"
           placeholder="Seleziona un tipo di stampo..."
           required
-        ></v-autocomplete>
+        ></v-select>
       </v-col>
     </v-row>
 
     <v-row no-glutters>
       <v-col cols="12" sm="3">
-        <v-text-field />
+        <v-text-field
+          v-bind="totalWidthProps"
+          v-model="totalWidth"
+          label="Larghezza Totale"
+          suffix="mm"
+          type="number"
+        ></v-text-field>
       </v-col>
       <v-col cols="12" sm="3">
-        <v-text-field />
+        <v-text-field
+          v-bind="totalHeightProps"
+          v-model="totalHeight"
+          label="Altezza Totale"
+          suffix="mm"
+          type="number"
+        ></v-text-field>
       </v-col>
       <v-col cols="12" sm="3">
-        <v-text-field />
+        <v-text-field
+          v-bind="shoeWidthProps"
+          v-model="shoeWidth"
+          label="Larghezza Scarpetta"
+          suffix="mm"
+          type="number"
+        ></v-text-field>
       </v-col>
       <v-col cols="12" sm="3">
-        <v-text-field />
+        <v-text-field
+          v-bind="crestWidthProps"
+          v-model="crestWidth"
+          label="Larghezza Cresta"
+          suffix="mm"
+          type="number"
+        ></v-text-field>
       </v-col>
     </v-row>
 
@@ -97,6 +126,7 @@ const die = ref<Client.Components.Schemas.Die | Client.Components.Schemas.DieDao
 const http = useHttp()
 const materials = ref<Client.Components.Schemas.MaterialType[]>(['TPU', 'PVC', 'TR', 'POLIETILENE'])
 const dieTypes = ref<Client.Components.Schemas.DieType[]>(['MONOCOLORE', 'BICOLORE', 'TRICOLORE'])
+const customers = ref<string[]>(['Test'])
 
 provide('edit', edit)
 provide('visible', visible)
@@ -106,15 +136,16 @@ watch(
 )
 
 const schema = yup.object({
+  // dieM: yup.string().required().label('Die'),
   code: yup.string().required().label('Codice'),
-  aliases: yup.array().of(yup.string()).label("Aliases"),
+  aliases: yup.array().of(yup.string()).label('Aliases'),
   customer: yup.string().required().label('Cliente'),
   material: yup.string().required().label('Materiale'),
   dieType: yup.string().required().label('Colore'),
-  totalWidth: yup.number().required().label('Larghezza Totale'),
-  totalHeight: yup.number().required().label('Altezza Totale'),
-  shoeWidth: yup.number().required().label('Larghezza Scarpetta'),
-  crestWidth: yup.number().required().label('Larghezza Cresta')
+  totalWidth: yup.number().required().positive().label('Larghezza Totale'),
+  totalHeight: yup.number().required().positive().label('Altezza Totale'),
+  shoeWidth: yup.number().required().positive().label('Larghezza Scarpetta'),
+  crestWidth: yup.number().required().positive().label('Larghezza Cresta')
 })
 
 const { defineField, handleSubmit, resetForm } = useForm({
@@ -127,11 +158,16 @@ const vuetifyConfig = (state: any) => ({
   }
 })
 
+const [dieM, dieMProps] = defineField('dieM', vuetifyConfig)
 const [code, codeProps] = defineField('code', vuetifyConfig)
 const [aliases, aliasesProps] = defineField('aliases', vuetifyConfig)
 const [customer, customerProps] = defineField('customer', vuetifyConfig)
 const [material, materialProps] = defineField('material', vuetifyConfig)
 const [dieType, dieTypeProps] = defineField('dieType', vuetifyConfig)
+const [totalWidth, totalWidthProps] = defineField('totalWidth', vuetifyConfig)
+const [totalHeight, totalHeightProps] = defineField('totalHeight', vuetifyConfig)
+const [shoeWidth, shoeWidthProps] = defineField('shoeWidth', vuetifyConfig)
+const [crestWidth, crestWidthProps] = defineField('crestWidth', vuetifyConfig)
 
 const onSubmit = handleSubmit((values) => {
   console.log('Submitted with', values)
