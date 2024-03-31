@@ -1,5 +1,7 @@
 package com.github.matteo099.resources;
 
+import java.util.NoSuchElementException;
+
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -46,7 +48,7 @@ public class DieResource {
         try {
             logger.info("creating die");
             String id = dieService.createDie(die);
-            dieService.new RandomDieService().saveRamdonDies(20);
+            //dieService.new RandomDieService().saveRamdonDies(20);
             return Response.ok().entity(IdWrapper.of(id)).build();
         } catch (Exception e) {
             e.printStackTrace();
@@ -78,12 +80,16 @@ public class DieResource {
     @Path("/die/{id}")
     @APIResponses({
             @APIResponse(responseCode = "200", description = "Get die", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Die.class))),
+            @APIResponse(responseCode = "404", description = "Die not found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorWrapper.class))),
             @APIResponse(responseCode = "500", description = "Unable to get die", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorWrapper.class)))
     })
     public Response getDie(String id) {
         try {
             logger.info("finding die with id " + id);
             return Response.ok().entity(dieService.findDie(id).orElseThrow()).build();
+        } catch (NoSuchElementException e) {
+            e.printStackTrace();
+            return Response.status(404).entity(ErrorWrapper.of(e)).build();
         } catch (Exception e) {
             e.printStackTrace();
             return Response.serverError().entity(ErrorWrapper.of(e)).build();

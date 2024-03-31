@@ -6,7 +6,7 @@
       </v-col>
       <v-col>
         <v-row no-glutters>
-          <v-text-field v-model="code" v-bind="codeProps" label="Codice" />
+          <v-text-field v-model="name" v-bind="nameProps" label="Codice" />
         </v-row>
         <v-row no-glutters>
           <v-combobox clearable v-model="customer" v-bind="customerProps" label="Cliente"
@@ -56,11 +56,11 @@
 
 <script setup lang="ts">
 import DieEditCard from '@/components/die/DieEditCard.vue'
-import type { IDieDataDao } from '@/model/manager/models/idie-data-dao'
 import { useHttp } from '@/plugins/http'
 import Client from '@/plugins/http/openapi'
-import { defineRule, useForm } from 'vee-validate'
-import { onMounted, provide, ref, watch } from 'vue'
+import { useForm, type GenericObject, type InvalidSubmissionContext } from 'vee-validate'
+import { onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import * as yup from 'yup'
 
 interface DieDataEditProps {
@@ -82,8 +82,13 @@ watch(
   () => loadDie(props.dieId)
 )
 
+const emit = defineEmits<{
+  (e: 'onSuccess', res?: GenericObject): void,
+  (e: 'onFail', res?: InvalidSubmissionContext<GenericObject>): void,
+}>()
+
 const schema = yup.object({
-  code: yup.string().required("Il Codice è necessario").label('Codice'),
+  name: yup.string().required("Il Codice è necessario").label('Codice'),
   aliases: yup.array().of(yup.string()).label('Aliases'),
   customer: yup.string().required("Il cliente è obbligatorio").label('Cliente'),
   dieData: yup.object().required("Il disegno dello stampo è obbligatorio").test({
@@ -111,7 +116,7 @@ const vuetifyConfig = (state: any) => ({
   }
 })
 
-const [code, codeProps] = defineField('code', vuetifyConfig)
+const [name, nameProps] = defineField('name', vuetifyConfig)
 const [customer, customerProps] = defineField('customer', vuetifyConfig)
 const [aliases, aliasesProps] = defineField('aliases', vuetifyConfig)
 const [dieData, dieDataProps] = defineField('dieData', vuetifyConfig)
@@ -124,10 +129,12 @@ const [crestWidth, crestWidthProps] = defineField('crestWidth', vuetifyConfig)
 
 console.log(dieDataProps)
 
-const onSubmit = handleSubmit((values) => {
+const onSubmit = handleSubmit(async (values: GenericObject) => {
   console.log('Submitted with', values)
+  emit('onSuccess', values);
 }, err => {
   console.log(err)
+  emit('onFail', err);
 })
 
 
@@ -159,7 +166,7 @@ async function loadDie(id?: string) {
       shoeWidth: 1,
       crestWidth: 1,
     };
-    code.value = die.name;
+    name.value = die.name;
     customer.value = die.customer?.name;
     aliases.value = die.aliases;
     dieData.value = die.dieData;
@@ -176,7 +183,7 @@ async function loadDie(id?: string) {
   const res = await client.getDie({ id })
   const die = res.data
 
-  code.value = die.name;
+  name.value = die.name;
   customer.value = die.customer?.name;
   aliases.value = die.aliases;
   dieData.value = die.dieData;

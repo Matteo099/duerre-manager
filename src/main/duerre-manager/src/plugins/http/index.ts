@@ -1,16 +1,19 @@
 import type { AxiosError, AxiosResponse } from "axios";
 import OpenAPIClientAxios from "openapi-client-axios";
 import type { App } from "vue";
+import { toast } from "vue3-toastify";
 import type { Client as DuerreManagerClient } from "./openapi";
 import Client from "./openapi";
-import { toast } from "vue3-toastify";
+import { useRoute, useRouter } from "vue-router";
 
 export class GaussService {
     public client!: Promise<DuerreManagerClient>;
     public authToken?: string
     public refToken?: string
+    private router?: any
 
-    public createClient() {
+    public createClient(router?: any) {
+        this.router = router ?? useRouter();
         this.client = this.createClientAsync();
     }
 
@@ -34,7 +37,7 @@ export class GaussService {
 
         // **** RESPONSE
         // Unauthorized response
-        client.interceptors.response.use(this.handleResponseOk, this.handleResponseError)
+        client.interceptors.response.use(this.handleResponseOk, e => this.handleResponseError(e))
         return client;
     }
 
@@ -46,11 +49,16 @@ export class GaussService {
     private async handleResponseError(error: AxiosError) {
         console.error('axios response error', error)
         // console.log('axios response error.response?.status = ', error.response?.status)
-        toast.error((error.response?.data as Client.Components.Schemas.ErrorWrapper)?.message || "Generic error");
 
-        if (error.response?.status === 401 || error.response?.status === 403) {
+
+        if (error.response?.status === 404) {
+            this.router?.push("/not-found");
+        }
+        else if (error.response?.status === 401 || error.response?.status === 403) {
             // const store = useAuthStore()
             // store.keycloak?.logout()
+        } else {
+            toast.error((error.response?.data as Client.Components.Schemas.ErrorWrapper)?.message || "Generic error");
         }
     }
 }
@@ -58,7 +66,7 @@ export class GaussService {
 const client = new GaussService();
 const http = {
     async install(app: App) {
-        client.createClient();
+        client.createClient(app.config.globalProperties.$router);
         app.provide("$http", client);
     }
 }

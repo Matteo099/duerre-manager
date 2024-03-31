@@ -74,10 +74,8 @@ public class DieService {
         return Die.findByIdOptional(id);
     }
 
-
-
     public class RandomDieService {
-        
+
         private static final Random random = new Random();
 
         public void saveRamdonDies(int number) throws DieAlreadyExists {
@@ -85,10 +83,10 @@ public class DieService {
                 var dieDao = randomDieDao(i);
                 dieDao.name += i;
                 String id = createDie(dieDao);
-                System.out.println("Saving " + id + " - " + i + "/1000");
+                System.out.println("Saving " + id + " - " + i + "/" + number);
             }
-        }    
-    
+        }
+
         private static String randomString(int length) {
             int leftLimit = 97; // letter 'a'
             int rightLimit = 122; // letter 'z'
@@ -99,7 +97,7 @@ public class DieService {
             }
             return buffer.toString();
         }
-    
+
         private static DieDataDao randomDieDataDao() {
             int numShapes = random.nextInt(5) + 1; // Random number of shapes, at least 1
             List<DieDataShapeDao> shapes = new ArrayList<>();
@@ -108,7 +106,7 @@ public class DieService {
             }
             return DieDataDao.builder().state(shapes).build();
         }
-    
+
         private static DieDataShapeDao randomDieDataShapeDao() {
             String type = randomShapeType();
             List<Double> points = new ArrayList<>();
@@ -117,19 +115,19 @@ public class DieService {
             }
             return DieDataShapeDao.builder().type(type).points(points).build();
         }
-    
+
         private static String randomShapeType() {
             String[] types = { "line", "bezier" }; // Example shape types
             return types[random.nextInt(types.length)];
         }
-    
+
         private static DieDao randomDieDao(int seed) {
             int numAliases = random.nextInt(5); // Random number of aliases, up to 4
             List<String> aliases = new ArrayList<>();
             for (int i = 0; i < numAliases; i++) {
                 aliases.add(randomString(8)); // Generate random alias with length 8
             }
-    
+
             return DieDao.builder()
                     .name(randomString(4))
                     .dieData(randomDieDataDao()) // Assuming you have a default constructor for DieDataDao
@@ -143,6 +141,6 @@ public class DieService {
                     .crestWidth(random.nextDouble() * 8)
                     .build();
         }
-        
+
     }
 }

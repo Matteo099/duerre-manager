@@ -18,7 +18,18 @@ const router = createRouter({
       path: '/create-die',
       name: 'createDie',
       component: () => import('../views/CreateDieView.vue')
-    }
+    },
+    {
+      path: '/die/:id',
+      name: 'visualizeDie',
+      component: () => import('../views/DieView.vue')
+    },
+
+    
+    {
+      path: "/:pathMatch(.*)*",
+      component: () => import('../views/NotFoundView.vue'),
+    },
   ]
 })
 

@@ -103,6 +103,16 @@
               }
             }
           },
+          "404" : {
+            "description" : "Die not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorWrapper"
+                }
+              }
+            }
+          },
           "500" : {
             "description" : "Unable to get die",
             "content" : {

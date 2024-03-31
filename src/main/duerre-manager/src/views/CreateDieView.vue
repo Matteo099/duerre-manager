@@ -1,18 +1,31 @@
 <template>
-  <DieDataEdit :editable="true" :die-id="id" />
+  <DieDataEdit :editable="true" :die-id="id" @on-success="onSuccess" @on-fail="onFail" />
 </template>
 
 <script setup lang="ts">
 import DieDataEdit from '@/components/die/DieDataEdit.vue'
 import { useHttp } from '@/plugins/http'
 import Client from '@/plugins/http/openapi'
-import { onMounted } from 'vue'
-import { watch } from 'vue'
-import { ref } from 'vue'
+import type { GenericObject } from 'vee-validate'
 import { useRouter } from 'vue-router'
+import { toast } from 'vue3-toastify'
 
 const router = useRouter()
 const http = useHttp()
 const props = defineProps<{ id?: string }>()
-const die = ref<Client.Components.Schemas.Die>()
+
+async function onSuccess(values?: GenericObject) {
+  const die: Client.Components.Schemas.DieDao = { ...values };
+  const client = await http.client
+  const res = await client.createDie(null, die)
+  console.log(res);
+  if (res.status == 200) {
+    router.push("/die/" + res.data.id).then(_ => {
+      toast.success("Lo stampo è stato creato!");
+    })
+  }
+}
+function onFail() {
+  toast.warn("Ci sono alcuni errori! Inserisci correttamente i dati");
+}
 </script>
