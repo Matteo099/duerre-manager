@@ -80,8 +80,8 @@ export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurabl
     }
 
     public destroy() {
-        UnscaleManager.instance?.unregisterObject(this.text.text);
-        UnscaleManager.instance?.unregisterObject(this.extShape.shape);
+        UnscaleManager.getInstance()?.unregisterObject(this.text.text);
+        UnscaleManager.getInstance()?.unregisterObject(this.extShape.shape);
 
         this.group.destroy();
     }

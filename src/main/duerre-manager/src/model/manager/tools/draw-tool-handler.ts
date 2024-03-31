@@ -137,7 +137,7 @@ export class DrawToolHandler extends ToolHandler {
                 stroke: '#00ff00',
                 strokeWidth: 2,
             });
-            UnscaleManager.instance?.registerShape(circle);
+            UnscaleManager.getInstance()?.registerShape(circle);
             return circle;
         });
         this.animationLayer?.add(...endpoints);
@@ -159,7 +159,7 @@ export class DrawToolHandler extends ToolHandler {
         this.animationTimer = undefined;
         this.anim?.stop();
         this.anim = undefined;
-        UnscaleManager.instance?.unregisterLayer(this.animationLayer);
+        UnscaleManager.getInstance()?.unregisterLayer(this.animationLayer);
         this.animationLayer?.clear();
         this.animationLayer?.destroyChildren();
     }
@@ -174,11 +174,11 @@ export class DrawToolHandler extends ToolHandler {
             strokeWidth: 3,
         });
         this.gizmoLayer?.add(pointerCircle);
-        UnscaleManager.instance?.registerShape(pointerCircle);
+        UnscaleManager.getInstance()?.registerShape(pointerCircle);
     }
 
     private clearGitzmos() {
-        UnscaleManager.instance?.unregisterLayer(this.gizmoLayer);
+        UnscaleManager.getInstance()?.unregisterLayer(this.gizmoLayer);
 
         this.gizmoLayer?.clear();
         this.gizmoLayer?.destroyChildren();

@@ -32,7 +32,7 @@ export class EraserToolHandler extends ToolHandler {
             lineJoin: 'round',
             points: [],
         });
-        UnscaleManager.instance?.registerShape(trail);
+        UnscaleManager.getInstance()?.registerShape(trail);
         this.editor.layer.add(trail);
 
         let acc = 0;
@@ -101,7 +101,7 @@ export class EraserToolHandler extends ToolHandler {
 
         this.shapesToDelete.forEach(s => {
             this.editor.state.remove(s);
-            UnscaleManager.instance?.unregisterObject(s as any);
+            UnscaleManager.getInstance()?.unregisterObject(s as any);
         });
     }
 

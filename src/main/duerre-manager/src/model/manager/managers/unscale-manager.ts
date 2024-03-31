@@ -80,20 +80,27 @@ class UnscaleFunctionImpl<T extends Konva.Shape, P extends keyof T> extends Unsc
     }
 }
 
-
+export const UPDATE = "UPDATE";
 export class UnscaleManager {
 
-    private editor: IDieEditor;
-    private zoomManager: ZoomManager;
+    private editor?: IDieEditor;
+    private zoomManager?: ZoomManager;
     private registeredObjects: Map<Konva.Shape, UnscaleFunction<Konva.Shape, any>[]> = new Map();
+    private flags: Map<string, boolean> = new Map([
+        [UPDATE, true]
+    ]);
 
-    public static instance?: UnscaleManager;
-
-    constructor(editor: IDieEditor, zoomManager: ZoomManager) {
-        this.editor = editor;
-        this.zoomManager = zoomManager;
-        UnscaleManager.instance = this;
+    private static instance?: UnscaleManager;
+    public static getInstance(): UnscaleManager {
+        if (!UnscaleManager.instance) UnscaleManager.instance = new UnscaleManager();
+        return UnscaleManager.instance;
     }
+
+    // constructor(editor: IDieEditor, zoomManager: ZoomManager) {
+    //     this.editor = editor;
+    //     this.zoomManager = zoomManager;
+    //     UnscaleManager.instance = this;
+    // }
 
     public registerShape<S extends Konva.Shape | Konva.Line | Konva.Rect | Konva.Circle | Konva.Text>(object: S, ...attionalFncs: UnscaleFnc<S>[]) {
         if (object instanceof Konva.Line) {
@@ -148,7 +155,21 @@ export class UnscaleManager {
         }
     }
 
+    public registerEditor(editor: IDieEditor, zoomManager: ZoomManager) {
+        this.editor = editor;
+        this.zoomManager = zoomManager;
+    }
+
+    public unregisterEditor() {
+        this.editor = undefined;
+        this.zoomManager = undefined;
+    }
+
+
     public update(object?: Konva.Shape) {
+        if (!this.zoomManager) return;
+        if (this.flags.get(UPDATE) == false) return;
+
         const scale = this.zoomManager.currentScale;
 
         if (object) {
@@ -167,5 +188,13 @@ export class UnscaleManager {
         }
 
         console.log("Updated " + this.registeredObjects.size);
+    }
+
+    setFlag(flag: string, value: boolean) {
+        this.flags.set(flag, value)
+    }
+
+    getFlag(flag: string): boolean | undefined {
+        return this.flags.get(flag)
     }
 }

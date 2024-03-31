@@ -39,6 +39,7 @@ export class DieEditorManager implements IDieEditor {
     private gridManager!: GridManager;
     private unscaleManager!: UnscaleManager;
     private _guidlinesManager!: GuidelinesManager;
+    private useToolCbk?: () => void;
 
 
     public get stage(): Konva.Stage { return this._stage; }
@@ -60,6 +61,10 @@ export class DieEditorManager implements IDieEditor {
         this._state = new DieState();
         this.stage.add(this.layer);
         this.zoom({});
+    }
+
+    public onUseTool(useToolCbk: () => void) {
+        this.useToolCbk = useToolCbk;
     }
 
     private createCanvas(stageContainer: Ref<HTMLDivElement>) {
@@ -89,7 +94,8 @@ export class DieEditorManager implements IDieEditor {
     private createManagers() {
         this._guidlinesManager = new GuidelinesManager(this);
         this._zoomManager = new ZoomManager(this);
-        this.unscaleManager = new UnscaleManager(this, this._zoomManager);
+        this.unscaleManager = UnscaleManager.getInstance();
+        this.unscaleManager.registerEditor(this, this._zoomManager);
         this.gridManager = new GridManager(this);
         this.gridManager.draw();
     }
@@ -207,7 +213,8 @@ export class DieEditorManager implements IDieEditor {
 
     public useTool(tool: Tool) {
         this._selectedTool = tool;
-
+        this.useToolCbk?.();
+        
         this._selectedToolHandler?.onToolDeselected();
         switch (tool) {
             case Tool.EDIT:
@@ -301,6 +308,7 @@ export class DieEditorManager implements IDieEditor {
         this.eraserHandler.destroy();
         this.moveHandler.destroy();
         this.gridManager.destroy();
+        this.unscaleManager.unregisterEditor();
         this.layer.destroy();
         this.stage.destroy();
     }

@@ -59,7 +59,7 @@ export class GridManager {
         this.layer.clear();
         this.layer.destroyChildren();
         this.layer.clipWidth(); // clear any clipping
-        UnscaleManager.instance?.unregisterObjectsIf(o => o.getAttr(GRID_ELEMENT));
+        UnscaleManager.getInstance()?.unregisterObjectsIf(o => o.getAttr(GRID_ELEMENT));
 
         //debugger;
 
@@ -137,7 +137,7 @@ export class GridManager {
             });
             line.setAttr(GRID_LINE, true);
             line.setAttr(GRID_ELEMENT, true);
-            UnscaleManager.instance?.registerShape(line);
+            UnscaleManager.getInstance()?.registerShape(line);
             this.layer.add(line);
         }
         j = 0;
@@ -152,7 +152,7 @@ export class GridManager {
             });
             line.setAttr(GRID_LINE, true);
             line.setAttr(GRID_ELEMENT, true);
-            UnscaleManager.instance?.registerShape(line);
+            UnscaleManager.getInstance()?.registerShape(line);
             this.layer.add(line);
         }
 
@@ -175,7 +175,7 @@ export class GridManager {
             rect.width(viewRect.x2 - viewRect.x1 - sw);
             rect.height(viewRect.y2 - viewRect.y1 - sw);
         });
-        UnscaleManager.instance?.registerShape(rect);
+        UnscaleManager.getInstance()?.registerShape(rect);
         this.layer.add(rect);
 
         // this.layer.add(

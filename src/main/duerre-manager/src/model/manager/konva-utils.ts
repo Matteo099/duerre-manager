@@ -4,6 +4,7 @@ import type { IDieDataShapeDao } from "./models/idie-data-shape-dao";
 import type { ExtendedShape } from "./shape-ext/extended-shape";
 import { LineExt } from "./shape-ext/line-ext";
 import { BezierLineExt } from "./shape-ext/bezier-line-ext";
+import { UPDATE, UnscaleManager } from "./managers/unscale-manager";
 
 export class KonvaUtils {
 
@@ -89,7 +90,7 @@ export class KonvaUtils {
     }
 
     public static findPoint(line: Konva.Line, distance: number): { x: number, y: number } {
-        const points = KonvaUtils.lineToCoords(line);
+        const points = KonvaUtils.lineToCoords(line)
 
         // Calculate the direction vector of the line
         const dx = points.x2 - points.x1;
@@ -109,8 +110,12 @@ export class KonvaUtils {
         return { x: x3, y: y3 };
     }
 
-    public static exportImage(dieState: IDieDataShapeDao[], width: number = 300, height: number = 300, border: number = 10): string {
-        const container = document.createElement("div");
+    public static exportImage(dieState: IDieDataShapeDao[], opts?: Partial<ExportImageOpts>): string {
+        const container = document.createElement("div"),
+            width = opts?.width ?? 300,
+            height = opts?.height ?? 300,
+            border = opts?.border ?? 10;
+
         container.style.display = "none";
         const crpStage = new Konva.Stage({
             container,
@@ -125,6 +130,8 @@ export class KonvaUtils {
         let maxX = -Infinity;
         let maxY = -Infinity;
 
+        const lastUpdate = UnscaleManager.getInstance()?.getFlag(UPDATE);
+        UnscaleManager.getInstance()?.setFlag(UPDATE, false);
 
         const shapes: ExtendedShape<any>[] = [];
         dieState.forEach(s => {
@@ -178,8 +185,16 @@ export class KonvaUtils {
             shape.y(shape.y() + translateY);
         });
 
+        UnscaleManager.getInstance()?.setFlag(UPDATE, lastUpdate || false);
+
         const dataURL = crpStage.toDataURL();
         container.remove();
         return dataURL;
     }
+}
+
+export interface ExportImageOpts {
+    width: number,
+    height: number,
+    border: number
 }

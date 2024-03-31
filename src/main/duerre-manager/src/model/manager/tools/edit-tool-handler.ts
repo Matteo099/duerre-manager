@@ -32,7 +32,7 @@ export class EditToolHandler extends ToolHandler {
 
     override onToolDeselected(): void {
         super.onToolDeselected();
-        UnscaleManager.instance?.unregisterLayer(this.gizmoLayer);
+        UnscaleManager.getInstance()?.unregisterLayer(this.gizmoLayer);
         this.gizmoLayer.removeChildren();
         this.tempSubscriptions.forEach(s => s.unsubscribe());
         this.tempSubscriptions = [];
@@ -91,7 +91,7 @@ export class EditToolHandler extends ToolHandler {
             strokeWidth: 2,
             draggable: true,
         });
-        UnscaleManager.instance?.registerShape(anchor);
+        UnscaleManager.getInstance()?.registerShape(anchor);
         this.gizmoLayer.add(anchor);
 
         // add hover styling

@@ -1,42 +1,73 @@
 <template>
-  <v-card
-    class="mx-auto"
-    height="200"
-    image="https://cdn.vuetifyjs.com/images/cards/docks.jpg"
-    width="200"
-    :link="editable"
-    @click="onEdit"
-  >
-    <v-container v-if="editable" class="h-100" fluid>
-      <v-row class="h-100" align="center" no-gutters>
-        <v-col class="text-center">
-          <v-icon color="success" icon="mdi-pencil"> </v-icon>
-        </v-col>
-      </v-row>
-    </v-container>
-  </v-card>
+  <div class="v-input--center-affix v-input--error">
+    <v-card class="mx-auto" height="200" :image="image" width="200" :link="true" @click="edit">
+      <v-container class="h-100" fluid>
+        <v-row class="h-100" align="center" no-gutters>
+          <v-col class="text-center">
+            <v-icon color="success" icon="mdi-pencil"> </v-icon>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-card>
+    <div class="v-input__details">
+      <div class="v-messages__message v-messages" role="alert">
+        <span>{{ error }}</span>
+      </div>
+    </div>
+
+    <teleport to="body">
+      <DieEditorWrapper v-model="model" :dialog="true" @close="close" />
+    </teleport>
+  </div>
 </template>
 
 <script setup lang="ts">
-import Client from '@/plugins/http/openapi'
-import { inject } from 'vue'
+import { KonvaUtils } from '@/model/manager/konva-utils';
+import type { IDieDataDao } from '@/model/manager/models/idie-data-dao';
+import { onBeforeUnmount, onMounted, provide, ref, watch } from 'vue';
+import DieEditorWrapper from './DieEditorWrapper.vue';
 
-type DieEdit = string | Client.Components.Schemas.Die | Client.Components.Schemas.DieDao
-interface DieEditCardProp {
-  die?: DieEdit
-  editable?: boolean
+const model = defineModel<IDieDataDao>();
+const props = defineProps<{ errorMessages: string[] }>()
+const error = ref("");
+const image = ref("https://cdn.vuetifyjs.com/images/cards/docks.jpg");
+
+watch(
+  () => props.errorMessages,
+  () => error.value = props.errorMessages.length == 0 ? "" : props.errorMessages[0]
+)
+watch(
+  model,
+  () => calculateImage()
+)
+const visible = ref(false)
+provide('visible', visible)
+
+function edit() {
+  console.log(props);
+  console.log(props.errorMessages)
+  visible.value = true
+  console.log("onEdit", model.value, visible.value)
 }
 
-const props = defineProps<DieEditCardProp>()
-const emit = defineEmits<{
-  edit: [dieEdit?: DieEdit]
-}>()
-const edit = inject<(dieEdit?: DieEdit) => void>('edit')
+function close(data?: IDieDataDao) {
+  model.value = data;
+  console.log(props);
 
-function onEdit() {
-  if (!props.editable) return
+  console.log(props.errorMessages)
 
-  emit('edit', props.die)
-  edit?.(props.die)
+  console.log("close", model.value, visible.value);
 }
+
+function calculateImage() {
+  if (model.value)
+    image.value = KonvaUtils.exportImage(model.value?.state, { border: 50 });
+  else image.value = "https://cdn.vuetifyjs.com/images/cards/docks.jpg"
+}
+
+onMounted(() => {
+  calculateImage();
+})
+onBeforeUnmount(() => {
+})
 </script>

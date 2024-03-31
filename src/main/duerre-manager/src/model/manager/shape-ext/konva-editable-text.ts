@@ -32,7 +32,7 @@ export class KonvaEditableText {
         this.editor = editor;
         this.text = new Konva.Text(opts);
         this.text.setAttr(EDITABLE_TEXT, true);
-        UnscaleManager.instance?.registerShape(this.text);    
+        UnscaleManager.getInstance()?.registerShape(this.text);    
         this.text.on('dblclick dbltap', event => this.handleDoubleTap(event));
     }
 

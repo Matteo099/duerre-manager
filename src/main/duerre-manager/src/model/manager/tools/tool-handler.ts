@@ -45,7 +45,7 @@ export abstract class ToolHandler {
 
     clear() {
         this.layers.forEach(l => {
-            UnscaleManager.instance?.unregisterLayer(l);
+            UnscaleManager.getInstance()?.unregisterLayer(l);
             l.removeChildren()
         });
     }

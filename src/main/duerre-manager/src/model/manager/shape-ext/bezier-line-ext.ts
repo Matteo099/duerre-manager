@@ -37,7 +37,7 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
                 ctx.fillStrokeShape(shape);
             }
         });
-        UnscaleManager.instance?.registerShape(bezierLine);
+        UnscaleManager.getInstance()?.registerShape(bezierLine);
 
         this.quadLinePath = new Konva.Line({
             dash: [10, 10, 0, 10],
@@ -49,7 +49,7 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
             points: [0, 0],
         });
         this.quadLinePath.setAttr(REMOVE_ONLY, true);
-        UnscaleManager.instance?.registerShape(this.quadLinePath, UnscaleFunction.unscaleDash);
+        UnscaleManager.getInstance()?.registerShape(this.quadLinePath, UnscaleFunction.unscaleDash);
 
         return bezierLine;
     }

@@ -79,7 +79,7 @@ export class GuidelinesManager {
                     x: pointer.x,
                     y: lg.lineGuide,
                 });
-                UnscaleManager.instance?.registerShape(line, UnscaleFunction.unscaleDash);
+                UnscaleManager.getInstance()?.registerShape(line, UnscaleFunction.unscaleDash);
                 this.layer.add(line);
             } else if (lg.orientation === 'V') {
                 const line = new Konva.Line({
@@ -93,14 +93,14 @@ export class GuidelinesManager {
                     x: lg.lineGuide,
                     y: pointer.y,
                 });
-                UnscaleManager.instance?.registerShape(line, UnscaleFunction.unscaleDash);
+                UnscaleManager.getInstance()?.registerShape(line, UnscaleFunction.unscaleDash);
                 this.layer.add(line);
             }
         });
     }
 
     private deleteGuides() {
-        UnscaleManager.instance?.unregisterLayer(this.layer);
+        UnscaleManager.getInstance()?.unregisterLayer(this.layer);
         this.layer.destroyChildren();
     }
 }

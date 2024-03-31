@@ -18,7 +18,7 @@ export class LineExt extends ExtendedShape<Konva.Line> {
             // add point twice, so we have some drawings even on a simple click
             points: [position.x, position.y, position.x, position.y],
         });
-        UnscaleManager.instance?.registerShape(line);
+        UnscaleManager.getInstance()?.registerShape(line);
         return line;
     }
 
