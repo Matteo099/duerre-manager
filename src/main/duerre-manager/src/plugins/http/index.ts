@@ -21,11 +21,14 @@ export class GaussService {
         const api = new OpenAPIClientAxios({
             definition: import.meta.env.VITE_VUE_APP_OPENAPI_URL
         })
-        api.withServer({
-            url: import.meta.env.VITE_VUE_APP_REST_API_URL,
-            description: 'Duerre Manager Backend'
-        })
-        const client = await api.getClient<DuerreManagerClient>()
+        const client = await api.init<DuerreManagerClient>();
+        
+        // api.withServer({
+        //     url: "", //import.meta.env.VITE_VUE_APP_REST_API_URL,
+        //     description: 'Duerre Manager Backend'
+        // })
+        
+        //const client = await api.getClient<DuerreManagerClient>()
 
         // **** REQUEST
         // Authorization header
