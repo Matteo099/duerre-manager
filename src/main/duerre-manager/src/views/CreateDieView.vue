@@ -1,5 +1,6 @@
 <template>
-  <DieDataEdit :editable="true" :die-id="id" @on-success="onSuccess" @on-fail="onFail" />
+  <h1 align="center">Crea un nuovo stampo</h1>
+  <DieDataEdit :editable="true" @on-success="onSuccess" @on-fail="onFail" />
 </template>
 
 <script setup lang="ts">
@@ -12,7 +13,6 @@ import { toast } from 'vue3-toastify'
 
 const router = useRouter()
 const http = useHttp()
-const props = defineProps<{ id?: string }>()
 
 async function onSuccess(values?: GenericObject) {
   const die: Client.Components.Schemas.DieDao = { ...values };

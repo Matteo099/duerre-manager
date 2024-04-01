@@ -27,10 +27,12 @@ import type { IDieDataDao } from '@/model/manager/models/idie-data-dao';
 import { onBeforeUnmount, onMounted, provide, ref, watch } from 'vue';
 import DieEditorWrapper from './DieEditorWrapper.vue';
 
+const defaultShape = new URL('@/assets/images/polygon.png', import.meta.url).href
+
 const model = defineModel<IDieDataDao>();
-const props = defineProps<{ errorMessages: string[] }>()
+const props = withDefaults(defineProps<{ errorMessages?: string[] }>(), { errorMessages: () => [] as string[] })
 const error = ref("");
-const image = ref("https://cdn.vuetifyjs.com/images/cards/docks.jpg");
+const image = ref(defaultShape);
 
 watch(
   () => props.errorMessages,
@@ -62,7 +64,7 @@ function close(data?: IDieDataDao) {
 function calculateImage() {
   if (model.value)
     image.value = KonvaUtils.exportImage(model.value?.state, { border: 50 });
-  else image.value = "https://cdn.vuetifyjs.com/images/cards/docks.jpg"
+  else image.value = defaultShape
 }
 
 onMounted(() => {

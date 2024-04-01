@@ -15,9 +15,11 @@ import com.github.matteo099.model.entities.Die;
 import com.github.matteo099.model.projections.DieSearchResult;
 import com.github.matteo099.model.wrappers.ErrorWrapper;
 import com.github.matteo099.model.wrappers.IdWrapper;
+import com.github.matteo099.model.wrappers.MessageWrapper;
 import com.github.matteo099.services.DieService;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -48,7 +50,25 @@ public class DieResource {
         try {
             logger.info("creating die");
             String id = dieService.createDie(die);
-            //dieService.new RandomDieService().saveRamdonDies(20);
+            dieService.new RandomDieService().saveRamdonDies(20);
+            return Response.ok().entity(IdWrapper.of(id)).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.serverError().entity(ErrorWrapper.of(e)).build();
+        }
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/edit-die")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Die modified", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = IdWrapper.class))),
+            @APIResponse(responseCode = "500", description = "Unable to modify die", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorWrapper.class)))
+    })
+    public Response editDie(DieDao die) {
+        try {
+            logger.info("editing die");
+            String id = dieService.editDie(die);
             return Response.ok().entity(IdWrapper.of(id)).build();
         } catch (Exception e) {
             e.printStackTrace();
@@ -91,6 +111,27 @@ public class DieResource {
             e.printStackTrace();
             return Response.status(404).entity(ErrorWrapper.of(e)).build();
         } catch (Exception e) {
+            e.printStackTrace();
+            return Response.serverError().entity(ErrorWrapper.of(e)).build();
+        }
+    }
+
+    @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/delete-die/{id}")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Delete die", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = MessageWrapper.class))),
+            //@APIResponse(responseCode = "404", description = "Die not found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorWrapper.class))),
+            @APIResponse(responseCode = "500", description = "Unable to delete die", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorWrapper.class)))
+    })
+    public Response deleteDie(String id) {
+        try {
+            logger.info("deleting die with id " + id);
+            return Response.ok().entity(MessageWrapper.of(dieService.deleteDie(id))).build();
+        } /*catch (NoSuchElementException e) {
+            e.printStackTrace();
+            return Response.status(404).entity(ErrorWrapper.of(e)).build();
+        }*/ catch (Exception e) {
             e.printStackTrace();
             return Response.serverError().entity(ErrorWrapper.of(e)).build();
         }

@@ -211,7 +211,7 @@ export class DieEditorManager implements IDieEditor {
         return points;
     }
 
-    public useTool(tool: Tool) {
+    public useTool(tool?: Tool) {
         this._selectedTool = tool;
         this.useToolCbk?.();
         

@@ -20,12 +20,15 @@ const router = createRouter({
       component: () => import('../views/CreateDieView.vue')
     },
     {
+      path: '/edit-die/:id',
+      name: 'editDie',
+      component: () => import('../views/EditDieView.vue')
+    },
+    {
       path: '/die/:id',
       name: 'visualizeDie',
       component: () => import('../views/DieView.vue')
-    },
-
-    
+    },    
     {
       path: "/:pathMatch(.*)*",
       component: () => import('../views/NotFoundView.vue'),

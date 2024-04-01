@@ -52,6 +52,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorWrapper'
+  /api/v1/die-controller/delete-die/{id}:
+    delete:
+      tags:
+      - Die Resource
+      operationId: deleteDie
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Delete die
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageWrapper'
+        "500":
+          description: Unable to delete die
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWrapper'
   /api/v1/die-controller/die/{id}:
     get:
       tags:
@@ -78,6 +102,29 @@ paths:
                 $ref: '#/components/schemas/ErrorWrapper'
         "500":
           description: Unable to get die
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWrapper'
+  /api/v1/die-controller/edit-die:
+    post:
+      tags:
+      - Die Resource
+      operationId: editDie
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DieDao'
+      responses:
+        "200":
+          description: Die modified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWrapper'
+        "500":
+          description: Unable to modify die
           content:
             application/json:
               schema:
@@ -306,3 +353,7 @@ components:
       - TR
       - POLIETILENE
       type: string
+    MessageWrapper:
+      type: object
+      properties:
+        message: {}

@@ -84,10 +84,32 @@ declare namespace Components {
          */
         export type LocalDateTime = string; // date-time
         export type MaterialType = "TPU" | "PVC" | "TR" | "POLIETILENE";
+        export interface MessageWrapper {
+            message?: any;
+        }
     }
 }
 declare namespace Paths {
     namespace CreateDie {
+        export type RequestBody = Components.Schemas.DieDao;
+        namespace Responses {
+            export type $200 = Components.Schemas.IdWrapper;
+            export type $500 = Components.Schemas.ErrorWrapper;
+        }
+    }
+    namespace DeleteDie {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.MessageWrapper;
+            export type $500 = Components.Schemas.ErrorWrapper;
+        }
+    }
+    namespace EditDie {
         export type RequestBody = Components.Schemas.DieDao;
         namespace Responses {
             export type $200 = Components.Schemas.IdWrapper;
@@ -103,6 +125,7 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.Die;
+            export type $404 = Components.Schemas.ErrorWrapper;
             export type $500 = Components.Schemas.ErrorWrapper;
         }
     }
@@ -151,6 +174,14 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.CreateDie.Responses.$200>
   /**
+   * deleteDie
+   */
+  'deleteDie'(
+    parameters?: Parameters<Paths.DeleteDie.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteDie.Responses.$200>
+  /**
    * getDie
    */
   'getDie'(
@@ -158,6 +189,14 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetDie.Responses.$200>
+  /**
+   * editDie
+   */
+  'editDie'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.EditDie.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.EditDie.Responses.$200>
   /**
    * listDies
    */
@@ -197,6 +236,16 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.CreateDie.Responses.$200>
   }
+  ['/api/v1/die-controller/delete-die/{id}']: {
+    /**
+     * deleteDie
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteDie.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteDie.Responses.$200>
+  }
   ['/api/v1/die-controller/die/{id}']: {
     /**
      * getDie
@@ -206,6 +255,16 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetDie.Responses.$200>
+  }
+  ['/api/v1/die-controller/edit-die']: {
+    /**
+     * editDie
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.EditDie.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.EditDie.Responses.$200>
   }
   ['/api/v1/die-controller/list-dies']: {
     /**

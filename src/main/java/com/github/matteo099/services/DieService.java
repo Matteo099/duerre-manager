@@ -45,6 +45,11 @@ public class DieService {
         return die.getName();
     }
 
+    public String editDie(IDie<?, ?> iDie) throws DieAlreadyExists {
+        deleteDie(iDie.getName());
+        return createDie(iDie);
+    }
+
     public List<Die> listDies() {
         return Die.listAll();
     }
@@ -72,6 +77,10 @@ public class DieService {
 
     public Optional<Die> findDie(String id) {
         return Die.findByIdOptional(id);
+    }
+
+    public boolean deleteDie(String id) {
+        return Die.deleteById(id);
     }
 
     public class RandomDieService {

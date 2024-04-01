@@ -1,28 +1,12 @@
 <template>
   <v-form @submit="onSubmit">
-    <v-text-field
-      v-model="text"
-      v-bind="textProps"
-      label="Text"
-      placeholder="Ricerca per nome o alias"
-      loading
-      clearable
-      @click:clear="clearSearch"
-    >
+    <v-text-field v-model="text" v-bind="textProps" label="Text" placeholder="Ricerca per nome o alias" loading
+      clearable @click:clear="clearSearch">
       <template v-slot:prepend>
-        <v-btn
-          :icon="more ? 'mdi-chevron-up' : 'mdi-chevron-down'"
-          variant="text"
-          @click="showMore"
-        ></v-btn>
+        <v-btn :icon="more ? 'mdi-chevron-up' : 'mdi-chevron-down'" variant="text" @click="showMore"></v-btn>
       </template>
       <template v-slot:loader>
-        <v-progress-linear
-          :active="searching"
-          color="info"
-          height="4"
-          indeterminate
-        ></v-progress-linear>
+        <v-progress-linear :active="searching" color="info" height="4" indeterminate></v-progress-linear>
       </template>
       <template v-slot:append>
         <v-btn type="submit" icon="mdi-flip-h mdi-magnify" variant="text"></v-btn>
@@ -30,7 +14,16 @@
     </v-text-field>
 
     <v-expand-transition>
-      <DieDataEdit class="py-0" v-show="more"/>
+      <DieDataEdit class="py-0" v-show="more" 
+        :name-field="{ visible: false }"
+        :aliases-field="{ visible: false }"
+        :customer-field="{ visible: true, required: false }" 
+        :material-field="{ visible: true, required: false }" 
+        :die-type-field="{ visible: true, required: false }"
+        :total-width-field="{ visible: true, required: false }" 
+        :total-height-field="{ visible: true, required: false }"
+        :shoe-width-field="{ visible: true, required: false }"
+        :crest-width-field="{ visible: true, required: false }" />
     </v-expand-transition>
   </v-form>
 </template>
@@ -78,7 +71,7 @@ async function search(values: GenericObject) {
   setTimeout(() => (searching.value = false), 2000)
 }
 
-function clearSearch() {}
+function clearSearch() { }
 
 function showMore() {
   more.value = !more.value

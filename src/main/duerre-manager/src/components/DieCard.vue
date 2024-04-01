@@ -32,8 +32,8 @@
     <v-divider class="mx-4 mb-1"></v-divider>
 
     <div class="text-center">
-      <v-chip class="ma-2" color="indigo" prepend-icon="mdi-invert-colors">MONOCOLORE</v-chip>
-      <v-chip class="ma-2" color="success" prepend-icon="mdi-material-ui">PVC</v-chip>
+      <v-chip class="ma-2 pa-2" color="indigo" prepend-icon="mdi-invert-colors">{{ die.dieType }}</v-chip>
+                        <v-chip class="ma-2 pa-2" color="success" prepend-icon="mdi-material-ui">{{ die.material }}</v-chip>
     </div>
   </v-card>
 </template>
