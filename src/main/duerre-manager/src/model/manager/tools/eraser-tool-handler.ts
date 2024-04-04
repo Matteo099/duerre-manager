@@ -52,11 +52,13 @@ export class EraserToolHandler extends ToolHandler {
         return { trail, anim };
     }
 
-    override onToolSelected(): void {
-        super.onToolSelected();
+    override onToolSelected(): boolean {
+        if(!super.onToolSelected()) return false;
+
         this.trail.moveToTop();
         this.anim.start();
         //this.editor.layer.toggleHitCanvas();
+        return true;
     }
 
     override onToolDeselected(): void {

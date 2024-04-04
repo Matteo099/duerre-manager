@@ -62,12 +62,14 @@
 - [x] (NON opz, 1 selezione) monocolore, bicolore, tricolore
 - [x] (NON opz, multi selezione) TPU / PVC / TR / POLIETILENE
 - [x] (NON opz) altezza, larghezza totale, larghezza solo scarpetta, larghezza cresta
-- ricerca per h x w + ricerca combinata con disegno
-- implementare la ricerca (https://www.mongodb.com/docs/manual/core/link-text-indexes/)
+- [x] ricerca per h x w + ricerca combinata con disegno
+- [x] implementare la ricerca (https://www.mongodb.com/docs/manual/core/link-text-indexes/)
 - possibilità di tracciare linee (rette) interne allo stampo (per delimitare le fasi dello stampo / i colori)
-- vista dettagliata dello stampo
+- [x] vista dettagliata dello stampo
 
 ## FEATURES
+- rimpiazare Konva.Layer con VirtualLayer (Konva warning: The stage has 6 layers. Recommended maximum number of layers is 3-5. Adding more layers into the stage may drop the performance. Rethink your tree structure, you can use Konva.Group.)
+- warning quando viene chiamato il metodo zoom appena si crea un'istanza di EditorManager (Konva warning: Pointer position is missing and not registered by the stage. Looks like it is outside of the stage container. You can set it manually from event: stage.setPointersPositions(event);)
 - eliminare bezier line & line => creare un unico strumento linea che internamente crea una curva di bezier retta
 - aggiungere bevel sui vertici
 

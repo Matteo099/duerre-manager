@@ -48,6 +48,11 @@ export class DrawToolHandler extends ToolHandler {
         this.startingPoint = undefined;
     }
 
+    override selectionConditionsSatisfied(): { value: boolean, message?: string } {
+        const polygon = this.editor.state.isPolygonCreated();
+        return !polygon ? { value: true } : { value: false, message: "il poligono è stato creato; elimina qualche linea o modifica i vertici" }
+    }
+
     protected override createLayers(): void {
         // const animationLayer = new Konva.Layer({
         //     name: DrawToolHandler.ANIMATION_LAYER_NAME

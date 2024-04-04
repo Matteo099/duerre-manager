@@ -1,8 +1,8 @@
 import Konva from "konva";
 import { KonvaUtils } from "../konva-utils";
-import { ExtendedShape } from "./extended-shape";
 import { UnscaleManager } from "../managers/unscale-manager";
 import type { IDieDataShapeDao } from "../models/idie-data-shape-dao";
+import { ExtendedShape } from "./extended-shape";
 
 export class LineExt extends ExtendedShape<Konva.Line> {
 
@@ -25,7 +25,7 @@ export class LineExt extends ExtendedShape<Konva.Line> {
     override getEndPoints(): Konva.Vector2d[] {
         return KonvaUtils.pointsVector2d(this.getPoints());
     }
-    
+
     override getAnchorPoints(): Konva.Vector2d[] {
         return this.getEndPoints();
     }
@@ -36,7 +36,45 @@ export class LineExt extends ExtendedShape<Konva.Line> {
             points: this.getPoints()
         };
     }
-    
+
+    override computeCurvePoints<T extends number | Konva.Vector2d>(precision: number = 10): T[] {
+        const points: T[] = [];
+        const [A, B] = KonvaUtils.pointsVector2d(this.getPoints());
+
+        for (let i = 0; i <= precision; i++) {
+            const t = i / precision;
+            const x = A.x + (B.x - A.x) * t;
+            const y = A.y + (B.y - A.y) * t;
+
+            if (typeof points[0] === 'number') {
+                points.push(x as T, y as T);
+            } else {
+                points.push({ x, y } as T);
+            }
+        }
+
+        return points;
+    }
+
+
+    override getNearestPoint(pointer: Konva.Vector2d): Konva.Vector2d | undefined {
+        const [A, B] = KonvaUtils.pointsVector2d(this.getPoints());
+        const AP = { x: pointer.x - A.x, y: pointer.y - A.y };
+        const AB = { x: B.x - A.x, y: B.y - A.y };
+        const magnitudeAB = Math.sqrt(AB.x * AB.x + AB.y * AB.y);
+        const ABunit = { x: AB.x / magnitudeAB, y: AB.y / magnitudeAB };
+        const dotProduct = AP.x * ABunit.x + AP.y * ABunit.y;
+
+        if (dotProduct <= 0) return A;
+        if (dotProduct >= magnitudeAB) return B;
+
+        const nearest = {
+            x: A.x + ABunit.x * dotProduct,
+            y: A.y + ABunit.y * dotProduct
+        };
+        return nearest;
+    }
+
     getPoints(): number[] {
         return this._shape.points();
     }

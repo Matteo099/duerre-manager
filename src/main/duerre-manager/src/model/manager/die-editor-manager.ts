@@ -1,26 +1,27 @@
 import Konva from "konva";
+import type { Ref } from "vue";
 import { GRID_ELEMENT } from "./constants";
 import { DieState } from "./die-state";
+import { DefaultExtVector2d, type ExtVector2d, type IDieEditor, type SnapConfig } from "./idie-editor";
 import { KonvaHelper } from "./konva-helper";
 import { KonvaUtils } from "./konva-utils";
 import { GridManager } from "./managers/grid-manager";
 import { GuidelinesManager } from "./managers/guidelines-manager";
 import { UnscaleManager } from "./managers/unscale-manager";
 import { ZoomManager } from "./managers/zoom-manager";
+import type { IDieDataDao } from "./models/idie-data-dao";
+import type { IDieDataShapeDao } from "./models/idie-data-shape-dao";
 import { BezierLineExt } from "./shape-ext/bezier-line-ext";
 import { ExtendedShape } from "./shape-ext/extended-shape";
 import { LineExt } from "./shape-ext/line-ext";
 import { MeasurableShape } from "./shape-ext/measurable-shape";
+import { CutToolHandler } from "./tools/cut-tool-handler";
 import { DrawToolHandler } from "./tools/draw-tool-handler";
 import { EditToolHandler } from "./tools/edit-tool-handler";
 import { EraserToolHandler } from "./tools/eraser-tool-handler";
 import { MoveToolHandler } from "./tools/move-tool-handler";
 import { Tool } from "./tools/tool";
 import { ToolHandler } from "./tools/tool-handler";
-import type { Ref } from "vue";
-import type { IDieDataDao } from "./models/idie-data-dao";
-import type { IDieDataShapeDao } from "./models/idie-data-shape-dao";
-import { DefaultExtVector2d, type ExtVector2d, type IDieEditor, type SnapConfig } from "./idie-editor";
 
 export class DieEditorManager implements IDieEditor {
 
@@ -33,6 +34,7 @@ export class DieEditorManager implements IDieEditor {
 
     private editHandler!: EditToolHandler;
     private drawHandler!: DrawToolHandler;
+    private cutHandler!: CutToolHandler;
     private eraserHandler!: EraserToolHandler;
     private moveHandler!: MoveToolHandler;
     private _zoomManager!: ZoomManager;
@@ -87,6 +89,7 @@ export class DieEditorManager implements IDieEditor {
         this._konvaHelper = new KonvaHelper(this);
         this.editHandler = new EditToolHandler(this);
         this.drawHandler = new DrawToolHandler(this);
+        this.cutHandler = new CutToolHandler(this);
         this.eraserHandler = new EraserToolHandler(this);
         this.moveHandler = new MoveToolHandler(this);
     }
@@ -211,30 +214,47 @@ export class DieEditorManager implements IDieEditor {
         return points;
     }
 
-    public useTool(tool?: Tool) {
+    public useTool(tool?: Tool): { value: boolean, message?: string } {
+        const canUse = this.canUseTool(tool);
+        if(!canUse.value) return canUse;
+
         this._selectedTool = tool;
         this.useToolCbk?.();
-        
+
         this._selectedToolHandler?.onToolDeselected();
+        this._selectedToolHandler = this.getToolHandler(tool);
+
+        // if the tool cannot be selected deselect the tool
+        if (this._selectedToolHandler?.onToolSelected() == true) {
+            return { value: true };
+        } else {
+            this.useTool();
+            return { value: false };
+        }
+    }
+
+    public canUseTool(tool?: Tool): { value: boolean, message?: string } {
+        if (tool == undefined) return { value: false };
+
+        return this.getToolHandler(tool)?.selectionConditionsSatisfied() ?? { value: false };
+    }
+
+    private getToolHandler(tool?: Tool): ToolHandler | undefined {
         switch (tool) {
             case Tool.EDIT:
-                this._selectedToolHandler = this.editHandler;
-                break;
+                return this.editHandler;
             case Tool.DRAW_LINE:
             case Tool.DRAW_CURVE:
-                this._selectedToolHandler = this.drawHandler;
-                break;
+                return this.drawHandler;
             case Tool.ERASER:
-                this._selectedToolHandler = this.eraserHandler;
-                break;
+                return this.eraserHandler;
             case Tool.MOVE:
-                this._selectedToolHandler = this.moveHandler;
-                break;
+                return this.moveHandler;
+            case Tool.CUT:
+                return this.cutHandler;
             default:
-                this._selectedToolHandler = undefined;
-                break;
+                return undefined;
         }
-        this._selectedToolHandler?.onToolSelected();
     }
 
     public resize(stageContainer: Ref<HTMLDivElement>) {
@@ -298,7 +318,7 @@ export class DieEditorManager implements IDieEditor {
 
     public getData(): IDieDataDao | undefined {
         const state = this.state.save();
-        if(state.length == 0){
+        if (state.length == 0) {
             return undefined;
         }
 

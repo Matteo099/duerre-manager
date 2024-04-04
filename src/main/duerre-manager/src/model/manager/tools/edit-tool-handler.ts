@@ -24,10 +24,12 @@ export class EditToolHandler extends ToolHandler {
         this.layers.push(this.gizmoLayer);
     }
 
-    override onToolSelected(): void {
-        super.onToolSelected();
+    override onToolSelected(): boolean {
+        if(!super.onToolSelected()) return false;
+
         this.gizmoLayer.moveToTop();
         this.createAnchorPoints();
+        return true;
     }
 
     override onToolDeselected(): void {

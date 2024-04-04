@@ -1,9 +1,9 @@
 import Konva from "konva";
 import { REMOVE_ONLY } from "../constants";
-import { ExtendedShape } from "./extended-shape";
-import { Quad } from "./quad";
 import { UnscaleFunction, UnscaleManager } from "../managers/unscale-manager";
 import type { IDieDataShapeDao } from "../models/idie-data-shape-dao";
+import { ExtendedShape } from "./extended-shape";
+import { Quad } from "./quad";
 
 export class BezierLineExt extends ExtendedShape<Konva.Shape> {
 
@@ -80,16 +80,48 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
         ];
     }
 
-    public getCurvePoints(precision?: number): number[] {
-        const points: number[] = [];
+    public computeCurvePoints<T extends number | Konva.Vector2d>(precision?: number): T[] {
+        const points: T[] = [];
         precision ??= this.numberOfPoints;
         for (let t = 0; t <= 1; t += 1 / precision) {
             const x = Math.pow(1 - t, 2) * this.quad.start.x + 2 * (1 - t) * t * this.quad.control.x + t * t * this.quad.end.x;
             const y = Math.pow(1 - t, 2) * this.quad.start.y + 2 * (1 - t) * t * this.quad.control.y + t * t * this.quad.end.y;
-            points.push(x, y);
+
+            if (typeof points[0] === 'number') {
+                points.push(x as T, y as T);
+            } else {
+                points.push({ x, y } as T);
+            }
         }
+
         return points;
     }
+
+    override getNearestPoint(pointer: Konva.Vector2d): Konva.Vector2d | undefined {
+        let nearest: Konva.Vector2d | undefined;
+        let minDistanceSquared = Infinity;
+        const points = this.computeCurvePoints<Konva.Vector2d>();
+        points.forEach((point: Konva.Vector2d) =>{
+            const distanceSquared = Math.pow(point.x - pointer.x, 2) + Math.pow(point.y - pointer.y, 2);
+            if (distanceSquared < minDistanceSquared) {
+                minDistanceSquared = distanceSquared;
+                nearest = point;
+            }
+        })
+
+        return nearest;
+    }
+
+    // public getCurvePoints(precision?: number): number[] {
+    //     const points: number[] = [];
+    //     precision ??= this.numberOfPoints;
+    //     for (let t = 0; t <= 1; t += 1 / precision) {
+    //         const x = Math.pow(1 - t, 2) * this.quad.start.x + 2 * (1 - t) * t * this.quad.control.x + t * t * this.quad.end.x;
+    //         const y = Math.pow(1 - t, 2) * this.quad.start.y + 2 * (1 - t) * t * this.quad.control.y + t * t * this.quad.end.y;
+    //         points.push(x, y);
+    //     }
+    //     return points;
+    // }
 
     setPoints(p: number[] | Quad): Konva.Shape {
         if (p instanceof Array && p.length % 2 === 0) {
@@ -185,6 +217,6 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
     }
 
     override calculateClientRect(): Konva.Vector2d & { width: number; height: number; } {
-        return super.calculateClientRectGivenPoints(this.getCurvePoints());
+        return super.calculateClientRectGivenPoints(this.computeCurvePoints());
     }
 }

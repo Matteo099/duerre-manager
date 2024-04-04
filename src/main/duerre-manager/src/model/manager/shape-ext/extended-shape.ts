@@ -27,6 +27,8 @@ export abstract class ExtendedShape<S extends Konva.Shape> implements IExtendedS
     abstract calculatePointsGivenLength(length: number): { oldPoints: number[], newPoints: number[] };
     abstract updateEndpoint(oldPoint: Konva.Vector2d | ('start' | 'end'), newValue: Konva.Vector2d): void;
     abstract getAnchorPoints(): Konva.Vector2d[];
+    abstract computeCurvePoints<T extends number | Konva.Vector2d>(precision?: number): T[];
+    abstract getNearestPoint(pointer: Konva.Vector2d): Konva.Vector2d | undefined;
 
     protected abstract createShape(initialPosition: Konva.Vector2d): S;
 

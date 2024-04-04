@@ -30,8 +30,16 @@ export abstract class ToolHandler {
         return this.editor.getSnapToNearest({ useEndpoints: true });
     }
 
-    onToolSelected(): void {
-        this.layers.forEach(l => l.visible(true));
+    selectionConditionsSatisfied(): { value: boolean, message?: string } {
+        return { value: true };
+    }
+
+    onToolSelected(): boolean {
+        if (this.selectionConditionsSatisfied()) {
+            this.layers.forEach(l => l.visible(true));
+            return true;
+        }
+        return false;
     }
 
     onToolDeselected(): void {

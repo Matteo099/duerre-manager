@@ -2,6 +2,8 @@ import Konva from "konva";
 import { Subscription } from "rxjs";
 import type { IMeasurableShape, LengthChanged } from "./shape-ext/imeasurable-shape";
 import type { IDieDataShapeDao } from "./models/idie-data-shape-dao";
+import { KonvaUtils } from "./konva-utils";
+import type { Vector2d } from "konva/lib/types";
 
 export class DieState {
 
@@ -20,6 +22,7 @@ export class DieState {
     //     visible: false
     // });
     public readonly subscriptions: Subscription[] = [];
+    private computedPoints: Konva.Vector2d[] = [];
 
     public canDrawNewLine(pos: Konva.Vector2d): boolean {
         if (this.lines.length > 0) {
@@ -86,7 +89,7 @@ export class DieState {
             const vertices: Konva.Vector2d[] = [];
             for (let i = 0; i < points.length - 1; i += 2) {
                 const v = { x: points[i], y: points[i + 1] };
-                if(!endpoints.find(e => e.x == v.x && e.y == v.y))
+                if (!endpoints.find(e => e.x == v.x && e.y == v.y))
                     vertices.push(v);
             }
             return vertices;
@@ -110,6 +113,45 @@ export class DieState {
         });
 
         return uniqueVectors;
+    }
+
+    public getNearestPolygonPointOld(pointer: Konva.Vector2d, distanceTreshold?: number): Konva.Vector2d | undefined {
+        this.computePoints();
+
+        const point = this.computedPoints.reduce((nearest: Konva.Vector2d, current: Konva.Vector2d) => {
+            const distanceToCurrent = KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: current.x, y2: current.y });
+            const distanceToNearest = nearest ? KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: nearest.x, y2: nearest.y }) : Infinity;
+
+            return distanceToCurrent < distanceToNearest ? current : nearest;
+        });
+
+        if (point && distanceTreshold != undefined) {
+            if (KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: point.x, y2: point.y }) > distanceTreshold) return undefined;
+        }
+        return point;
+    }
+
+    public getNearestPolygonPoint(pointer: Konva.Vector2d, distanceTreshold?: number): Konva.Vector2d | undefined {
+        let nearestPoint: Konva.Vector2d | undefined;
+        for (const line of this.lines) {
+            // TODO: must cache result!!!
+            const currentNearestPont = line.extShape.getNearestPoint(pointer);
+            if(!currentNearestPont) continue;
+
+            const distanceToCurrent = KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: currentNearestPont.x, y2: currentNearestPont.y });
+            const distanceToNearest = nearestPoint ? KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: nearestPoint.x, y2: nearestPoint.y }) : Infinity;
+
+            if(distanceToCurrent < distanceToNearest) nearestPoint = currentNearestPont;
+        }
+
+        if (nearestPoint && distanceTreshold != undefined) {
+            if (KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: nearestPoint.x, y2: nearestPoint.y }) > distanceTreshold) return undefined;
+        }
+        return nearestPoint;
+    }
+
+    private computePoints() {
+        this.computedPoints = this.lines.flatMap(l => l.extShape.computeCurvePoints<Vector2d>());
     }
 
     /*public findAttachedLines(line: Konva.Line): Konva.Line[] {
