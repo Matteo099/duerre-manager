@@ -298,6 +298,10 @@ export class DieEditorManager implements IDieEditor {
 
     public getData(): IDieDataDao | undefined {
         const state = this.state.save();
+        if(state.length == 0){
+            return undefined;
+        }
+
         const valid = this.state.isPolygonCreated();
         return { state, valid }
     }

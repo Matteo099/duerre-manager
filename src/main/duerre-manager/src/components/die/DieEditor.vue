@@ -37,7 +37,6 @@ import { DieEditorManager } from '@/model/manager/die-editor-manager'
 import type { IDieDataDao } from '@/model/manager/models/idie-data-dao'
 import { Tool } from '@/model/manager/tools/tool'
 import { computed } from 'vue';
-import { watch } from 'vue';
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 
 interface DieEditorProps {

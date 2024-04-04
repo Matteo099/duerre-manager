@@ -1,6 +1,6 @@
 <template>
   <h1 align="center">Modifica stampo</h1>
-  <DieDataEdit :editable="true" :die-id="id" @on-success="onSuccess" @on-fail="onFail" okButton="Modifica" />
+  <DieDataEdit :editable="true" :die-id="id" @on-success="onSuccess" @on-fail="onFail" okButton="Modifica" :show-buttons="true" />
 </template>
 
 <script setup lang="ts">

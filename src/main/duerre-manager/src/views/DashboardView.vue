@@ -2,7 +2,7 @@
   <div class="ma-4">
     <v-row no-gutters>
       <v-col cols="12">
-        <AdvancedSearch />
+        <AdvancedSearch :search-dies="searchDies" @reset="reset" />
       </v-col>
     </v-row>
 
@@ -27,13 +27,15 @@
 import AdvancedSearch from '@/components/AdvancedSearch.vue'
 import DieCard from '@/components/DieCard.vue'
 import { useHttp } from '@/plugins/http'
-import Client from '@/plugins/http/openapi';
-import { ref } from 'vue';
+import Client from '@/plugins/http/openapi'
+import { all } from 'axios'
+import { ref } from 'vue'
 import { onMounted } from 'vue'
 
 const http = useHttp()
 
 const dies = ref<Client.Components.Schemas.Die[]>([])
+const allDies: Client.Components.Schemas.Die[] = []
 
 function randomAlias(): string[] {
   const length = Math.floor(Math.random() * 5)
@@ -45,8 +47,22 @@ async function loadDies() {
   console.log(res)
 
   if (res.status == 200) {
-    dies.value = res.data;
+    dies.value = res.data
+    allDies.length = 0;
+    allDies.push(...dies.value)
   }
+}
+async function searchDies(dieSearchDao: Client.Components.Schemas.DieSearchDao) {
+  const client = await http.client
+  const res = await client.searchDies(null, dieSearchDao)
+  console.log(res)
+
+  if (res.status == 200) {
+    dies.value = res.data
+  }
+}
+function reset() {
+  dies.value = [...allDies]
 }
 
 onMounted(() => loadDies())
