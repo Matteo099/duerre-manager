@@ -1,4 +1,4 @@
 export interface IDieDataShapeDao {
-    type: 'bezier' | 'line';
+    type: 'bezier' | 'line' | 'cut';
     points: number[];
 }

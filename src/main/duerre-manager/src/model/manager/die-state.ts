@@ -4,6 +4,8 @@ import type { IMeasurableShape, LengthChanged } from "./shape-ext/imeasurable-sh
 import type { IDieDataShapeDao } from "./models/idie-data-shape-dao";
 import { KonvaUtils } from "./konva-utils";
 import type { Vector2d } from "konva/lib/types";
+import type { LineExt } from "./shape-ext/line-ext";
+import type { CutLine } from "./shape-ext/cut-line";
 
 export class DieState {
 
@@ -13,6 +15,7 @@ export class DieState {
     // permette di ottenere gli endpoints
 
     public readonly lines: IMeasurableShape[] = [];
+    public readonly cuts: CutLine[] = [];
     // public readonly polygon: Konva.Line = new Konva.Line({
     //     points: [],
     //     fill: '#00D2FF',
@@ -23,6 +26,7 @@ export class DieState {
     // });
     public readonly subscriptions: Subscription[] = [];
     private computedPoints: Konva.Vector2d[] = [];
+    private computePointsRequired = true;
 
     public canDrawNewLine(pos: Konva.Vector2d): boolean {
         if (this.lines.length > 0) {
@@ -42,7 +46,12 @@ export class DieState {
         // this.updatePolygon();
         const s = shape.onLengthChanged.subscribe((v: LengthChanged) => this.onLengthChange(shape, v.oldPoint, v.newPoint));
         this.subscriptions.push(s);
+        this.computePointsRequired = true;
         //shape.onLengthChange = (oldPoint: Konva.Vector2d, newPoint: Konva.Vector2d) => this.onLengthChange(shape, oldPoint, newPoint);
+    }
+
+    public addCutLine(cutLine: CutLine) {
+        this.cuts.push(cutLine);
     }
 
     public remove(node?: Konva.Shape | Konva.Stage | Konva.Node) {
@@ -52,7 +61,14 @@ export class DieState {
         if (index >= 0) {
             this.lines[index].destroy();
             this.lines.splice(index, 1);
+            this.computePointsRequired = true;
             // this.updatePolygon();
+        } else {
+            const index = this.cuts.findIndex(l => l.getId() == node._id);
+            if (index >= 0) {
+                this.cuts[index].shape.destroy();
+                this.cuts.splice(index, 1);
+            }
         }
     }
 
@@ -136,12 +152,12 @@ export class DieState {
         for (const line of this.lines) {
             // TODO: must cache result!!!
             const currentNearestPont = line.extShape.getNearestPoint(pointer);
-            if(!currentNearestPont) continue;
+            if (!currentNearestPont) continue;
 
             const distanceToCurrent = KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: currentNearestPont.x, y2: currentNearestPont.y });
             const distanceToNearest = nearestPoint ? KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: nearestPoint.x, y2: nearestPoint.y }) : Infinity;
 
-            if(distanceToCurrent < distanceToNearest) nearestPoint = currentNearestPont;
+            if (distanceToCurrent < distanceToNearest) nearestPoint = currentNearestPont;
         }
 
         if (nearestPoint && distanceTreshold != undefined) {
@@ -151,7 +167,10 @@ export class DieState {
     }
 
     private computePoints() {
-        this.computedPoints = this.lines.flatMap(l => l.extShape.computeCurvePoints<Vector2d>());
+        if (this.computePointsRequired) {
+            this.computedPoints = this.lines.flatMap(l => l.extShape.computeCurvePoints<Vector2d>());
+            this.computePointsRequired = false;
+        }
     }
 
     /*public findAttachedLines(line: Konva.Line): Konva.Line[] {
@@ -183,6 +202,7 @@ export class DieState {
         const dieDataShapeDao: IDieDataShapeDao[] = [];
         const orderedLines: IMeasurableShape[] = [];
         const allLinesCopy = [...this.lines]; // Create a copy to avoid modifying the original array
+        const allCutsCopy = [...this.cuts]; // Create a copy to avoid modifying the original array
         let i = 0;
 
         // Order the lines so that it generates an array of contigous lines
@@ -199,6 +219,8 @@ export class DieState {
 
         for (const line of orderedLines)
             dieDataShapeDao.push(line.extShape.toDieDataShape());
+        for (const cut of allCutsCopy)
+            dieDataShapeDao.push(cut.toDieDataShape());
 
         return dieDataShapeDao;
     }
@@ -208,6 +230,11 @@ export class DieState {
             element.destroy();
         });
         this.lines.splice(0, this.lines.length);
+
+        this.cuts.forEach(element => {
+            element.shape.destroy();
+        });
+        this.cuts.splice(0, this.cuts.length);
     }
 
 }

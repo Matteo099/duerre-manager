@@ -164,7 +164,7 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
         return length;
     }
 
-    private calculateLineLength(t: number) {
+    protected calculateLineLength(t: number) {
         const derivativeX = 2 * (1 - t) * (this.quad.control.x - this.quad.start.x) + 2 * t * (this.quad.end.x - this.quad.control.x);
         const derivativeY = 2 * (1 - t) * (this.quad.control.y - this.quad.start.y) + 2 * t * (this.quad.end.y - this.quad.control.y);
         return Math.sqrt(derivativeX ** 2 + derivativeY ** 2);

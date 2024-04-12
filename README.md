@@ -64,7 +64,7 @@
 - [x] (NON opz) altezza, larghezza totale, larghezza solo scarpetta, larghezza cresta
 - [x] ricerca per h x w + ricerca combinata con disegno
 - [x] implementare la ricerca (https://www.mongodb.com/docs/manual/core/link-text-indexes/)
-- possibilità di tracciare linee (rette) interne allo stampo (per delimitare le fasi dello stampo / i colori)
+- [] possibilità di tracciare linee (rette) interne allo stampo (per delimitare le fasi dello stampo / i colori)
 - [x] vista dettagliata dello stampo
 
 ## FEATURES

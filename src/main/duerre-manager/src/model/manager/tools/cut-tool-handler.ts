@@ -5,6 +5,7 @@ import { LineExt } from "../shape-ext/line-ext";
 import { MeasurableShape } from "../shape-ext/measurable-shape";
 import { ToolHandler } from "./tool-handler";
 import { UnscaleManager } from "../managers/unscale-manager";
+import { ERASABLE } from "../constants";
 
 export class CutToolHandler extends ToolHandler {
 
@@ -13,7 +14,7 @@ export class CutToolHandler extends ToolHandler {
 
     private isDrawing: boolean = false;
     private startingPoint?: Konva.Vector2d;
-    private drawingLine?: MeasurableShape<LineExt | BezierLineExt>;
+    private drawingLine?: LineExt;
 
     // I memorize a reference only to optimize the animations
     declare private animationLayer?: Konva.Layer;
@@ -38,7 +39,7 @@ export class CutToolHandler extends ToolHandler {
     override clear(): void {
         super.clear();
 
-        this.drawingLine?.destroy();
+        this.drawingLine?.shape.destroy();
         this.drawingLine = undefined;
         this.isDrawing = false;
         this.startingPoint = undefined;
@@ -51,8 +52,9 @@ export class CutToolHandler extends ToolHandler {
         this.startingPoint = pointer;
         this.showGitzmoOnPointer(pointer);
         this.isDrawing = true;
-        this.drawingLine = new MeasurableShape<any>(this.editor, pointer, LineExt);
-        this.editor.layer.add(this.drawingLine.group);
+        this.drawingLine = new LineExt(pointer);
+        this.drawingLine.shape.setAttr(ERASABLE, true);
+        this.editor.layer.add(this.drawingLine.shape);
 
         super.onMouseDown(event);
     }
@@ -73,7 +75,7 @@ export class CutToolHandler extends ToolHandler {
 
         const actualPos = polygonPoint ?? pos;
         const newPoints = [this.startingPoint!.x, this.startingPoint!.y, actualPos.x, actualPos.y];
-        this.drawingLine!.updatePoints(newPoints);
+        this.drawingLine!.setPoints(newPoints);
 
         super.onMouseMove(event);
     }
@@ -88,10 +90,10 @@ export class CutToolHandler extends ToolHandler {
         const pointer = this.getPointer('polygon-only');
 
         if (pointer) this.drawingLine.updateEndpoint('end', pointer);
-        if (this.drawingLine.getLength() > 0 && pointer) {
-            // this.editor.state.addCutLine(this.drawingLine);
+        if (this.drawingLine.calculateLength() > 0 && pointer) {
+            this.editor.state.addCutLine(this.drawingLine);
         } else {
-            this.drawingLine.destroy();
+            this.drawingLine.shape.destroy();
         }
 
         this.drawingLine = undefined;
