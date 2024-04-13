@@ -75,6 +75,13 @@ export class LineExt extends ExtendedShape<Konva.Line> {
         return nearest;
     }
 
+    override interpolatePoint(percentage: number): Konva.Vector2d {
+        const [A, B] = KonvaUtils.pointsVector2d(this.getPoints());
+        const x = A.x + (B.x - A.x) * percentage;
+        const y = A.y + (B.y - A.y) * percentage;
+        return { x, y };
+    }
+
     getPoints(): number[] {
         return this._shape.points();
     }
@@ -101,6 +108,7 @@ export class LineExt extends ExtendedShape<Konva.Line> {
     }
 
     updateEndpoint(oldPoint: Konva.Vector2d | ('start' | 'end'), newValue: Konva.Vector2d): void {
+        console.log("updateEndpoint BEFORE", this.getPoints(), this.getId(), oldPoint, newValue)
         const coords = KonvaUtils.lineToCoords(this._shape);
         if (oldPoint == 'start' || (typeof oldPoint === 'object' && coords.x1 == oldPoint.x && coords.y1 == oldPoint.y)) {
             this.setPoints([
@@ -111,6 +119,9 @@ export class LineExt extends ExtendedShape<Konva.Line> {
                 coords.x1, coords.y1, newValue.x, newValue.y
             ]);
         }
+        console.log("updateEndpoint AFTER", this.getPoints(), this.getId())
+
+        super.updateEndpoint(oldPoint, newValue);
     }
 
     override calculateClientRect(): Konva.Vector2d & { width: number; height: number; } {

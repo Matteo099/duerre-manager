@@ -41,7 +41,6 @@ export class GuidelinesManager {
         const guides = this.getGuideLines(pointer);
         // draw guidelines
         this.drawGuides(pointer, guides);
-        console.log("drawGuides", pointer, guides);
     }
     
     public deactivate() {

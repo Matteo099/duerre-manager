@@ -1,11 +1,15 @@
 import Konva from "konva";
-import type { IExtendedShape } from "./iextended-shape";
+import type { IExtendedShape, ShapeChanged } from "./iextended-shape";
 import type { IDieDataShapeDao } from "../models/idie-data-shape-dao";
+import type { Vector2d } from "konva/lib/types";
+import { Subject } from "rxjs";
 
 export abstract class ExtendedShape<S extends Konva.Shape> implements IExtendedShape<S> {
 
     protected readonly _shape: S;
+    protected readonly _onUpdateEndpoint: Subject<ShapeChanged> = new Subject();
     get shape(): S { return this._shape; }
+    get onUpdateEndpoint(): Subject<ShapeChanged> { return this._onUpdateEndpoint }
 
     constructor(position: Konva.Vector2d) {
         this._shape = this.createShape(position);
@@ -25,13 +29,16 @@ export abstract class ExtendedShape<S extends Konva.Shape> implements IExtendedS
     abstract calculateMiddlePoint(): Konva.Vector2d;
     abstract calculateClientRect(): Konva.Vector2d & {width: number, height: number};
     abstract calculatePointsGivenLength(length: number): { oldPoints: number[], newPoints: number[] };
-    abstract updateEndpoint(oldPoint: Konva.Vector2d | ('start' | 'end'), newValue: Konva.Vector2d): void;
     abstract getAnchorPoints(): Konva.Vector2d[];
     abstract computeCurvePoints<T extends number | Konva.Vector2d>(precision?: number): T[];
     abstract getNearestPoint(pointer: Konva.Vector2d): Konva.Vector2d | undefined;
-
+    abstract interpolatePoint(percentage: number): Vector2d;
     protected abstract createShape(initialPosition: Konva.Vector2d): S;
-
+    
+    public updateEndpoint(oldPoint: Konva.Vector2d | ('start' | 'end'), newValue: Konva.Vector2d): void{
+        this._onUpdateEndpoint.next({});
+    }
+    
     abstract toDieDataShape(): IDieDataShapeDao;
 
     protected calculateClientRectGivenPoints(points: number[]): Konva.Vector2d & { width: number; height: number; } {

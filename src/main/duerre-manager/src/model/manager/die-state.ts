@@ -51,6 +51,7 @@ export class DieState {
     }
 
     public addCutLine(cutLine: CutLine) {
+        cutLine.calculatePointsPercentage();
         this.cuts.push(cutLine);
     }
 
@@ -147,23 +148,26 @@ export class DieState {
         return point;
     }
 
-    public getNearestPolygonPoint(pointer: Konva.Vector2d, distanceTreshold?: number): Konva.Vector2d | undefined {
-        let nearestPoint: Konva.Vector2d | undefined;
+    public getNearestPolygonPoint(pointer: Konva.Vector2d, distanceTreshold?: number): { point?: Konva.Vector2d, shape?: IMeasurableShape } {
+        let nearestPointAndShape: { point?: Konva.Vector2d, shape?: IMeasurableShape } = {};
         for (const line of this.lines) {
             // TODO: must cache result!!!
             const currentNearestPont = line.extShape.getNearestPoint(pointer);
             if (!currentNearestPont) continue;
 
             const distanceToCurrent = KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: currentNearestPont.x, y2: currentNearestPont.y });
-            const distanceToNearest = nearestPoint ? KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: nearestPoint.x, y2: nearestPoint.y }) : Infinity;
+            const distanceToNearest = nearestPointAndShape.point ? KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: nearestPointAndShape.point.x, y2: nearestPointAndShape.point.y }) : Infinity;
 
-            if (distanceToCurrent < distanceToNearest) nearestPoint = currentNearestPont;
+            if (distanceToCurrent < distanceToNearest) {
+                nearestPointAndShape.point = currentNearestPont;
+                nearestPointAndShape.shape = line;
+            }
         }
 
-        if (nearestPoint && distanceTreshold != undefined) {
-            if (KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: nearestPoint.x, y2: nearestPoint.y }) > distanceTreshold) return undefined;
+        if (nearestPointAndShape.point && distanceTreshold != undefined) {
+            if (KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: nearestPointAndShape.point.x, y2: nearestPointAndShape.point.y }) > distanceTreshold) return {};
         }
-        return nearestPoint;
+        return nearestPointAndShape;
     }
 
     private computePoints() {

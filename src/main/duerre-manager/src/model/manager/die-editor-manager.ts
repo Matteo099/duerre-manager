@@ -120,18 +120,14 @@ export class DieEditorManager implements IDieEditor {
     }
 
     private handleMouseDown(event: Konva.KonvaEventObject<any>) {
-        console.log(event)
-
         this._selectedToolHandler?.onMouseDown(event);
     }
 
     private handleMouseMove(event: Konva.KonvaEventObject<any>) {
-        // console.log(event)
         this._selectedToolHandler?.onMouseMove(event);
     }
 
     private handleMouseUp(event: Konva.KonvaEventObject<any>) {
-        console.log(event)
         this._selectedToolHandler?.onMouseUp(event);
     }
 

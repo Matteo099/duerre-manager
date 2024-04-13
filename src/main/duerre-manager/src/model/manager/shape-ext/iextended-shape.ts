@@ -1,7 +1,8 @@
 import Konva from "konva";
+import { Subject } from 'rxjs';
 import type { IDieDataShapeDao } from "../models/idie-data-shape-dao";
-import type { Vector2d } from "konva/lib/types";
 
+export type ShapeChanged = {};
 export interface IExtendedShape<S extends Konva.Shape> {
     getPoints(): number[];
     setPoints(p: number[]): S;
@@ -13,5 +14,8 @@ export interface IExtendedShape<S extends Konva.Shape> {
     getNearestPoint(pointer: Konva.Vector2d): Konva.Vector2d | undefined;
     computeCurvePoints<T extends number | Konva.Vector2d>(precision?: number): T[];
     toDieDataShape(): IDieDataShapeDao;
+    interpolatePoint(percentage: number): Konva.Vector2d;
+
+    get onUpdateEndpoint(): Subject<ShapeChanged>
     get shape(): S;
 }

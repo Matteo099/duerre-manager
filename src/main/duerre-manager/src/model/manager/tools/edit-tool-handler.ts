@@ -128,7 +128,11 @@ export class EditToolHandler extends ToolHandler {
                 currentPosition = anchor.position();
             }
 
+            if(currentPosition.x == lastPosition.x && currentPosition.y == lastPosition.y)
+                return;
+
             shapes.forEach(s => {
+                console.log(s.getId());
                 s.updateEndpoint(lastPosition, currentPosition);
                 // console.log(s.extShape.shape, lastPosition, currentPosition);
                 // this.updateDottedLines();

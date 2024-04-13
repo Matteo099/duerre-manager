@@ -65,6 +65,14 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
         };
     }
 
+    override interpolatePoint(percentage: number): Konva.Vector2d {
+        const { start, end, control } = this.quad;
+        const t = percentage; // Assuming percentage is already in the range [0, 1]
+        const x = (1 - t) * (1 - t) * start.x + 2 * (1 - t) * t * control.x + t * t * end.x;
+        const y = (1 - t) * (1 - t) * start.y + 2 * (1 - t) * t * control.y + t * t * end.y;
+        return { x, y };
+    }
+
     getEndPoints(): Konva.Vector2d[] {
         return [{ x: this.quad.start.x, y: this.quad.start.y }, { x: this.quad.end.x, y: this.quad.end.y }];
     }
@@ -101,7 +109,7 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
         let nearest: Konva.Vector2d | undefined;
         let minDistanceSquared = Infinity;
         const points = this.computeCurvePoints<Konva.Vector2d>();
-        points.forEach((point: Konva.Vector2d) =>{
+        points.forEach((point: Konva.Vector2d) => {
             const distanceSquared = Math.pow(point.x - pointer.x, 2) + Math.pow(point.y - pointer.y, 2);
             if (distanceSquared < minDistanceSquared) {
                 minDistanceSquared = distanceSquared;
@@ -206,6 +214,7 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
         }
 
         this.updateDottedLines();
+        super.updateEndpoint(oldPoint as any, newValue);
     }
 
     public isControlPoint(vector: Konva.Vector2d) {

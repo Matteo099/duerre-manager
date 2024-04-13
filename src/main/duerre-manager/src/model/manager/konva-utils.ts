@@ -196,5 +196,5 @@ export class KonvaUtils {
 export interface ExportImageOpts {
     width: number,
     height: number,
-    border: number
+    border: number,
 }

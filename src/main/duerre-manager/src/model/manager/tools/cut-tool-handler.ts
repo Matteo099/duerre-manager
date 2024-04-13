@@ -6,6 +6,9 @@ import { MeasurableShape } from "../shape-ext/measurable-shape";
 import { ToolHandler } from "./tool-handler";
 import { UnscaleManager } from "../managers/unscale-manager";
 import { ERASABLE } from "../constants";
+import { CutLine } from "../shape-ext/cut-line";
+import type { Vector2d } from "konva/lib/types";
+import type { IMeasurableShape } from "../shape-ext/imeasurable-shape";
 
 export class CutToolHandler extends ToolHandler {
 
@@ -14,7 +17,7 @@ export class CutToolHandler extends ToolHandler {
 
     private isDrawing: boolean = false;
     private startingPoint?: Konva.Vector2d;
-    private drawingLine?: LineExt;
+    private drawingLine?: CutLine;
 
     // I memorize a reference only to optimize the animations
     declare private animationLayer?: Konva.Layer;
@@ -47,12 +50,12 @@ export class CutToolHandler extends ToolHandler {
 
     override onMouseDown(event: Konva.KonvaEventObject<any>): void {
         const pointer = this.getPointer('polygon-only');
-        if (!pointer) return;
+        if (!pointer || !pointer.point) return;
 
-        this.startingPoint = pointer;
-        this.showGitzmoOnPointer(pointer);
+        this.startingPoint = pointer.point;
+        this.showGitzmoOnPointer(pointer.point);
         this.isDrawing = true;
-        this.drawingLine = new LineExt(pointer);
+        this.drawingLine = new CutLine(pointer.point, pointer.shape!);
         this.drawingLine.shape.setAttr(ERASABLE, true);
         this.editor.layer.add(this.drawingLine.shape);
 
@@ -70,10 +73,10 @@ export class CutToolHandler extends ToolHandler {
         if (!pos) return;
         const polygonPoint = this.editor.state.getNearestPolygonPoint(pos, CutToolHandler.SNAP_PRECISION);
 
-        if (polygonPoint) this.showGitzmoOnPointer(polygonPoint);
+        if (polygonPoint?.point) this.showGitzmoOnPointer(polygonPoint.point);
         else this.clearGitzmos();
 
-        const actualPos = polygonPoint ?? pos;
+        const actualPos = polygonPoint.point ?? pos;
         const newPoints = [this.startingPoint!.x, this.startingPoint!.y, actualPos.x, actualPos.y];
         this.drawingLine!.setPoints(newPoints);
 
@@ -89,7 +92,10 @@ export class CutToolHandler extends ToolHandler {
         this.clearGitzmos();
         const pointer = this.getPointer('polygon-only');
 
-        if (pointer) this.drawingLine.updateEndpoint('end', pointer);
+        if (pointer) {
+            if(pointer.point) this.drawingLine.updateEndpoint('end', pointer.point);
+            if(pointer.shape) this.drawingLine.setEndPointShape(pointer.shape);
+        }
         if (this.drawingLine.calculateLength() > 0 && pointer) {
             this.editor.state.addCutLine(this.drawingLine);
         } else {
@@ -99,14 +105,17 @@ export class CutToolHandler extends ToolHandler {
         this.drawingLine = undefined;
     }
 
-    private getPointer(opt: 'polygon-only' | 'polygon-or-pointer' = 'polygon-or-pointer'): Konva.Vector2d | undefined {
+    private getPointer(opt: 'polygon-only' | 'polygon-or-pointer' = 'polygon-or-pointer'): {
+        point?: Vector2d | undefined;
+        shape?: IMeasurableShape | undefined;
+    } | undefined {
         const pos = this.editor.stage.getRelativePointerPosition();
         if (!pos) return;
         const polygonPoint = this.editor.state.getNearestPolygonPoint(pos, CutToolHandler.SNAP_PRECISION);
 
         if (opt == 'polygon-only')
             return polygonPoint;
-        return polygonPoint ?? pos;
+        return !polygonPoint.point ? { point: pos } : polygonPoint;
     }
 
     private showGitzmoOnPointer(pos: Konva.Vector2d) {
