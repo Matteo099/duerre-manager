@@ -3,10 +3,14 @@ import { KonvaUtils } from "../konva-utils";
 import { UnscaleManager } from "../managers/unscale-manager";
 import type { IDieDataShapeDao } from "../models/idie-data-shape-dao";
 import { ExtendedShape } from "./extended-shape";
+import { Point } from "./point";
 
-export class LineExt2 extends ExtendedShape<Konva.Line> {
+export class Line extends ExtendedShape<Konva.Line> {
 
-    protected override createShape(position: Konva.Vector2d): Konva.Line {
+    declare startPoint: Point;
+    declare endPoint: Point;
+
+    protected override createShape(position: Point | Konva.Vector2d): Konva.Line {
         const line = new Konva.Line({
             stroke: '#df4b26',
             strokeWidth: 5,
@@ -19,14 +23,26 @@ export class LineExt2 extends ExtendedShape<Konva.Line> {
             points: [position.x, position.y, position.x, position.y],
         });
         UnscaleManager.getInstance()?.registerShape(line);
+        this.startPoint = Point.from(position);
+        this.endPoint = new Point(position);
         return line;
     }
 
-    override getEndPoints(): Konva.Vector2d[] {
-        return KonvaUtils.pointsVector2d(this.getPoints());
+    setStartPoint(point: Konva.Vector2d) {
+        this.startPoint.set(point.x, point.y);
+        this._shape.points([...this.startPoint.get(), ...this.endPoint.get()])
     }
 
-    override getAnchorPoints(): Konva.Vector2d[] {
+    setEndPoint(point: Konva.Vector2d) {
+        this.endPoint.set(point.x, point.y);
+        this._shape.points([...this.startPoint.get(), ...this.endPoint.get()])
+    }
+
+    override getEndPoints(): Point[] {
+        return [this.startPoint, this.endPoint]
+    }
+
+    override getAnchorPoints(): Point[] {
         return this.getEndPoints();
     }
 
@@ -39,7 +55,7 @@ export class LineExt2 extends ExtendedShape<Konva.Line> {
 
     override computeCurvePoints<T extends number | Konva.Vector2d>(precision: number = 10): T[] {
         const points: T[] = [];
-        const [A, B] = KonvaUtils.pointsVector2d(this.getPoints());
+        const [A, B] = [this.startPoint, this.endPoint];
 
         for (let i = 0; i <= precision; i++) {
             const t = i / precision;
@@ -58,7 +74,7 @@ export class LineExt2 extends ExtendedShape<Konva.Line> {
 
 
     override getNearestPoint(pointer: Konva.Vector2d): Konva.Vector2d | undefined {
-        const [A, B] = KonvaUtils.pointsVector2d(this.getPoints());
+        const [A, B] = [this.startPoint, this.endPoint];
         const AP = { x: pointer.x - A.x, y: pointer.y - A.y };
         const AB = { x: B.x - A.x, y: B.y - A.y };
         const magnitudeAB = Math.sqrt(AB.x * AB.x + AB.y * AB.y);
@@ -76,7 +92,7 @@ export class LineExt2 extends ExtendedShape<Konva.Line> {
     }
 
     override interpolatePoint(percentage: number): Konva.Vector2d {
-        const [A, B] = KonvaUtils.pointsVector2d(this.getPoints());
+        const [A, B] = [this.startPoint, this.endPoint];
         const x = A.x + (B.x - A.x) * percentage;
         const y = A.y + (B.y - A.y) * percentage;
         return { x, y };
@@ -87,6 +103,8 @@ export class LineExt2 extends ExtendedShape<Konva.Line> {
     }
 
     setPoints(p: number[]): Konva.Line {
+        this.startPoint.set(p[0], p[1])
+        this.endPoint.set(p[2], p[3])
         return this._shape.points(p);
     }
 
@@ -107,17 +125,14 @@ export class LineExt2 extends ExtendedShape<Konva.Line> {
         return { oldPoints, newPoints };
     }
 
-    updateEndpoint(oldPoint: Konva.Vector2d | ('start' | 'end'), newValue: Konva.Vector2d): void {
+    updateEndpoint(oldPoint: Point | ('start' | 'end'), newValue: Konva.Vector2d): void {
         console.log("updateEndpoint BEFORE", this.getPoints(), this.getId(), oldPoint, newValue)
-        const coords = KonvaUtils.lineToCoords(this._shape);
-        if (oldPoint == 'start' || (typeof oldPoint === 'object' && coords.x1 == oldPoint.x && coords.y1 == oldPoint.y)) {
-            this.setPoints([
-                newValue.x, newValue.y, coords.x2, coords.y2
-            ]);
-        } else if (oldPoint == 'end' || (typeof oldPoint === 'object' && coords.x2 == oldPoint.x && coords.y2 == oldPoint.y)) {
-            this.setPoints([
-                coords.x1, coords.y1, newValue.x, newValue.y
-            ]);
+        if (oldPoint == 'start') {
+            this.setStartPoint(newValue);
+        } else if (oldPoint == 'end') {
+            this.setEndPoint(newValue);
+        } else {
+            this.getEndPoints().find(p => p.equalsById(oldPoint))?.set(newValue);
         }
         console.log("updateEndpoint AFTER", this.getPoints(), this.getId())
 

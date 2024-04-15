@@ -1,7 +1,7 @@
 import Konva from "konva";
 import type { IDieEditor } from "../idie-editor";
 import { BezierLineExt } from "../shape-ext/bezier-line-ext";
-import { LineExt } from "../shape-ext/line-ext";
+// import { LineExt } from "../shape-ext/line-ext";
 import { MeasurableShape } from "../shape-ext/measurable-shape";
 import { ToolHandler } from "./tool-handler";
 import { UnscaleManager } from "../managers/unscale-manager";

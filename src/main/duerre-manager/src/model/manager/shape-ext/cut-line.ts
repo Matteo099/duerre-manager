@@ -1,10 +1,10 @@
 import type Konva from "konva";
 import type { IMeasurableShape } from "./imeasurable-shape";
-import { LineExt } from "./line-ext";
+import { LineExt2 } from "./line-ext";
 import { KonvaUtils } from "../konva-utils";
 import type { Subscription } from "rxjs";
 
-export class CutLine extends LineExt {
+export class CutLine extends LineExt2 {
     private startPointShape?: IMeasurableShape;
     private startPointShapeOnUpdateSub?: Subscription;
     private endPointShape?: IMeasurableShape;

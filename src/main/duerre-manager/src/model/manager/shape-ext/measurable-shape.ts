@@ -7,6 +7,7 @@ import { UnscaleManager } from "../managers/unscale-manager";
 import type { IMeasurableShape, LengthChanged } from "./imeasurable-shape";
 import type { IDieEditor } from "../idie-editor";
 import { Subject } from 'rxjs'
+import type { Point } from "./point";
 
 export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurableShape {
 
@@ -25,14 +26,14 @@ export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurabl
     //public onLengthChange?: LengthChangeFn;
     public onLengthChanged: Subject<LengthChanged> = new Subject();
 
-    constructor(editor: IDieEditor, position: Konva.Vector2d, shapeConstructor: (new (initialPosition: Konva.Vector2d) => S) | S) {
+    constructor(editor: IDieEditor, position: Point | Konva.Vector2d, shapeConstructor: (new (initialPosition: Konva.Vector2d) => S) | S) {
         this.editor = editor;
         this.extShape = shapeConstructor instanceof Function ? this.createShape(position, shapeConstructor) : shapeConstructor;
         this.text = this.createText(position);
         this.group = this.createGroup();
     }
 
-    private createShape(position: Konva.Vector2d, shapeConstructor: new (initialPosition: Konva.Vector2d) => S): S {
+    private createShape(position: Point | Konva.Vector2d, shapeConstructor: new (initialPosition: Point | Konva.Vector2d) => S): S {
         return new shapeConstructor(position);
     }
 
@@ -86,7 +87,7 @@ export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurabl
         this.group.destroy();
     }
 
-    public getEndPoints(): Konva.Vector2d[] {
+    public getEndPoints(): Point[] {
         return this.extShape.getEndPoints();
     }
 
@@ -105,7 +106,7 @@ export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurabl
         return false;
     }
 
-    public getAnchorPoints(): Konva.Vector2d[] {
+    public getAnchorPoints(): Point[] {
         return this.extShape.getAnchorPoints();
     }
 
@@ -123,7 +124,7 @@ export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurabl
         } catch (error) { }
     }
 
-    public updateEndpoint(oldPoint: Konva.Vector2d | ('start' | 'end'), newValue: Konva.Vector2d) {
+    public updateEndpoint(oldPoint: Point | ('start' | 'end'), newValue: Konva.Vector2d) {
         this.extShape.updateEndpoint(oldPoint, newValue);
         this.updateText();
     }

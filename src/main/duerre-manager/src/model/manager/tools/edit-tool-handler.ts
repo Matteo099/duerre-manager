@@ -5,6 +5,7 @@ import { ToolHandler } from "./tool-handler";
 import { UnscaleManager } from "../managers/unscale-manager";
 import type { IDieEditor } from "../idie-editor";
 import type { IMeasurableShape } from "../shape-ext/imeasurable-shape";
+import type { Point } from "../shape-ext/point";
 
 export class EditToolHandler extends ToolHandler {
 
@@ -25,7 +26,7 @@ export class EditToolHandler extends ToolHandler {
     }
 
     override onToolSelected(): boolean {
-        if(!super.onToolSelected()) return false;
+        if (!super.onToolSelected()) return false;
 
         this.gizmoLayer.moveToTop();
         this.createAnchorPoints();
@@ -42,7 +43,7 @@ export class EditToolHandler extends ToolHandler {
 
     override clear(): void {
         super.clear();
-        
+
         this.tempSubscriptions.forEach(s => s.unsubscribe());
         this.tempSubscriptions = [];
     }
@@ -50,6 +51,7 @@ export class EditToolHandler extends ToolHandler {
     private createAnchorPoints() {
         this.gizmoLayer.removeChildren();
 
+        const anchorPoints: { point: Point, shapes: IMeasurableShape[] }[] = [];
         const dAnchorPoints = this.editor.state.lines.flatMap(l => {
             if (l.extShape instanceof BezierLineExt && l.extShape.quadLinePath)
                 this.gizmoLayer.add(l.extShape.quadLinePath);
@@ -58,25 +60,24 @@ export class EditToolHandler extends ToolHandler {
                 this.createAnchorPoints();
             }));
 
-            return { l, v: l.getAnchorPoints() }
+            return { shape: l, points: l.getAnchorPoints() }
         });
 
+        // TODO Correct!!!!
         // Remove duplicate points
-        const anchorPoints: Map<string, IMeasurableShape[]> = new Map();
         for (const anchorObj of dAnchorPoints) {
-            for (const point of anchorObj.v) {
-                const pointKey = `${point.x},${point.y}`;
-                if (!anchorPoints.has(pointKey)) {
-                    anchorPoints.set(pointKey, [anchorObj.l]);
+            for (const point of anchorObj.points) {
+                const index = anchorPoints.findIndex();
+                if (!anchorPoints.has(point.id)) {
+                    anchorPoints.set(point.id, { point: point, shapes: [anchorObj.l] });
                 } else {
-                    const objArr = anchorPoints.get(pointKey);
+                    const objArr = anchorPoints.get(point);
                     if (!objArr?.includes(anchorObj.l)) objArr?.push(anchorObj.l);
                 }
             }
         }
 
-        anchorPoints.forEach((shapes, pointKey) => {
-            const [x, y] = pointKey.split(',').map(parseFloat);
+        anchorPoints.forEach((shapes, id) => {
             this.buildAnchor(shapes, { x, y });
         });
     }
@@ -128,7 +129,7 @@ export class EditToolHandler extends ToolHandler {
                 currentPosition = anchor.position();
             }
 
-            if(currentPosition.x == lastPosition.x && currentPosition.y == lastPosition.y)
+            if (currentPosition.x == lastPosition.x && currentPosition.y == lastPosition.y)
                 return;
 
             shapes.forEach(s => {
@@ -153,7 +154,7 @@ export class EditToolHandler extends ToolHandler {
             const shape: Konva.Shape = s.extShape.shape;
             //shape.dash(active ? [10, 20, 0.001, 20] : []);
             //shape.dashEnabled(active);
-            shape.stroke(active ? "#26df48" : "#df4b26" );
+            shape.stroke(active ? "#26df48" : "#df4b26");
         });
     }
 }

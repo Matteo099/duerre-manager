@@ -2,7 +2,7 @@ import Konva from "konva";
 import { GridManager } from "./managers/grid-manager";
 import type { IDieDataShapeDao } from "./models/idie-data-shape-dao";
 import type { ExtendedShape } from "./shape-ext/extended-shape";
-import { LineExt } from "./shape-ext/line-ext";
+import { LineExt2 as LineExt } from "./shape-ext/line-ext";
 import { BezierLineExt } from "./shape-ext/bezier-line-ext";
 import { UPDATE, UnscaleManager } from "./managers/unscale-manager";
 

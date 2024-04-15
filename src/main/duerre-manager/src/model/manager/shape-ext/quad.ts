@@ -1,4 +1,5 @@
 import Konva from "konva";
+import { Point } from "./point";
 
 export interface IQuad {
     start: Konva.Vector2d
@@ -7,14 +8,14 @@ export interface IQuad {
     toArray(): number[];
 }
 export class Quad implements IQuad {
-    public readonly start: Konva.Vector2d;
-    public readonly control: Konva.Vector2d;
-    public readonly end: Konva.Vector2d;
+    public readonly start: Point;
+    public readonly control: Point;
+    public readonly end: Point;
 
     constructor(start: Konva.Vector2d, control: Konva.Vector2d, end: Konva.Vector2d) {
-        this.start = start; 
-        this.control = control; 
-        this.end = end; 
+        this.start = Point.from(start); 
+        this.control = Point.from(control); 
+        this.end = Point.from(end); 
     }
 
     public toArray(): number[] {

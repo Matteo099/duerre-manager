@@ -4,8 +4,9 @@ import type { IMeasurableShape, LengthChanged } from "./shape-ext/imeasurable-sh
 import type { IDieDataShapeDao } from "./models/idie-data-shape-dao";
 import { KonvaUtils } from "./konva-utils";
 import type { Vector2d } from "konva/lib/types";
-import type { LineExt } from "./shape-ext/line-ext";
+// import type { LineExt } from "./shape-ext/line-ext";
 import type { CutLine } from "./shape-ext/cut-line";
+import type { Point } from "./shape-ext/point";
 
 export class DieState {
 
@@ -35,6 +36,15 @@ export class DieState {
             if (!vertex) return false;
         }
         return true;
+    }
+
+    public getDrawingPoint(pos: Konva.Vector2d): { vertex?: Point, canDraw: boolean } {
+        if (this.lines.length > 0) {
+            const endpoints = this.getEndPoints();
+            const vertex = endpoints.find(v => v.x == pos.x && v.y == pos.y);
+            return { vertex, canDraw: !!vertex }
+        }
+        return { canDraw: true }
     }
 
     public isPolygonCreated(): boolean {
@@ -113,23 +123,27 @@ export class DieState {
         });
     }
 
-    public getEndPoints(): Konva.Vector2d[] {
-        const vectors = this.lines.flatMap(l => l.getEndPoints());
-        const vectorCountMap: Record<string, number> = {};
+    public getEndPoints(): Point[] {
+        return this.lines.flatMap(l => l.getEndPoints()).reduce((a: Point[], b: Point) => {
+            if (!a.find(p => p.equalsById(b))) a.push(b);
+            return a;
+        }, []);
 
-        // Count the occurrences of each vector
-        for (const vector of vectors) {
-            const key = `${vector.x}-${vector.y}`;
-            vectorCountMap[key] = (vectorCountMap[key] || 0) + 1;
-        }
+        // const vectorCountMap: Record<string, number> = {};
 
-        // Filter out vectors that occur only once
-        const uniqueVectors = vectors.filter(vector => {
-            const key = `${vector.x}-${vector.y}`;
-            return vectorCountMap[key] === 1;
-        });
+        // // Count the occurrences of each vector
+        // for (const vector of vectors) {
+        //     const key = `${vector.x}-${vector.y}`;
+        //     vectorCountMap[key] = (vectorCountMap[key] || 0) + 1;
+        // }
 
-        return uniqueVectors;
+        // // Filter out vectors that occur only once
+        // const uniqueVectors = vectors.filter(vector => {
+        //     const key = `${vector.x}-${vector.y}`;
+        //     return vectorCountMap[key] === 1;
+        // });
+
+        // return uniqueVectors;
     }
 
     public getNearestPolygonPointOld(pointer: Konva.Vector2d, distanceTreshold?: number): Konva.Vector2d | undefined {

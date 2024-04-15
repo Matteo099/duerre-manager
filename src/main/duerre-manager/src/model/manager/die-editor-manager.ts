@@ -13,7 +13,7 @@ import type { IDieDataDao } from "./models/idie-data-dao";
 import type { IDieDataShapeDao } from "./models/idie-data-shape-dao";
 import { BezierLineExt } from "./shape-ext/bezier-line-ext";
 import { ExtendedShape } from "./shape-ext/extended-shape";
-import { LineExt } from "./shape-ext/line-ext";
+// import { LineExt } from "./shape-ext/line-ext";
 import { MeasurableShape } from "./shape-ext/measurable-shape";
 import { CutToolHandler } from "./tools/cut-tool-handler";
 import { DrawToolHandler } from "./tools/draw-tool-handler";
@@ -22,6 +22,7 @@ import { EraserToolHandler } from "./tools/eraser-tool-handler";
 import { MoveToolHandler } from "./tools/move-tool-handler";
 import { Tool } from "./tools/tool";
 import { ToolHandler } from "./tools/tool-handler";
+import { Line } from "./shape-ext/line";
 
 export class DieEditorManager implements IDieEditor {
 
@@ -305,7 +306,7 @@ export class DieEditorManager implements IDieEditor {
     public setData(data: IDieDataDao) {
         this.clear();
         data.state.forEach(s => {
-            const drawingLine = new MeasurableShape<any>(this, { x: 0, y: 0 }, s.type == 'line' ? LineExt : BezierLineExt);
+            const drawingLine = new MeasurableShape<any>(this, { x: 0, y: 0 }, s.type == 'line' ? Line : BezierLineExt);
             drawingLine.updatePoints(s.points);
             this.layer.add(drawingLine.group);
             this.state.addLine(drawingLine);
@@ -352,7 +353,7 @@ export class DieEditorManager implements IDieEditor {
 
         const shapes: MeasurableShape<ExtendedShape<any>>[] = [];
         dieState.forEach(s => {
-            const drawingLine = new MeasurableShape<ExtendedShape<any>>(this, { x: 0, y: 0 }, s.type == 'line' ? LineExt : BezierLineExt);
+            const drawingLine = new MeasurableShape<ExtendedShape<any>>(this, { x: 0, y: 0 }, s.type == 'line' ? Line : BezierLineExt);
             drawingLine.updatePoints(s.points);
             shapes.push(drawingLine);
             const shape: Konva.Shape = drawingLine.extShape.shape;

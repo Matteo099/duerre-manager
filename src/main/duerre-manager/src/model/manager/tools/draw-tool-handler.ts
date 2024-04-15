@@ -2,12 +2,13 @@ import Konva from "konva";
 import { UnscaleManager } from "../managers/unscale-manager";
 import { BezierLineExt } from "../shape-ext/bezier-line-ext";
 import { KonvaEditableText } from "../shape-ext/konva-editable-text";
-import { LineExt } from "../shape-ext/line-ext";
+// import { LineExt } from "../shape-ext/line-ext";
 import { MeasurableShape } from "../shape-ext/measurable-shape";
 import { Tool } from "./tool";
 import { ToolHandler } from "./tool-handler";
 import type { IDieEditor } from "../idie-editor";
 import type { IFrame } from "konva/lib/types";
+import { Line } from "../shape-ext/line";
 
 export class DrawToolHandler extends ToolHandler {
 
@@ -16,7 +17,7 @@ export class DrawToolHandler extends ToolHandler {
 
     private isDrawing: boolean = false;
     private startingPoint?: Konva.Vector2d;
-    private drawingLine?: MeasurableShape<LineExt | BezierLineExt>;
+    private drawingLine?: MeasurableShape<Line | BezierLineExt>;
 
     public get isDrawingLine(): boolean { return this.editor.selectedTool == Tool.DRAW_LINE; }
     public get isDrawingCurve(): boolean { return this.editor.selectedTool == Tool.DRAW_CURVE; }
@@ -77,19 +78,19 @@ export class DrawToolHandler extends ToolHandler {
         if (KonvaEditableText.editing) return;
 
         const pos = this.getSnappingPoint();
-        const hoverEndpoints = this.editor.state.canDrawNewLine(pos);
-        if (!hoverEndpoints) {
+        const hoverEndpoints = this.editor.state.getDrawingPoint(pos);
+        if (!hoverEndpoints.canDraw) {
             this.startAnimationAvailablePoints();
             return;
         }
         console.log(this.gizmoLayer, this.layers);
 
-        this.startingPoint = pos;
+        this.startingPoint = hoverEndpoints.vertex ?? pos;
         this.stopAnimationAvailablePoints();
         this.showGitzmoOnPointer(pos);
         this.isDrawing = true;
         //debugger;
-        this.drawingLine = new MeasurableShape<any>(this.editor, pos, this.isDrawingLine ? LineExt : BezierLineExt);
+        this.drawingLine = new MeasurableShape<any>(this.editor, pos, this.isDrawingLine ? Line : BezierLineExt);
         this.editor.layer.add(this.drawingLine.group);
 
         super.onMouseDown(event);

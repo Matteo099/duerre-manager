@@ -4,6 +4,7 @@ import { UnscaleFunction, UnscaleManager } from "../managers/unscale-manager";
 import type { IDieDataShapeDao } from "../models/idie-data-shape-dao";
 import { ExtendedShape } from "./extended-shape";
 import { Quad } from "./quad";
+import type { Point } from "./point";
 
 export class BezierLineExt extends ExtendedShape<Konva.Shape> {
 
@@ -54,8 +55,8 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
         return bezierLine;
     }
 
-    override getAnchorPoints(): Konva.Vector2d[] {
-        return [...this.getEndPoints(), { x: this.quad.control.x, y: this.quad.control.y }];
+    override getAnchorPoints(): Point[] {
+        return [...this.getEndPoints(), this.quad.control];
     }
 
     override toDieDataShape(): IDieDataShapeDao {
@@ -73,8 +74,8 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
         return { x, y };
     }
 
-    getEndPoints(): Konva.Vector2d[] {
-        return [{ x: this.quad.start.x, y: this.quad.start.y }, { x: this.quad.end.x, y: this.quad.end.y }];
+    getEndPoints(): Point[] {
+        return [this.quad.start, this.quad.end];
     }
 
     getPoints(): number[] {

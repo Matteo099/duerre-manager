@@ -2,6 +2,7 @@ import type Konva from "konva";
 import type { IExtendedShape } from "./iextended-shape";
 import type { KonvaEditableText } from "./konva-editable-text";
 import { Subject } from "rxjs";
+import type { Point } from "./point";
 
 export type LengthChangeFn = (oldPoint: Konva.Vector2d, newPoint: Konva.Vector2d) => void;
 export type LengthChanged = {oldPoint: Konva.Vector2d, newPoint: Konva.Vector2d};
@@ -20,6 +21,6 @@ export interface IMeasurableShape {
     destroy(): void;
     updateEndpoint(oldPoint: Konva.Vector2d | ('start' | 'end'), newValue: Konva.Vector2d): void;
     getId(): number;
-    getEndPoints(): Konva.Vector2d[];
-    getAnchorPoints(): Konva.Vector2d[]
+    getEndPoints(): Point[];
+    getAnchorPoints(): Point[]
 }
