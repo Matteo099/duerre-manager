@@ -28,8 +28,18 @@ export class Line extends ExtendedShape<Konva.Line> {
         return line;
     }
 
+    overrideStartPoint(point: Point) {
+        this.startPoint = point
+        this._shape.points([...this.startPoint.get(), ...this.endPoint.get()])
+    }
+
     setStartPoint(point: Konva.Vector2d) {
         this.startPoint.set(point.x, point.y);
+        this._shape.points([...this.startPoint.get(), ...this.endPoint.get()])
+    }
+    
+    overrideEndPoint(point: Point) {
+        this.endPoint = point
         this._shape.points([...this.startPoint.get(), ...this.endPoint.get()])
     }
 
@@ -133,6 +143,7 @@ export class Line extends ExtendedShape<Konva.Line> {
             this.setEndPoint(newValue);
         } else {
             this.getEndPoints().find(p => p.equalsById(oldPoint))?.set(newValue);
+            this._shape.points([...this.startPoint.get(), ...this.endPoint.get()])
         }
         console.log("updateEndpoint AFTER", this.getPoints(), this.getId())
 

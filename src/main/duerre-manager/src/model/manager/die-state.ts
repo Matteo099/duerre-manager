@@ -40,7 +40,7 @@ export class DieState {
 
     public getDrawingPoint(pos: Konva.Vector2d): { vertex?: Point, canDraw: boolean } {
         if (this.lines.length > 0) {
-            const endpoints = this.getEndPoints();
+            const endpoints = this.getPolygonEndPoints();
             const vertex = endpoints.find(v => v.x == pos.x && v.y == pos.y);
             return { vertex, canDraw: !!vertex }
         }
@@ -48,7 +48,7 @@ export class DieState {
     }
 
     public isPolygonCreated(): boolean {
-        return this.lines.length > 0 && this.getEndPoints().length == 0;
+        return this.lines.length > 0 && this.getPolygonEndPoints().length == 0;
     }
 
     public addLine(shape: IMeasurableShape) {
@@ -92,7 +92,7 @@ export class DieState {
     //     }
     // }
 
-    private onLengthChange(shape: IMeasurableShape, oldPoints: Konva.Vector2d, newPoints: Konva.Vector2d) {
+    private onLengthChange(shape: IMeasurableShape, oldPoints: Point, newPoints: Konva.Vector2d) {
         const attachedLine = this.findShapesWithEndpoint(oldPoints).filter(s => s.getId() != shape.getId())[0];
         console.log("onLengthChange", shape, oldPoints, newPoints, attachedLine);
         attachedLine?.updateEndpoint(oldPoints, newPoints);
@@ -123,6 +123,9 @@ export class DieState {
         });
     }
 
+    /**
+     * @returns all the endpoints of the shapes
+     */
     public getEndPoints(): Point[] {
         return this.lines.flatMap(l => l.getEndPoints()).reduce((a: Point[], b: Point) => {
             if (!a.find(p => p.equalsById(b))) a.push(b);
@@ -144,6 +147,22 @@ export class DieState {
         // });
 
         // return uniqueVectors;
+    }
+
+    /**
+     * @returns points that are not connected with other lines/curves 
+     */
+    public getPolygonEndPoints(): Point[] {
+        const availablePoints: Point[] = [];
+        this.lines.flatMap(l => l.getEndPoints()).forEach(point => {
+            const index = availablePoints.findIndex(p => p.equalsById(point))
+            if (index == -1) {
+                availablePoints.push(point);
+            } else {
+                availablePoints.splice(index, 1);
+            }
+        })
+        return availablePoints;
     }
 
     public getNearestPolygonPointOld(pointer: Konva.Vector2d, distanceTreshold?: number): Konva.Vector2d | undefined {

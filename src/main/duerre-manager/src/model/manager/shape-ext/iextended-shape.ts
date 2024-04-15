@@ -17,6 +17,9 @@ export interface IExtendedShape<S extends Konva.Shape> {
     toDieDataShape(): IDieDataShapeDao;
     interpolatePoint(percentage: number): Konva.Vector2d;
 
+    overrideEndPoint(point: Point): void;
+    overrideStartPoint(point: Point): void;
+
     get onUpdateEndpoint(): Subject<ShapeChanged>
     get shape(): S;
 }

@@ -4,8 +4,8 @@ import type { KonvaEditableText } from "./konva-editable-text";
 import { Subject } from "rxjs";
 import type { Point } from "./point";
 
-export type LengthChangeFn = (oldPoint: Konva.Vector2d, newPoint: Konva.Vector2d) => void;
-export type LengthChanged = {oldPoint: Konva.Vector2d, newPoint: Konva.Vector2d};
+export type LengthChangeFn = (oldPoint: Point, newPoint: Konva.Vector2d) => void;
+export type LengthChanged = {oldPoint: Point, newPoint: Konva.Vector2d};
 
 export interface IMeasurableShape {
     //onLengthChange?: LengthChangeFn;
@@ -19,7 +19,7 @@ export interface IMeasurableShape {
     updateText(): void;
     getLength(): number;
     destroy(): void;
-    updateEndpoint(oldPoint: Konva.Vector2d | ('start' | 'end'), newValue: Konva.Vector2d): void;
+    updateEndpoint(oldPoint: Point | ('start' | 'end'), newValue: Konva.Vector2d): void;
     getId(): number;
     getEndPoints(): Point[];
     getAnchorPoints(): Point[]

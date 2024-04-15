@@ -52,42 +52,34 @@ export class EditToolHandler extends ToolHandler {
         this.gizmoLayer.removeChildren();
 
         const anchorPoints: { point: Point, shapes: IMeasurableShape[] }[] = [];
-        const dAnchorPoints = this.editor.state.lines.flatMap(l => {
-            if (l.extShape instanceof BezierLineExt && l.extShape.quadLinePath)
-                this.gizmoLayer.add(l.extShape.quadLinePath);
 
-            this.tempSubscriptions.push(l.onLengthChanged.subscribe(v => {
-                this.createAnchorPoints();
-            }));
+        this.editor.state.lines.forEach(shape => {
+            if (shape.extShape instanceof BezierLineExt && shape.extShape.quadLinePath)
+                this.gizmoLayer.add(shape.extShape.quadLinePath);
+            this.tempSubscriptions.push(shape.onLengthChanged.subscribe(_ => this.createAnchorPoints()));
 
-            return { shape: l, points: l.getAnchorPoints() }
-        });
-
-        // TODO Correct!!!!
-        // Remove duplicate points
-        for (const anchorObj of dAnchorPoints) {
-            for (const point of anchorObj.points) {
-                const index = anchorPoints.findIndex();
-                if (!anchorPoints.has(point.id)) {
-                    anchorPoints.set(point.id, { point: point, shapes: [anchorObj.l] });
+            shape.getAnchorPoints().forEach(point => {
+                const index = anchorPoints.findIndex(p => p.point.equalsById(point))
+                if (index != -1) {
+                    anchorPoints[index].shapes.push(shape);
                 } else {
-                    const objArr = anchorPoints.get(point);
-                    if (!objArr?.includes(anchorObj.l)) objArr?.push(anchorObj.l);
+                    anchorPoints.push({ point, shapes: [shape] })
                 }
-            }
-        }
+            })
+        })
+        console.log(anchorPoints)
 
-        anchorPoints.forEach((shapes, id) => {
-            this.buildAnchor(shapes, { x, y });
+        anchorPoints.forEach(anchorObj => {
+            this.buildAnchor(anchorObj.point, anchorObj.shapes);
         });
     }
 
     // function to build anchor point
-    private buildAnchor(shapes: IMeasurableShape[], vector: Konva.Vector2d): void {
-        const controlPoint = shapes.length == 1 && shapes[0].extShape instanceof BezierLineExt && shapes[0].extShape.isControlPoint(vector);
+    private buildAnchor(point: Point, shapes: IMeasurableShape[]): void {
+        const controlPoint = shapes.length == 1 && shapes[0].extShape instanceof BezierLineExt && shapes[0].extShape.isControlPoint(point);
         const anchor = new Konva.Circle({
-            x: vector.x,
-            y: vector.y,
+            x: point.x,
+            y: point.y,
             radius: 10,
             stroke: '#666',
             fill: '#ddd',
@@ -134,7 +126,7 @@ export class EditToolHandler extends ToolHandler {
 
             shapes.forEach(s => {
                 console.log(s.getId());
-                s.updateEndpoint(lastPosition, currentPosition);
+                s.updateEndpoint(point, currentPosition);
                 // console.log(s.extShape.shape, lastPosition, currentPosition);
                 // this.updateDottedLines();
             });

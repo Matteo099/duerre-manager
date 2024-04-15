@@ -8,11 +8,11 @@ export interface IQuad {
     toArray(): number[];
 }
 export class Quad implements IQuad {
-    public readonly start: Point;
-    public readonly control: Point;
-    public readonly end: Point;
+    public start: Point;
+    public control: Point;
+    public end: Point;
 
-    constructor(start: Konva.Vector2d, control: Konva.Vector2d, end: Konva.Vector2d) {
+    constructor(start: Point | Konva.Vector2d, control: Point | Konva.Vector2d, end: Point | Konva.Vector2d) {
         this.start = Point.from(start); 
         this.control = Point.from(control); 
         this.end = Point.from(end); 

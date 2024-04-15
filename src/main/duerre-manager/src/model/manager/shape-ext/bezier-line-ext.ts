@@ -12,9 +12,8 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
     declare public quadLinePath?: Konva.Line;
     private readonly numberOfPoints: number = 100;
 
-    protected override createShape(position: Konva.Vector2d): Konva.Shape {
-        this.quad = new Quad(
-            { x: position.x, y: position.y },
+    protected override createShape(position: Point | Konva.Vector2d): Konva.Shape {
+        this.quad = new Quad(position,
             { x: position.x, y: position.y + 50 },
             { x: position.x, y: position.y });
 
@@ -76,6 +75,22 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
 
     getEndPoints(): Point[] {
         return [this.quad.start, this.quad.end];
+    }
+
+    overrideStartPoint(point: Point) {
+        this.quad.start = point
+    }
+
+    setStartPoint(point: Konva.Vector2d) {
+        this.quad.start.set(point.x, point.y);
+    }
+
+    overrideEndPoint(point: Point) {
+        this.quad.end = point
+    }
+
+    setEndPoint(point: Konva.Vector2d) {
+        this.quad.end.set(point.x, point.y);
     }
 
     getPoints(): number[] {
@@ -193,25 +208,18 @@ export class BezierLineExt extends ExtendedShape<Konva.Shape> {
         return { oldPoints: this.quad.toArray(), newPoints: this.quad.toArray() };
     }
 
-    updateEndpoint(oldPoint: Konva.Vector2d | ('start' | 'end' | 'control'), newValue: Konva.Vector2d): void {
-        if (oldPoint == 'start' || (typeof oldPoint === 'object' &&
-            oldPoint.x === this.quad.start.x &&
-            oldPoint.y === this.quad.start.y)
-        ) {
+    updateEndpoint(oldPoint: Point | ('start' | 'end' | 'control'), newValue: Konva.Vector2d): void {
+        if (oldPoint == 'start') {
             this.quad.start.x = newValue.x;
             this.quad.start.y = newValue.y;
-        } else if (oldPoint == 'end' || (typeof oldPoint === 'object' &&
-            oldPoint.x === this.quad.end.x &&
-            oldPoint.y === this.quad.end.y
-        )) {
+        } else if (oldPoint == 'end') {
             this.quad.end.x = newValue.x;
             this.quad.end.y = newValue.y;
-        } else if (oldPoint == 'control' || (typeof oldPoint === 'object' &&
-            oldPoint.x === this.quad.control.x &&
-            oldPoint.y === this.quad.control.y
-        )) {
+        } else if (oldPoint == 'control') {
             this.quad.control.x = newValue.x;
             this.quad.control.y = newValue.y;
+        } else {
+            this.getAnchorPoints().find(p => p.equalsById(oldPoint))?.set(newValue);
         }
 
         this.updateDottedLines();

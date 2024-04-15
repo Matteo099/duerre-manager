@@ -83,14 +83,13 @@ export class DrawToolHandler extends ToolHandler {
             this.startAnimationAvailablePoints();
             return;
         }
-        console.log(this.gizmoLayer, this.layers);
 
         this.startingPoint = hoverEndpoints.vertex ?? pos;
         this.stopAnimationAvailablePoints();
         this.showGitzmoOnPointer(pos);
         this.isDrawing = true;
         //debugger;
-        this.drawingLine = new MeasurableShape<any>(this.editor, pos, this.isDrawingLine ? Line : BezierLineExt);
+        this.drawingLine = new MeasurableShape<any>(this.editor, this.startingPoint, this.isDrawingLine ? Line : BezierLineExt);
         this.editor.layer.add(this.drawingLine.group);
 
         super.onMouseDown(event);
@@ -104,11 +103,43 @@ export class DrawToolHandler extends ToolHandler {
         // prevent scrolling on touch devices
         event.evt.preventDefault();
         const pos = this.getSnappingPoint();
-        const newPoints = [this.startingPoint!.x, this.startingPoint!.y, pos.x, pos.y];
+        const newPoints = [this.startingPoint!.x, this.startingPoint!.y];
+        if (this.drawingLine?.extShape instanceof BezierLineExt)
+            newPoints.push(...this.getPerpendicularMiddlePoint(this.startingPoint!, pos, 100))
+        newPoints.push(pos.x, pos.y);
         this.drawingLine!.updatePoints(newPoints);
         pos.source == 'grid' ? this.clearGitzmos() : this.showGitzmoOnPointer(pos);
 
         super.onMouseMove(event);
+    }
+
+    /**
+     * 
+     * @param A start point
+     * @param B end point
+     * @param distance to point C 
+     * @returns point C that is perpendicular to segment AB and distant from it distance
+     */
+    private getPerpendicularMiddlePoint(A: Konva.Vector2d, B: Konva.Vector2d, distance: number): number[] {
+        // Calculate the midpoint between A and B
+        const midPoint = { x: (A.x + B.x) / 2, y: (A.y + B.y) / 2 };
+
+        // Calculate the direction from A to B
+        const direction = { x: B.x - A.x, y: B.y - A.y };
+
+        // Calculate the perpendicular direction
+        const perpendicularDirection = { x: -direction.y, y: direction.x };
+
+        // Normalize the perpendicular direction
+        const length = Math.sqrt(perpendicularDirection.x * perpendicularDirection.x + perpendicularDirection.y * perpendicularDirection.y);
+        const normalizedPerpendicularDirection = { x: perpendicularDirection.x / length, y: perpendicularDirection.y / length };
+
+        // Scale the normalized perpendicular direction by the distance
+        const scaledDirection = { x: normalizedPerpendicularDirection.x * distance, y: normalizedPerpendicularDirection.y * distance };
+
+        // Calculate and return point C
+        const pointC = { x: midPoint.x + scaledDirection.x, y: midPoint.y + scaledDirection.y };
+        return [pointC.x, pointC.y];
     }
 
     override onMouseUp(event: Konva.KonvaEventObject<any>): void {
@@ -119,9 +150,14 @@ export class DrawToolHandler extends ToolHandler {
 
         this.clearGitzmos();
         const pos = this.getSnappingPoint();
+        const hoverEndpoints = this.editor.state.getDrawingPoint(pos);
+        console.log(hoverEndpoints);
+
         //const newPoints = [this.startingPoint!.x, this.startingPoint!.y, pos.x, pos.y];
         //this.drawingLine.updatePoints(newPoints);
-        this.drawingLine.updateEndpoint('end', pos);
+        if (hoverEndpoints.vertex)
+            this.drawingLine.extShape.overrideEndPoint(hoverEndpoints.vertex);
+        else this.drawingLine.updateEndpoint('end', pos);
 
         if (this.drawingLine.getLength() > 0) {
             this.editor.state.addLine(this.drawingLine);
@@ -135,7 +171,7 @@ export class DrawToolHandler extends ToolHandler {
     private startAnimationAvailablePoints(): void {
         this.stopAnimationAvailablePoints();
 
-        const endpoints = this.editor.state.getEndPoints().map(e => {
+        const endpoints = this.editor.state.getPolygonEndPoints().map(e => {
             const circle = new Konva.Circle({
                 x: e.x,
                 y: e.y,

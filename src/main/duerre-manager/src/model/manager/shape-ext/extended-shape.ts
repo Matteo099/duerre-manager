@@ -21,6 +21,8 @@ export abstract class ExtendedShape<S extends Konva.Shape> implements IExtendedS
     }
 
     abstract getEndPoints(): Point[]
+    abstract overrideStartPoint(point: Point): void;
+    abstract overrideEndPoint(point: Point): void;
     abstract getPoints(): number[];
     abstract setPoints(p: number[]): S;
     /**
