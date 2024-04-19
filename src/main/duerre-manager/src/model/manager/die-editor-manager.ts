@@ -61,7 +61,6 @@ export class DieEditorManager implements IDieEditor {
         this.setupListeners();
         this.createManagers();
 
-        this._state = new DieState();
         this.stage.add(this.layer);
         this.zoom({});
     }
