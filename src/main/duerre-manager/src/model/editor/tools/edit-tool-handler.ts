@@ -1,18 +1,18 @@
-import { BezierLineExt } from "@/model/manager/shape-ext/bezier-line-ext";
-import type { IMeasurableShape } from "@/model/manager/shape-ext/imeasurable-shape";
-import type { Point } from "@/model/manager/shape-ext/point";
 import Konva from "konva";
-import { Subscription } from "rxjs";
 import { VirtualLayer } from "../core/layer/virtual-layer";
 import type { EditorOrchestrator } from "../editor-orchestrator";
 import { GenericToolHandler } from "./generic-tool-handler";
+import type { EventSubscription } from "../core/event/lite-event";
+import type { Point } from "../core/math/point";
+import type { IMeasurableShape } from "../core/shape/wrappers/imeasurable-shape";
+import { BezierLine } from "../core/shape/bezier-line";
 
 export class EditToolHandler extends GenericToolHandler {
 
     public static readonly GIZMO_LAYER_NAME = "GIZMO_LAYER_NAME";
 
     declare private gizmoLayer: VirtualLayer;
-    private tempSubscriptions: Subscription[] = [];
+    private tempSubscriptions: EventSubscription[] = [];
 
     constructor(editor: EditorOrchestrator) {
         super(editor, false);
@@ -23,12 +23,10 @@ export class EditToolHandler extends GenericToolHandler {
         this.layers.push(this.gizmoLayer);
     }
 
-    override onToolSelected(): boolean {
-        if (!super.onToolSelected()) return false;
-
-        this.gizmoLayer.moveToTop();
+    override onToolSelected() {
+        console.log("Edit tool onToolSelected")
+        super.onToolSelected();
         this.createAnchorPoints();
-        return true;
     }
 
     override onToolDeselected(): void {
@@ -52,7 +50,7 @@ export class EditToolHandler extends GenericToolHandler {
         const anchorPoints: { point: Point, shapes: IMeasurableShape[] }[] = [];
 
         this.stateManager?.dieShape.lines.forEach(shape => {
-            if (shape.extShape instanceof BezierLineExt && shape.extShape.quadLinePath)
+            if (shape.extShape instanceof BezierLine && shape.extShape.quadLinePath)
                 this.gizmoLayer.add(shape.extShape.quadLinePath);
             this.tempSubscriptions.push(shape.onLengthChanged.subscribe(_ => this.createAnchorPoints()));
 
@@ -70,11 +68,13 @@ export class EditToolHandler extends GenericToolHandler {
         anchorPoints.forEach(anchorObj => {
             this.buildAnchor(anchorObj.point, anchorObj.shapes);
         });
+
+        this.gizmoLayer.moveToTop();
     }
 
     // function to build anchor point
     private buildAnchor(point: Point, shapes: IMeasurableShape[]): void {
-        const controlPoint = shapes.length == 1 && shapes[0].extShape instanceof BezierLineExt && shapes[0].extShape.isControlPoint(point);
+        const controlPoint = shapes.length == 1 && shapes[0].extShape instanceof BezierLine && shapes[0].extShape.isControlPoint(point);
         const anchor = new Konva.Circle({
             x: point.x,
             y: point.y,

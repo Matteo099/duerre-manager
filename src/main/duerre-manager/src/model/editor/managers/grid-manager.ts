@@ -4,7 +4,7 @@ import { GenericManager } from "@/model/editor/managers/generic-manager";
 import Konva from "konva";
 import { UnscaleManager } from "./unscale-manager";
 import { ZoomManager } from "./zoom-manager";
-import { GRID_ELEMENT, GRID_LINE, UPDATE_UNSCALE } from "@/model/manager/constants";
+import { GRID_ELEMENT, GRID_LINE, UPDATE_UNSCALE } from "../core/constants";
 
 export class GridManager extends GenericManager {
 
@@ -21,8 +21,11 @@ export class GridManager extends GenericManager {
         this.stage = this.editor.stage;
         this.layer = new Konva.Layer({ x: 0, y: 0, draggable: false });
         this.stage.add(this.layer);
+        this.layer.moveToBottom();
         this.unscaleManager = this.editor.getManager(UnscaleManager)!;
     }
+
+    public clear(): void { }
 
     public destroy(): void {
         this.layer.destroy();

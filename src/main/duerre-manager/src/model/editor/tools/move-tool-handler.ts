@@ -7,11 +7,9 @@ export class MoveToolHandler extends GenericToolHandler {
         super(editor, false);
     }
 
-    override onToolSelected(): boolean {
-        if(!super.onToolSelected()) return false;
-        
+    override onToolSelected() {
+        super.onToolSelected();
         this.editor.stage.draggable(true);
-        return true;
     }
 
     override onToolDeselected(): void {

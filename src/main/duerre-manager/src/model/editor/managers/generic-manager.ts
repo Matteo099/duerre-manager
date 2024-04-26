@@ -10,5 +10,6 @@ export abstract class GenericManager implements ELifecycle {
     ) { }
 
     public abstract setup(): void;
+    public abstract clear(): void;
     public abstract destroy(): void;
 }

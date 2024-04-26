@@ -15,6 +15,10 @@ export class LiteEvent<T> implements ILiteEvent<T> {
         }
     }
 
+    public unsubscribeAll() {
+        this.clear();
+    }
+
     public next(data: T) {
         [...this.handlers].forEach(h => h(data))
     }

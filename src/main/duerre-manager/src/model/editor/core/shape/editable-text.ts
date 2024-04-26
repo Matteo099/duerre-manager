@@ -1,9 +1,9 @@
 import Konva from "konva";
 import type { EditorOrchestrator } from "../../editor-orchestrator";
-import { EDITABLE_TEXT } from "@/model/manager/constants";
 import { UnscaleManager } from "../../managers/unscale-manager";
 import { LiteEvent } from "../event/lite-event";
 import type { ILiteEvent } from "../event/ilite-event";
+import { EDITABLE_TEXT } from "../constants";
 
 export class EditableText {
 

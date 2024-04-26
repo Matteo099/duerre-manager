@@ -3,6 +3,8 @@ import type { EditorOrchestrator } from "../editor-orchestrator";
 import { EManager } from "./emanager";
 import { GenericManager } from "./generic-manager";
 import { Vec2DZero } from "../core/math/vec2d";
+import { GridManager } from "./grid-manager";
+import { UnscaleManager } from "./unscale-manager";
 
 export class ZoomManager extends GenericManager {
     public static readonly SCALES = [
@@ -24,6 +26,8 @@ export class ZoomManager extends GenericManager {
         { scale: 0.1, step: 1000, lineMode: 1 } //  10 mm
     ];
     private currentScaleIndex = 5;
+    private gridManager?: GridManager;
+    private unscaleManager?: UnscaleManager;
 
     public get currentScale(): number {
         return ZoomManager.SCALES[this.currentScaleIndex].scale;
@@ -35,7 +39,11 @@ export class ZoomManager extends GenericManager {
     }
 
     public setup(): void {
-        this.resetZoom();
+        this.gridManager = this.editor.getManager(GridManager);
+        this.unscaleManager = this.editor.getManager(UnscaleManager);
+    }
+
+    public clear(): void {
     }
 
     public destroy(): void {
@@ -44,6 +52,14 @@ export class ZoomManager extends GenericManager {
     public resetZoom() {
         this.currentScaleIndex = Math.max((ZoomManager.SCALES.length / 2) - 1, 0);
         this.updateZoom(Vec2DZero);
+    }
+
+    public zoomIn() {
+        this.zoom({ direction: 1 });
+    }
+
+    public zoomOut() {
+        this.zoom({ direction: -1 });
     }
 
     public zoom(opts: { direction?: number, event?: Konva.KonvaEventObject<any> }) {
@@ -90,5 +106,8 @@ export class ZoomManager extends GenericManager {
 
         stage.position(newPos);
         stage.draw();
+
+        this.gridManager?.draw();
+        this.unscaleManager?.update();
     }
 }

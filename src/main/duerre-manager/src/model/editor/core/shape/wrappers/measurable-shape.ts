@@ -1,13 +1,13 @@
 import type { EditorOrchestrator } from "@/model/editor/editor-orchestrator";
 import { UnscaleManager } from "@/model/editor/managers/unscale-manager";
-import { ERASABLE, UPDATE_UNSCALE } from "@/model/manager/constants";
 import Konva from "konva";
 import { LiteEvent } from "../../event/lite-event";
 import type { Point } from "../../math/point";
 import { toVec2DArray } from "../../math/vec2d";
 import { EditableText } from "../editable-text";
-import type { ExtendedShape } from "./extended-shape";
+import type { ExtendedShape, ExtendedShapeOpt } from "./extended-shape";
 import type { IMeasurableShape, LengthChanged } from "./imeasurable-shape";
+import { ERASABLE, MEASUREMENT, UPDATE_UNSCALE } from "../../constants";
 
 export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurableShape {
 
@@ -19,7 +19,7 @@ export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurabl
     private currentUnit = MeasurableShape.UNITS[0];
 
     private readonly editor: EditorOrchestrator;
-    private readonly unscaleManager?: UnscaleManager;
+    private declare readonly unscaleManager?: UnscaleManager;
     public readonly group: Konva.Group;
     public readonly extShape: S;
     public readonly text: EditableText;
@@ -27,16 +27,17 @@ export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurabl
     //public onLengthChange?: LengthChangeFn;
     public onLengthChanged: LiteEvent<LengthChanged> = new LiteEvent();
 
-    constructor(editor: EditorOrchestrator, position: Point | Konva.Vector2d, shapeConstructor: (new (initialPosition: Konva.Vector2d) => S) | S) {
+    constructor(editor: EditorOrchestrator, position: Point | Konva.Vector2d, shapeConstructor: (new (opts: Partial<ExtendedShapeOpt>) => S) | S) {
         this.editor = editor;
         this.unscaleManager = editor.getManager(UnscaleManager);
-        this.extShape = shapeConstructor instanceof Function ? this.createShape(position, shapeConstructor) : shapeConstructor;
+        console.log(this.unscaleManager)
+        this.extShape = shapeConstructor instanceof Function ? this.createShape({ initialPosition: position }, shapeConstructor) : shapeConstructor;
         this.text = this.createText(position);
         this.group = this.createGroup();
     }
 
-    private createShape(position: Point | Konva.Vector2d, shapeConstructor: new (initialPosition: Point | Konva.Vector2d) => S): S {
-        return new shapeConstructor(position);
+    private createShape(opts: Partial<ExtendedShapeOpt>, shapeConstructor: new (opts: Partial<ExtendedShapeOpt>) => S): S {
+        return new shapeConstructor(opts);
     }
 
     private createText(position: Konva.Vector2d): EditableText {
@@ -49,7 +50,7 @@ export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurabl
             fontFamily: 'Arial',
             align: 'center'
         });
-        text.text.setAttr("MEASUREMENT", true);
+        text.text.setAttr(MEASUREMENT, true);
         text.text.setAttr(UPDATE_UNSCALE, (scale: number) => this.updateText());
         text.onDeleteTextarea = (v: string) => this.onDeleteTextarea(v);
         text.beforeCreateTextarea = () => { this.text.text.text(this.extShape.calculateLength().toFixed(2).toString()); }

@@ -58,9 +58,13 @@
 </template>
 
 <script setup lang="ts">
-import { DieEditorManager } from '@/model/manager/die-editor-manager'
-import type { IDieDataDao } from '@/model/manager/models/idie-data-dao'
-import { Tool } from '@/model/manager/tools/tool'
+import type { IDieShapeExport } from '@/model/editor/core/shape/model/idie-shape-export';
+import type { IDieShapeImport } from '@/model/editor/core/shape/model/idie-shape-import';
+import { EditorOrchestrator } from '@/model/editor/editor-orchestrator';
+import { StateManager } from '@/model/editor/managers/state-manager';
+import { UndoRedoManager } from '@/model/editor/managers/undo-redo-manager';
+import { ZoomManager } from '@/model/editor/managers/zoom-manager';
+import { Tool } from '@/model/editor/tools/tool';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { toast } from 'vue3-toastify'
 
@@ -74,8 +78,8 @@ interface DieEditorProps {
   canDeselectTool?: boolean
 }
 
-let editor: DieEditorManager
-const model = defineModel<IDieDataDao>()
+let editor: EditorOrchestrator
+const model = defineModel<IDieShapeImport>()
 const konvaEditor = ref()
 const ro = new ResizeObserver(onResize)
 const colors = ref<string[]>([])
@@ -97,7 +101,7 @@ const canCut = computed(() => props.tools.includes(Tool.CUT))
 const canSaveUndoRedo = computed(() => props.canSave || props.canUndo || props.canRedo)
 
 const emit = defineEmits<{
-  (e: 'close', data?: IDieDataDao): void
+  (e: 'close', data?: IDieShapeExport): void
 }>()
 
 function onResize() {
@@ -129,22 +133,22 @@ function useTool(tool: Tool) {
   }
 }
 function zoomIn() {
-  editor.zoomIn()
+  editor.getManager(ZoomManager)?.zoomIn()
 }
 function zoomOut() {
-  editor.zoomOut()
+  editor.getManager(ZoomManager)?.zoomOut()
 }
 function undo() {
-  //editor.undo()
+  editor.getManager(UndoRedoManager)?.undo()
 }
 function redo() {
-  //editor.redo()
+  editor.getManager(UndoRedoManager)?.redo()
 }
 function clear() {
   editor.clear()
 }
 function close() {
-  const dieDataDao = editor.getData()
+  const dieDataDao = editor.getManager(StateManager)?.save()
   emit('close', dieDataDao)
 }
 function deselectTool() {
@@ -162,12 +166,12 @@ function updateColors() {
 }
 function loadDieData() {
   console.log('loadDieData', model.value)
-  if (model.value) editor.setData(model.value)
+  if (model.value) editor.getManager(StateManager)?.load(model.value)
 }
 
 onMounted(() => {
-  editor = new DieEditorManager(konvaEditor)
-  editor.onUseTool(updateColors)
+  editor = new EditorOrchestrator(konvaEditor)
+  editor.AfterSwitchTool.subscribe(_ => updateColors())
   // editor.useTool(Tool.DRAW_CURVE)
   loadDieData()
 
@@ -175,6 +179,7 @@ onMounted(() => {
 })
 onBeforeUnmount(() => {
   ro.unobserve(konvaEditor.value)
+  editor.AfterSwitchTool.unsubscribe(_ => updateColors())
   editor.destroy()
 })
 </script>

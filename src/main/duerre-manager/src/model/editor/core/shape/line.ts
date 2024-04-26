@@ -1,6 +1,6 @@
 import Konva from "konva";
 import { Point } from "../math/point";
-import { ExtendedShape } from "./wrappers/extended-shape";
+import { ExtendedShape, type ExtendedShapeOpt } from "./wrappers/extended-shape";
 import type { IDieLine } from "./model/idie-line";
 import { lengthOf, middlePointOf, pointOf } from "../math/vec2d";
 
@@ -9,9 +9,10 @@ export class Line extends ExtendedShape<Konva.Line> {
     declare startPoint: Point;
     declare endPoint: Point;
 
-    protected override createShape(position: Point | Konva.Vector2d): Konva.Line {
+    protected override createShape(opts: Partial<ExtendedShapeOpt>): Konva.Line {
+        const position = opts.initialPosition!;
         const line = new Konva.Line({
-            stroke: '#df4b26',
+            stroke: opts.color ?? '#df4b26',
             strokeWidth: 5,
             globalCompositeOperation: 'source-over',
             // round cap for smoother lines
@@ -21,6 +22,9 @@ export class Line extends ExtendedShape<Konva.Line> {
             // add point twice, so we have some drawings even on a simple click
             points: [position.x, position.y, position.x, position.y],
         });
+        console.log("line", this.unscaleManager, this)
+
+        this.unscaleManager?.registerShape(line);
         this.startPoint = Point.from(position);
         this.endPoint = new Point(position);
         return line;
@@ -35,7 +39,7 @@ export class Line extends ExtendedShape<Konva.Line> {
         this.startPoint.set(point.x, point.y);
         this._shape.points([...this.startPoint.get(), ...this.endPoint.get()])
     }
-    
+
     overrideEndPoint(point: Point) {
         this.endPoint = point
         this._shape.points([...this.startPoint.get(), ...this.endPoint.get()])

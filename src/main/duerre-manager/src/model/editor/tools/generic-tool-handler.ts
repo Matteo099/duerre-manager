@@ -32,7 +32,7 @@ export abstract class GenericToolHandler implements ELifecycle {
 
     public setup() {
         this.createLayers();
-
+        
         this.stateManager = this.editor.getManager(StateManager);
         this.snapManager = this.editor.getManager(SnapManager);
         this.unscaleManager = this.editor.getManager(UnscaleManager);
@@ -50,16 +50,12 @@ export abstract class GenericToolHandler implements ELifecycle {
         return this.snapManager!.getSnapToNearest({ useEndpoints: true });
     }
 
-    selectionConditionsSatisfied(): { value: boolean, message?: string } {
+    canBeUsed(): { value: boolean, message?: string } {
         return { value: true };
     }
 
-    onToolSelected(): boolean {
-        if (this.selectionConditionsSatisfied()) {
-            this.layers.forEach(l => l.visible(true));
-            return true;
-        }
-        return false;
+    onToolSelected() {
+        this.layers.forEach(l => l.visible(true));
     }
 
     onToolDeselected(): void {

@@ -1,20 +1,21 @@
 import type Konva from "konva";
-import type { Subscription } from "rxjs";
-import { KonvaUtils } from "../konva-utils";
 import type { IMeasurableShape } from "./wrappers/imeasurable-shape";
 import { Line } from "./line";
+import { vec2DDistance } from "../math/vec2d";
+import type { EventSubscription } from "../event/lite-event";
+import type { ExtendedShapeOpt } from "./wrappers/extended-shape";
 
 export class CutLine extends Line {
     private startPointShape?: IMeasurableShape;
-    private startPointShapeOnUpdateSub?: Subscription;
+    private startPointShapeOnUpdateSub?: EventSubscription;
     private endPointShape?: IMeasurableShape;
-    private endPointShapeOnUpdateSub?: Subscription;
+    private endPointShapeOnUpdateSub?: EventSubscription;
 
     private startPointPercentage: number = 0;
     private endPointPercentage: number = 0;
 
-    constructor(position: Konva.Vector2d, startPointShape: IMeasurableShape) {
-        super(position);
+    constructor(opts: Partial<ExtendedShapeOpt>, startPointShape: IMeasurableShape) {
+        super(opts);
         this.setStartPointShape(startPointShape);
     }
 
@@ -23,12 +24,15 @@ export class CutLine extends Line {
         this.startPointShape = startPointShape;
         this.startPointShapeOnUpdateSub = this.startPointShape.extShape.onUpdateEndpoint.subscribe(_ => this.updateCutLine());
     }
+    public getStartPointShape() { return this.startPointShape; }
 
     public setEndPointShape(endPointShape: IMeasurableShape) {
         this.endPointShapeOnUpdateSub?.unsubscribe();
         this.endPointShape = endPointShape;
         this.endPointShapeOnUpdateSub = this.endPointShape.extShape.onUpdateEndpoint.subscribe(_ => this.updateCutLine());
     }
+
+    public getEndPointShape() { return this.endPointShape; }
 
     public calculatePointsPercentage() {
         const endpoints = this.getEndPoints();
@@ -72,7 +76,7 @@ export class CutLine extends Line {
         let minI = 0;
         for (let i = 0; i < points.length; i++) {
             const bp = points[i];
-            const d = KonvaUtils.calculateDistance({ x1: bp.x, x2: point.x, y1: bp.y, y2: point.y });
+            const d = vec2DDistance(bp, point);
             if (d < min) {
                 min = d;
                 minI = i;

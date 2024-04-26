@@ -4,8 +4,9 @@ import type { EditorOrchestrator } from "../editor-orchestrator";
 import { EManager } from "./emanager";
 import { GenericManager } from "./generic-manager";
 import { ZoomManager } from "./zoom-manager";
-import { UPDATE_UNSCALE } from "@/model/manager/constants";
+import { UPDATE, UPDATE_UNSCALE } from "@/model/editor/core/constants";
 import type { VirtualLayer } from "../core/layer/virtual-layer";
+import { GRID_ELEMENT } from "../core/constants";
 
 export type UnscaleFnc<T extends Konva.Shape> = () => UnscaleFunction<T, any>;
 
@@ -52,7 +53,6 @@ class UnscaleFunctionImpl<T extends Konva.Shape, P extends keyof T> extends Unsc
     }
 }
 
-export const UPDATE = "UPDATE";
 export class UnscaleManager extends GenericManager {
     private zoomManager?: ZoomManager;
     private registeredObjects: Map<Konva.Shape, UnscaleFunction<Konva.Shape, any>[]> = new Map();
@@ -67,6 +67,11 @@ export class UnscaleManager extends GenericManager {
     public setup(): void {
         this.zoomManager = this.editor.getManager(ZoomManager);
     }
+
+    public clear(): void {
+        this.unregisterObjectsIf(o => !o.getAttr(GRID_ELEMENT));
+    }
+
     public destroy(): void {
     }
 

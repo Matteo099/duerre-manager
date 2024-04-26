@@ -16,10 +16,12 @@ export class UndoRedoManager extends GenericManager {
     }
 
     public setup(): void {
-        throw new Error("Method not implemented.");
     }
+    
+    public clear(): void {
+    }
+
     public destroy(): void {
-        throw new Error("Method not implemented.");
     }
 
     addAction(action: Action) {

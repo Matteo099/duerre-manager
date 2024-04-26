@@ -27,6 +27,18 @@ export class DieShape {
     }
 
     /**
+     * @returns the array of all the vertices of the die shape minus the enpoints (meaning all the points connected with 2 lines)
+     */
+    getVerticesExceptEndpoints(): Point[] {
+        const allPoints = this.lines.flatMap(l => l.getEndPoints());
+        // Count the occurrences of each point
+        const pointCounts: Map<number, number> = new Map();
+        allPoints.forEach(point => pointCounts.set(point.id, (pointCounts.get(point.id) || 0) + 1));
+        // Filter out points that only appear once
+        return allPoints.filter(point => (pointCounts.get(point.id) || 0) > 1);
+    }
+
+    /**
      * @returns an array of endpoints, meaning the points that are not connected with 2 lines 
      */
     getAvailableEndpoints(): Point[] {
@@ -64,7 +76,7 @@ export class DieShape {
         }
     }
 
-    public findNearestVertex(pointer: Konva.Vector2d, distanceTreshold?: number): NearestVertex {
+    public findNearestVertex(pointer: Konva.Vector2d, distanceTreshold?: number): NearestVertex | undefined {
         let nearestPointAndShape: NearestVertex = {};
         for (const line of this.lines) {
             // TODO: must cache result!!!
@@ -81,7 +93,7 @@ export class DieShape {
         }
 
         if (nearestPointAndShape.point && distanceTreshold !== undefined) {
-            if (vec2DDistance(pointer, nearestPointAndShape.point) > distanceTreshold) return {};
+            if (vec2DDistance(pointer, nearestPointAndShape.point) > distanceTreshold) return;
         }
         return nearestPointAndShape;
     }
@@ -94,6 +106,30 @@ export class DieShape {
                 attachedLines.push(mLine);
         }
         return attachedLines;
+    }
+
+    public findCutsConnectedTo(shape: Konva.Shape | Konva.Stage | Konva.Node): CutLine[] | undefined {
+        const checkChildren = (node: Konva.Node): CutLine[] | undefined => {
+            // Check if current node matches the condition
+            const cut = this.cuts.filter(c => c.getStartPointShape()?.getId() === node._id || c.getEndPointShape()?.getId() === node._id);
+            if (cut && cut.length > 0) return cut;
+
+            // If current node has children, recursively check them
+            if (node.hasChildren()) {
+                const children = (node as any).children;
+                for (const child of children) {
+                    const result = checkChildren(child);
+                    if (result) return result; // If a cut is found in children, return it
+                }
+            }
+
+
+            // If no matching cut is found in this node or its children, return undefined
+            return undefined;
+        };
+
+        // Start the search from the provided shape
+        return checkChildren(shape);
     }
 
     public clear() {

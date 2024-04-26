@@ -1,19 +1,30 @@
+import { EditorOrchestrator } from "@/model/editor/editor-orchestrator";
+import { UnscaleManager } from "@/model/editor/managers/unscale-manager";
 import Konva from "konva";
 import type { Vector2d } from "konva/lib/types";
-import { Subject } from "rxjs";
+import type { ILiteEvent } from "../../event/ilite-event";
+import { LiteEvent } from "../../event/lite-event";
 import type { Point } from "../../math/point";
 import type { IDieLine } from "../model/idie-line";
 import type { IExtendedShape, ShapeChanged } from "./iextended-shape";
 
+export type ExtendedShapeOpt = {
+    initialPosition: Point | Konva.Vector2d,
+    color?: string
+}
+
 export abstract class ExtendedShape<S extends Konva.Shape> implements IExtendedShape<S> {
 
     protected readonly _shape: S;
-    protected readonly _onUpdateEndpoint: Subject<ShapeChanged> = new Subject();
+    protected readonly _onUpdateEndpoint: LiteEvent<ShapeChanged> = new LiteEvent();
     get shape(): S { return this._shape; }
-    get onUpdateEndpoint(): Subject<ShapeChanged> { return this._onUpdateEndpoint }
+    get onUpdateEndpoint(): ILiteEvent<ShapeChanged> { return this._onUpdateEndpoint.expose() }
 
-    constructor(position: Point | Konva.Vector2d) {
-        this._shape = this.createShape(position);
+    protected unscaleManager?: UnscaleManager;
+
+    constructor(opts: Partial<ExtendedShapeOpt>) {
+        this.unscaleManager = EditorOrchestrator.instance?.getManager(UnscaleManager);
+        this._shape = this.createShape(opts);
     }
 
     getId(): number {
@@ -30,18 +41,18 @@ export abstract class ExtendedShape<S extends Konva.Shape> implements IExtendedS
      */
     abstract calculateLength(): number;
     abstract calculateMiddlePoint(): Konva.Vector2d;
-    abstract calculateClientRect(): Konva.Vector2d & {width: number, height: number};
+    abstract calculateClientRect(): Konva.Vector2d & { width: number, height: number };
     abstract calculatePointsGivenLength(length: number): { oldPoints: number[], newPoints: number[] };
     abstract getAnchorPoints(): Point[];
     abstract computeCurvePoints<T extends number | Konva.Vector2d>(precision?: number): T[];
     abstract getNearestPoint(pointer: Konva.Vector2d): Konva.Vector2d | undefined;
     abstract interpolatePoint(percentage: number): Vector2d;
-    protected abstract createShape(initialPosition: Point | Konva.Vector2d): S;
-    
-    public updateEndpoint(oldPoint: Point | ('start' | 'end'), newValue: Konva.Vector2d): void{
+    protected abstract createShape(opts: Partial<ExtendedShapeOpt>): S;
+
+    public updateEndpoint(oldPoint: Point | ('start' | 'end'), newValue: Konva.Vector2d): void {
         this._onUpdateEndpoint.next({});
     }
-    
+
     abstract toDieLine(): IDieLine;
 
     protected calculateClientRectGivenPoints(points: number[]): Konva.Vector2d & { width: number; height: number; } {

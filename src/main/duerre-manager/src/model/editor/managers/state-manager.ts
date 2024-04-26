@@ -10,6 +10,9 @@ import { EManager } from "./emanager";
 import { GenericManager } from "./generic-manager";
 import type { EventSubscription } from "../core/event/lite-event";
 import type { IDieLine } from "../core/shape/model/idie-line";
+import { MeasurableShape } from "../core/shape/wrappers/measurable-shape";
+import { Line } from "../core/shape/line";
+import { BezierLine } from "../core/shape/bezier-line";
 
 export class StateManager extends GenericManager {
 
@@ -23,6 +26,18 @@ export class StateManager extends GenericManager {
 
     constructor(editor: EditorOrchestrator) {
         super(editor, EManager.STATE);
+    }
+
+
+    public setup(): void { }
+
+    public clear() {
+        this.dieShape.clear();
+        this.subscriptions.forEach(s => s.unsubscribe());
+    }
+
+    public destroy(): void {
+        this.clear();
     }
 
     public add(line: IMeasurableShape | CutLine) {
@@ -66,7 +81,15 @@ export class StateManager extends GenericManager {
         return this.dieShape.getAvailableEndpoints();
     }
 
-    public findNearestVertex/*getNearestPolygonPoint*/(pointer: Konva.Vector2d, distanceTreshold?: number): NearestVertex {
+    public getVertices() {
+        return this.dieShape.getVertices();
+    }
+
+    public getVerticesExceptEndpoints() {
+        return this.dieShape.getVerticesExceptEndpoints();
+    }
+
+    public findNearestVertex/*getNearestPolygonPoint*/(pointer: Konva.Vector2d, distanceTreshold?: number): NearestVertex | undefined {
         return this.dieShape.findNearestVertex(pointer, distanceTreshold);
     }
 
@@ -74,9 +97,13 @@ export class StateManager extends GenericManager {
         return this.dieShape.findNeighbors(vertex);
     }
 
+    public findCutsConnectedTo(shape: Konva.Shape | Konva.Stage | Konva.Node): Konva.Shape[] | undefined {
+        return this.dieShape.findCutsConnectedTo(shape)?.map(c => c.shape);
+    }
+
     public save(): IDieShapeExport {
         const lines: IDieLine[] = [];
-        const valid = true;
+        const valid = this.isDieCreated();
 
         const orderedLines: IMeasurableShape[] = [];
         const allLinesCopy = [...this.dieShape.lines];
@@ -104,18 +131,12 @@ export class StateManager extends GenericManager {
     }
 
     public load(die: IDieShapeImport): void {
-
+        this.editor.clear();
+        die.lines.forEach(l => {
+            const drawingLine = new MeasurableShape<any>(this.editor, { x: 0, y: 0 }, l.type == 'line' ? Line : BezierLine);
+            drawingLine.updatePoints(l.points);
+            this.editor.layer.add(drawingLine.group);
+            this.add(drawingLine);
+        });
     }
-
-    public clear() {
-        this.dieShape.clear();
-        this.subscriptions.forEach(s => s.unsubscribe());
-    }
-
-    public setup(): void { }
-
-    public destroy(): void {
-        this.clear();
-    }
-
 }

@@ -1,10 +1,10 @@
-import type { DieState } from "@/model/manager/die-state";
 import type Konva from "konva";
-import { Vec2DZero, type Vec2D } from "../core/math/vec2d";
+import { Vec2DZero, vec2DDistance, vec2DEquals, type Vec2D } from "../core/math/vec2d";
 import { GenericManager } from "./generic-manager";
 import { GridManager } from "./grid-manager";
 import { EManager } from "./emanager";
 import type { EditorOrchestrator } from "../editor-orchestrator";
+import { StateManager } from "./state-manager";
 
 export interface SnapConfig {
     useEndpoints: boolean;
@@ -15,8 +15,9 @@ export class SnapManager extends GenericManager {
     
     private lastPointerPosition: Vec2D = Vec2DZero;
     private stage!: Konva.Stage;
-    private state!: DieState;
+
     private gridManager!: GridManager;
+    private stateManager!: StateManager;
 
     constructor(editor: EditorOrchestrator) {
         super(editor, EManager.SNAP);
@@ -24,12 +25,14 @@ export class SnapManager extends GenericManager {
 
     public setup(): void {
         this.stage = this.editor.stage
-        this.state = this.editor.state
         this.gridManager = this.editor.getManager(GridManager)!;
+        this.stateManager = this.editor.getManager(StateManager)!;
+    }
+
+    public clear(): void {
     }
     
     public destroy(): void {
-        throw new Error("Method not implemented.");
     }
 
     public getSnapToNearest(config?: SnapConfig): Vec2D {
@@ -45,7 +48,7 @@ export class SnapManager extends GenericManager {
 
         if (config?.useEndpoints) {
             // get the shape endpoints => push to points array
-            const endpoints: Vec2D[] = this.state.getEndPoints().map(v => { return { ...v, source: 'vertex' } });
+            const endpoints: Vec2D[] = this.stateManager.getEndpoints().map(v => { return { ...v, source: 'vertex' } });
             points.push(...endpoints);
         }
 
@@ -62,10 +65,10 @@ export class SnapManager extends GenericManager {
         // remove all points that are vertex excluding the endpoints => push to points array
         points.splice(0, points.length);
         const tmpPoints = [nearestPoint, ...vhPoints];
-        const vertexExceptEndpoints = this.state.getVerticesExceptEndpoints();
+        const vertexExceptEndpoints = this.stateManager.getVerticesExceptEndpoints();
         for (let i = 0; i < tmpPoints.length; i++) {
             const vertex = tmpPoints[i];
-            if (!vertexExceptEndpoints.find(v => KonvaUtils.v2Equals(v, vertex))) {
+            if (!vertexExceptEndpoints.find(v => vec2DEquals(v, vertex))) {
                 points.push(vertex);
             }
         }
@@ -78,8 +81,8 @@ export class SnapManager extends GenericManager {
     private findNearestPoint(pointer: Konva.Vector2d, points: Vec2D[]): Vec2D {
         if (points.length == 0) return this.lastPointerPosition;
         return points.reduce((nearest: Konva.Vector2d & { source: 'grid' | 'vertex' }, current: Konva.Vector2d & { source: 'grid' | 'vertex' }) => {
-            const distanceToCurrent = KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: current.x, y2: current.y });
-            const distanceToNearest = nearest ? KonvaUtils.calculateDistance({ x1: pointer.x, y1: pointer.y, x2: nearest.x, y2: nearest.y }) : Infinity;
+            const distanceToCurrent = vec2DDistance(pointer, current);
+            const distanceToNearest = nearest ? vec2DDistance(pointer, nearest) : Infinity;
 
             if (distanceToCurrent == distanceToNearest)
                 return current.source == 'vertex' ? current : nearest;
@@ -89,7 +92,7 @@ export class SnapManager extends GenericManager {
 
     private getVHPoints(pointer: Konva.Vector2d): (Vec2D & { orientation: 'H' | 'V' | 'HV' })[] {
         const points: (Vec2D & { orientation: 'H' | 'V' | 'HV' })[] = [];
-        const vertex = this.state.getVertices();
+        const vertex = this.stateManager.getVertices();
         let nearX = Infinity,
             nearY = Infinity,
             vX = 0,

@@ -1,5 +1,3 @@
-import type { IDieDataDao } from "./manager/models/idie-data-dao";
-
 export class FncWorker {
     public readonly promise: Promise<any>
     public readonly worker: Worker;

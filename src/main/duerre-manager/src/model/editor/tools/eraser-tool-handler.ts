@@ -2,7 +2,7 @@ import Konva from "konva";
 import type { IFrame } from "konva/lib/types";
 import type { EditorOrchestrator } from "../editor-orchestrator";
 import { GenericToolHandler } from "./generic-tool-handler";
-import { ERASABLE } from "@/model/manager/constants";
+import { ERASABLE } from "../core/constants";
 
 const FADE_DURATION = 0.5; // in seconds
 const FRAME_RATE = 60; // Frames per second
@@ -55,13 +55,10 @@ export class EraserToolHandler extends GenericToolHandler {
         return { trail, anim };
     }
 
-    override onToolSelected(): boolean {
-        if(!super.onToolSelected()) return false;
-
+    override onToolSelected() {
+        super.onToolSelected()
         this.trail.moveToTop();
         this.anim.start();
-        //this.editor.layer.toggleHitCanvas();
-        return true;
     }
 
     override onToolDeselected(): void {
@@ -98,7 +95,12 @@ export class EraserToolHandler extends GenericToolHandler {
 
         const newPoints = this.trail.points().concat([pos.x, pos.y]);
         this.trail.points(newPoints);
-        this.addToDeletedShapes(this.getEraseableNode(event));
+        const eraseableNode = this.getEraseableNode(event)
+        this.addToDeletedShapes(eraseableNode);
+        if (eraseableNode) {
+            const connectedCutLine = this.stateManager?.findCutsConnectedTo(eraseableNode)
+            connectedCutLine?.forEach(n => this.addToDeletedShapes(n));
+        }
     }
 
     override onMouseUp(event: Konva.KonvaEventObject<any>): void {

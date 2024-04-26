@@ -19,8 +19,14 @@ export class EventManager extends GenericManager {
         this.editor.stage.on('mousemove touchmove', (event) => this.handleMouseMove(event));
     }
 
+    public clear(): void { }
+
     public destroy(): void {
-        throw new Error("Method not implemented.");
+        this.editor.stage.removeEventListener('wheel');
+        this.editor.stage.removeEventListener('dragend');
+        this.editor.stage.removeEventListener('mousedown touchstart');
+        this.editor.stage.removeEventListener('mouseup touchend');
+        this.editor.stage.removeEventListener('mousemove touchmove');
     }
 
     private handleWheel(event: Konva.KonvaEventObject<WheelEvent>) {

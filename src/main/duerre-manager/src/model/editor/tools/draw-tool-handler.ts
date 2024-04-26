@@ -8,6 +8,7 @@ import { MeasurableShape } from "../core/shape/wrappers/measurable-shape";
 import { Line } from "../core/shape/line";
 import { BezierLine } from "../core/shape/bezier-line";
 import { EditableText } from "../core/shape/editable-text";
+import { vec2DEquals } from "../core/math/vec2d";
 
 export class DrawToolHandler extends GenericToolHandler {
 
@@ -49,7 +50,7 @@ export class DrawToolHandler extends GenericToolHandler {
         this.startingPoint = undefined;
     }
 
-    override selectionConditionsSatisfied(): { value: boolean, message?: string } {
+    override canBeUsed(): { value: boolean, message?: string } {
         const polygon = this.stateManager?.isDieCreated();
         return !polygon ? { value: true } : { value: false, message: "il poligono è stato creato; elimina qualche linea o modifica i vertici" }
     }
@@ -75,9 +76,7 @@ export class DrawToolHandler extends GenericToolHandler {
         this.stopAnimationAvailablePoints();
         this.showGitzmoOnPointer(pos);
         this.isDrawing = true;
-        //debugger;
         this.drawingLine = new MeasurableShape<any>(this.editor, this.startingPoint, this.isDrawingLine ? Line : BezierLine);
-        this.unscaleManager?.registerShape(this.drawingLine.extShape.shape);
         this.editor.layer.add(this.drawingLine.group);
 
         super.onMouseDown(event);
@@ -109,6 +108,9 @@ export class DrawToolHandler extends GenericToolHandler {
      * @returns point C that is perpendicular to segment AB and distant from it distance
      */
     private getPerpendicularMiddlePoint(A: Konva.Vector2d, B: Konva.Vector2d, distance: number): number[] {
+        if (vec2DEquals(A, B)) {
+            return [A.x, A.y + distance];
+        }
         // Calculate the midpoint between A and B
         const midPoint = { x: (A.x + B.x) / 2, y: (A.y + B.y) / 2 };
 
@@ -147,7 +149,7 @@ export class DrawToolHandler extends GenericToolHandler {
             this.drawingLine.extShape.overrideEndPoint(hoverEndpoints.vertex);
         else this.drawingLine.updateEndpoint('end', pos);
 
-        if (this.drawingLine.getLength() > 0) {
+        if (this.drawingLine.getLength() > 0 && !vec2DEquals(...this.drawingLine.extShape.getEndPoints())) {
             this.stateManager?.add(this.drawingLine);
         } else {
             this.unscaleManager?.unregisterObject(this.drawingLine.extShape.shape);

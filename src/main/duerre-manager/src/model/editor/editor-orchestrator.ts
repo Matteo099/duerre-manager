@@ -1,6 +1,5 @@
 import Konva from "konva";
 import type { Ref } from "vue";
-import type { DieState } from "../manager/die-state";
 import { EManager } from "./managers/emanager";
 import { EventManager } from "./managers/event-manager";
 import type { GenericManager } from "./managers/generic-manager";
@@ -19,8 +18,12 @@ import { EraserToolHandler } from "./tools/eraser-tool-handler";
 import { MoveToolHandler } from "./tools/move-tool-handler";
 import { CutToolHandler } from "./tools/cut-tool-handler";
 import { StateManager } from "./managers/state-manager";
+import { SnapManager } from "./managers/snap-manager";
 
 export class EditorOrchestrator {
+
+    private static _instance: EditorOrchestrator;
+    public static get instance(): EditorOrchestrator { return this._instance; }
 
     private _stage!: Konva.Stage;
     private _layer!: Konva.Layer;
@@ -42,13 +45,12 @@ export class EditorOrchestrator {
     public get selectedTool(): Tool | undefined { return this._selectedTool; }
 
     constructor(stageContainer: Ref<HTMLDivElement>) {
+        EditorOrchestrator._instance = this;
         this.createCanvas(stageContainer);
         this.createTools();
         this.createManagers();
 
         this.setup();
-
-        // this.resetZoom();
     }
 
     private createCanvas(stageContainer: Ref<HTMLDivElement>) {
@@ -65,7 +67,8 @@ export class EditorOrchestrator {
 
     private createTools() {
         this.tools.set(Tool.EDIT, new EditToolHandler(this))
-        this.tools.set(Tool.DRAW_CURVE | Tool.DRAW_LINE, new DrawToolHandler(this))
+        this.tools.set(Tool.DRAW_LINE, new DrawToolHandler(this))
+        this.tools.set(Tool.DRAW_CURVE, this.tools.get(Tool.DRAW_LINE)!)
         this.tools.set(Tool.ERASER, new EraserToolHandler(this))
         this.tools.set(Tool.MOVE, new MoveToolHandler(this))
         this.tools.set(Tool.CUT, new CutToolHandler(this))
@@ -79,37 +82,43 @@ export class EditorOrchestrator {
         this.managers.push(new GridManager(this))
         this.managers.push(new EventManager(this))
         this.managers.push(new StateManager(this))
+        this.managers.push(new SnapManager(this))
     }
 
     private setup() {
         this.managers.forEach(m => m.setup());
         this.tools.forEach((v, _) => v.setup());
+
+        this.getManager(ZoomManager)?.resetZoom();
     }
 
     public useTool(tool?: Tool): { value: boolean, message?: string } {
-        const canUse = this.canUseTool(tool);
-        if (!canUse.value) return canUse;
+        if (tool == undefined) {
+            // deselect
+            this.onBeforeSwitchTool.next();
+            this.getSelectedToolHandler()?.onToolDeselected();
+            this._selectedTool = tool;
+            this.onAfterSwitchTool.next();
 
-        this.onBeforeSwitchTool.next();
-
-        this.getSelectedToolHandler()?.onToolDeselected();
-        this._selectedTool = tool;
-
-        const usingTool = this.getSelectedToolHandler()?.onToolSelected();
-        this.onAfterSwitchTool.next();
-        // if the tool cannot be selected deselect the tool
-        if (usingTool == true) {
             return { value: true };
         } else {
-            this.useTool();
-            return { value: false };
+            // select
+            const canUse = this.canUseTool(tool);
+            if (!canUse.value) return canUse;
+
+            this.onBeforeSwitchTool.next();
+            this.getSelectedToolHandler()?.onToolDeselected();
+            this._selectedTool = tool;
+            this.getSelectedToolHandler()?.onToolSelected();
+            this.onAfterSwitchTool.next();
+            return { value: true };
         }
     }
 
     public canUseTool(tool?: Tool): { value: boolean, message?: string } {
         if (tool == undefined) return { value: false };
 
-        return this.getToolHandler(tool)?.selectionConditionsSatisfied() ?? { value: false };
+        return this.getToolHandler(tool)?.canBeUsed() ?? { value: false };
     }
 
     public getSelectedToolHandler(): GenericToolHandler | undefined {
@@ -117,7 +126,7 @@ export class EditorOrchestrator {
     }
 
     public getToolHandler(tool?: Tool): GenericToolHandler | undefined {
-        return tool ? this.tools.get(tool) : undefined;
+        return tool != undefined ? this.tools.get(tool) : undefined;
     }
 
     public getManager<M extends GenericManager>(emanager: EManager | (new (e: any) => M)): M | undefined {
@@ -127,5 +136,30 @@ export class EditorOrchestrator {
             }
         }
         return undefined;
+    }
+
+    public resize(stageContainer: Ref<HTMLDivElement>) {
+        // Set canvas size to match the outer div size
+        const fullWidth = stageContainer.value.offsetWidth;
+        const fullHeight = stageContainer.value.offsetHeight;
+
+        this._stage.width(fullWidth);
+        this._stage.height(fullHeight);
+
+        this.getManager(GridManager)?.draw();
+    }
+
+    public clear() {
+        this.managers.forEach(m => m.clear());
+        this.tools.forEach(m => m.clear());
+    }
+
+    public destroy(): void {
+        this.tools.forEach(m => m.destroy());
+        this.managers.forEach(m => m.destroy());
+        this.onBeforeSwitchTool.unsubscribeAll();
+        this.onAfterSwitchTool.unsubscribeAll();
+        this.layer.destroy();
+        this.stage.destroy();
     }
 }

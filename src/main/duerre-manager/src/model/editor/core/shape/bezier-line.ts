@@ -1,10 +1,10 @@
 import Konva from "konva";
+import { UnscaleFunction } from "../../managers/unscale-manager";
 import { REMOVE_ONLY } from "../constants";
-import { UnscaleFunction, UnscaleManager } from "../managers/unscale-manager";
 import type { Point } from "../math/point";
 import { Quad } from "../math/quad";
-import type { IDieDataShapeDao } from "../models/idie-data-shape-dao";
-import { ExtendedShape } from "./wrappers/extended-shape";
+import type { IDieLine } from "./model/idie-line";
+import { ExtendedShape, type ExtendedShapeOpt } from "./wrappers/extended-shape";
 
 export class BezierLine extends ExtendedShape<Konva.Shape> {
 
@@ -12,13 +12,14 @@ export class BezierLine extends ExtendedShape<Konva.Shape> {
     declare public quadLinePath?: Konva.Line;
     private readonly numberOfPoints: number = 100;
 
-    protected override createShape(position: Point | Konva.Vector2d): Konva.Shape {
+    protected override createShape(opts: Partial<ExtendedShapeOpt>): Konva.Shape {
+        const position = opts.initialPosition!;
         this.quad = new Quad(position,
             { x: position.x, y: position.y + 50 },
             { x: position.x, y: position.y });
 
         const bezierLine = new Konva.Shape({
-            stroke: '#df4b26',
+            stroke: opts.color ?? '#df4b26',
             strokeWidth: 5,
             globalCompositeOperation: 'source-over',
             // round cap for smoother lines
@@ -37,7 +38,7 @@ export class BezierLine extends ExtendedShape<Konva.Shape> {
                 ctx.fillStrokeShape(shape);
             }
         });
-        UnscaleManager.getInstance()?.registerShape(bezierLine);
+        this.unscaleManager?.registerShape(bezierLine);
 
         this.quadLinePath = new Konva.Line({
             dash: [10, 10, 0, 10],
@@ -49,7 +50,7 @@ export class BezierLine extends ExtendedShape<Konva.Shape> {
             points: [0, 0],
         });
         this.quadLinePath.setAttr(REMOVE_ONLY, true);
-        UnscaleManager.getInstance()?.registerShape(this.quadLinePath, UnscaleFunction.unscaleDash);
+        this.unscaleManager?.registerShape(this.quadLinePath, UnscaleFunction.unscaleDash);
 
         return bezierLine;
     }
@@ -58,7 +59,7 @@ export class BezierLine extends ExtendedShape<Konva.Shape> {
         return [...this.getEndPoints(), this.quad.control];
     }
 
-    override toDieLine(): IDieDataShapeDao {
+    override toDieLine(): IDieLine {
         return {
             type: 'bezier',
             points: this.getPoints()
@@ -197,8 +198,8 @@ export class BezierLine extends ExtendedShape<Konva.Shape> {
     calculateMiddlePoint(): Konva.Vector2d {
         const t = 0.5; // middle point
 
-        const x = Math.pow(1 - t, 2) * this.quad.start.x + 2 * (1 - t) * t * this.quad.control.x + t * t * this.quad.end.x;
-        const y = Math.pow(1 - t, 2) * this.quad.start.y + 2 * (1 - t) * t * this.quad.control.y + t * t * this.quad.end.y;
+        const x = (Math.pow(1 - t, 2) * this.quad.start.x + 2 * (1 - t) * t * this.quad.control.x + t * t * this.quad.end.x) || 0;
+        const y = (Math.pow(1 - t, 2) * this.quad.start.y + 2 * (1 - t) * t * this.quad.control.y + t * t * this.quad.end.y) || 0;
 
         return { x, y };
     }

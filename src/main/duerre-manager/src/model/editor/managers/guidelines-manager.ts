@@ -1,9 +1,11 @@
 import Konva from "konva";
+import { vec2DEquals, type Vec2D } from "../core/math/vec2d";
 import type { EditorOrchestrator } from "../editor-orchestrator";
 import { EManager } from "./emanager";
 import { GenericManager } from "./generic-manager";
+import { SnapManager } from "./snap-manager";
+import { StateManager } from "./state-manager";
 import { UnscaleFunction, UnscaleManager } from "./unscale-manager";
-import type { Vec2D } from "../core/math/vec2d";
 
 export interface Guide {
     lineGuide: number,
@@ -15,7 +17,11 @@ export class GuidelinesManager extends GenericManager {
     private layer!: Konva.Layer;
     private lastPointerPosition?: Vec2D;
     private active = false;
-    
+
+    private snapManager!: SnapManager;
+    private unscaleManager!: UnscaleManager;
+    private stateManager!: StateManager;
+
 
     constructor(editor: EditorOrchestrator) {
         super(editor, EManager.GUIDELINE);
@@ -24,6 +30,12 @@ export class GuidelinesManager extends GenericManager {
     public setup(): void {
         this.layer = new Konva.Layer();
         this.editor.stage.add(this.layer);
+        this.snapManager = this.editor.getManager(SnapManager)!;
+        this.unscaleManager = this.editor.getManager(UnscaleManager)!;
+        this.stateManager = this.editor.getManager(StateManager)!;
+    }
+
+    public clear(): void {
     }
 
     public destroy(): void {
@@ -37,8 +49,8 @@ export class GuidelinesManager extends GenericManager {
     public update(optPointer?: Konva.Vector2d): void {
         if (!this.active) return;
 
-        const pointer = this.editor.getSnapToNearest({ useEndpoints: true, pointer: optPointer }); //this.editor.stage.getRelativePointerPosition();
-        if (!pointer || KonvaUtils.v2Equals(this.lastPointerPosition, pointer)) return;
+        const pointer = this.snapManager.getSnapToNearest({ useEndpoints: true, pointer: optPointer }); //this.editor.stage.getRelativePointerPosition();
+        if (!pointer || vec2DEquals(this.lastPointerPosition, pointer)) return;
 
         // clear all previous lines on the screen        
         this.deleteGuides();
@@ -49,18 +61,18 @@ export class GuidelinesManager extends GenericManager {
         // draw guidelines
         this.drawGuides(pointer, guides);
     }
-    
+
     public deactivate() {
         this.active = false;
         this.deleteGuides();
     }
 
     private getGuideLines(pointer: Konva.Vector2d): Guide[] {
-        const vertices = this.editor.state.getVertices();
+        const vertices = this.stateManager.getVertices();
         const guides: Guide[] = [];
 
         vertices.forEach(v => {
-            if (!KonvaUtils.v2Equals(v, pointer)) {
+            if (!vec2DEquals(v, pointer)) {
                 if (v.x == pointer.x && !guides.find(g => g.orientation == 'V'))
                     guides.push({ lineGuide: v.x, orientation: 'V' });
                 if (v.y == pointer.y && !guides.find(g => g.orientation == 'H'))
@@ -85,7 +97,7 @@ export class GuidelinesManager extends GenericManager {
                     x: pointer.x,
                     y: lg.lineGuide,
                 });
-                UnscaleManager.getInstance()?.registerShape(line, UnscaleFunction.unscaleDash);
+                this.unscaleManager?.registerShape(line, UnscaleFunction.unscaleDash);
                 this.layer.add(line);
             } else if (lg.orientation === 'V') {
                 const line = new Konva.Line({
@@ -99,14 +111,14 @@ export class GuidelinesManager extends GenericManager {
                     x: lg.lineGuide,
                     y: pointer.y,
                 });
-                UnscaleManager.getInstance()?.registerShape(line, UnscaleFunction.unscaleDash);
+                this.unscaleManager?.registerShape(line, UnscaleFunction.unscaleDash);
                 this.layer.add(line);
             }
         });
     }
 
     private deleteGuides() {
-        UnscaleManager.getInstance()?.unregisterLayer(this.layer);
+        this.unscaleManager?.unregisterLayer(this.layer);
         this.layer.destroyChildren();
     }
 }

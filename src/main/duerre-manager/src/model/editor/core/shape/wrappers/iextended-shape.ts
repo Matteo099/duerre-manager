@@ -2,6 +2,7 @@ import Konva from "konva";
 import { Subject } from 'rxjs';
 import type { Point } from "../../math/point";
 import type { IDieLine } from "../model/idie-line";
+import type { ILiteEvent } from "../../event/ilite-event";
 
 export type ShapeChanged = {};
 export interface IExtendedShape<S extends Konva.Shape> {
@@ -20,6 +21,6 @@ export interface IExtendedShape<S extends Konva.Shape> {
     overrideEndPoint(point: Point): void;
     overrideStartPoint(point: Point): void;
 
-    get onUpdateEndpoint(): Subject<ShapeChanged>
+    get onUpdateEndpoint(): ILiteEvent<ShapeChanged>
     get shape(): S;
 }

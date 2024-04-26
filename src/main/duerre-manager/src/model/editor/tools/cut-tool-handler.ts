@@ -4,8 +4,8 @@ import type { EditorOrchestrator } from "../editor-orchestrator";
 import { GenericToolHandler } from "./generic-tool-handler";
 import { VirtualLayer } from "../core/layer/virtual-layer";
 import { CutLine } from "../core/shape/cut-line";
-import { ERASABLE } from "@/model/manager/constants";
 import type { IMeasurableShape } from "../core/shape/wrappers/imeasurable-shape";
+import { ERASABLE } from "../core/constants";
 
 export class CutToolHandler extends GenericToolHandler {
 
@@ -29,7 +29,7 @@ export class CutToolHandler extends GenericToolHandler {
         this.layers.push(gizmoLayer);
     }
 
-    override selectionConditionsSatisfied(): { value: boolean, message?: string } {
+    override canBeUsed(): { value: boolean, message?: string } {
         const polygon = this.stateManager?.isDieCreated();
         return polygon ? { value: true } : { value: false, message: "è necessario completare il poligono prima di poter definire delle regioni" }
     }
@@ -50,7 +50,7 @@ export class CutToolHandler extends GenericToolHandler {
         this.startingPoint = pointer.point;
         this.showGitzmoOnPointer(pointer.point);
         this.isDrawing = true;
-        this.drawingLine = new CutLine(pointer.point, pointer.shape!);
+        this.drawingLine = new CutLine({ initialPosition: pointer.point, color: "#00FFCC" }, pointer.shape!);
         this.drawingLine.shape.setAttr(ERASABLE, true);
         this.editor.layer.add(this.drawingLine.shape);
 
@@ -100,7 +100,7 @@ export class CutToolHandler extends GenericToolHandler {
         this.drawingLine = undefined;
     }
 
-    private getPointer(opt: 'polygon-only' | 'polygon-or-pointer' = 'polygon-or-pointer'): {
+    private getPointer(opt: 'polygon-only' | 'everywhere' = 'everywhere'): {
         point?: Vector2d | undefined;
         shape?: IMeasurableShape | undefined;
     } | undefined {

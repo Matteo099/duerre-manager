@@ -2,11 +2,24 @@ import Konva from "konva";
 
 export interface Vec2D extends Konva.Vector2d {
     source: 'grid' | 'vertex';
-} 
+}
 export const Vec2DZero: Vec2D = { x: 0, y: 0, source: 'grid' };
 
-export const vec2DEquals = function (v1?: Konva.Vector2d, v2?: Konva.Vector2d): boolean {
-    return v1 == undefined || v2 == undefined ? false : (v1?.x == v2?.x && v1?.y == v2?.y);
+// export const vec2DEquals = function (v1?: Konva.Vector2d, v2?: Konva.Vector2d): boolean {
+//     return v1 == undefined || v2 == undefined ? false : (v1?.x == v2?.x && v1?.y == v2?.y);
+// }
+
+export const vec2DEquals = function (...vecs: (Konva.Vector2d | undefined)[]): boolean {
+    if(vecs.length <= 1) return true;
+
+    let ret = true;
+    for (let i = 1; i < vecs.length; i++) {
+        const v1 = vecs[i - 1];
+        const v2 = vecs[i];
+        ret &&= v1 == undefined || v2 == undefined ? false : (v1?.x == v2?.x && v1?.y == v2?.y);
+        if(!ret) return false;
+    }
+    return ret;
 }
 
 export const vec2DDistance = function (v1: Konva.Vector2d, v2: Konva.Vector2d): number {
