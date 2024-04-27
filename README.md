@@ -64,12 +64,17 @@
 - [x] (NON opz) altezza, larghezza totale, larghezza solo scarpetta, larghezza cresta
 - [x] ricerca per h x w + ricerca combinata con disegno
 - [x] implementare la ricerca (https://www.mongodb.com/docs/manual/core/link-text-indexes/)
-- [] possibilità di tracciare linee (rette) interne allo stampo (per delimitare le fasi dello stampo / i colori)
+- [x] possibilità di tracciare linee (rette) interne allo stampo (per delimitare le fasi dello stampo / i colori)
 - [x] vista dettagliata dello stampo
+- [] possibilità di aggiungere etichette (label) ai lati dello stampo o alle regioni 
+- [] centrare lo stampo quando si apre l'editor
+- [] paginare la dashboard (caricare n stampi alla volta)
+- [] salvare le ultime n ricerche effettuate (timespamp come chiave)
+- [] guidelines quando si traccia una cutline (linee interne allo stampo)
 
 ## FEATURES
-- rimpiazare Konva.Layer con VirtualLayer (Konva warning: The stage has 6 layers. Recommended maximum number of layers is 3-5. Adding more layers into the stage may drop the performance. Rethink your tree structure, you can use Konva.Group.)
-- warning quando viene chiamato il metodo zoom appena si crea un'istanza di EditorManager (Konva warning: Pointer position is missing and not registered by the stage. Looks like it is outside of the stage container. You can set it manually from event: stage.setPointersPositions(event);)
+- [x] rimpiazare Konva.Layer con VirtualLayer (Konva warning: The stage has 6 layers. Recommended maximum number of layers is 3-5. Adding more layers into the stage may drop the performance. Rethink your tree structure, you can use Konva.Group.)
+- [x] warning quando viene chiamato il metodo zoom appena si crea un'istanza di EditorManager (Konva warning: Pointer position is missing and not registered by the stage. Looks like it is outside of the stage container. You can set it manually from event: stage.setPointersPositions(event);)
 - eliminare bezier line & line => creare un unico strumento linea che internamente crea una curva di bezier retta
 - aggiungere bevel sui vertici
 
