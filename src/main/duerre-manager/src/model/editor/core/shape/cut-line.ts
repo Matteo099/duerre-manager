@@ -4,6 +4,8 @@ import { Line } from "./line";
 import { vec2DDistance } from "../math/vec2d";
 import type { EventSubscription } from "../event/lite-event";
 import type { ExtendedShapeOpt } from "./wrappers/extended-shape";
+import { ERASABLE } from "../constants";
+import type { IDieLine } from "./model/idie-line";
 
 export class CutLine extends Line {
     private startPointShape?: IMeasurableShape;
@@ -14,9 +16,12 @@ export class CutLine extends Line {
     private startPointPercentage: number = 0;
     private endPointPercentage: number = 0;
 
-    constructor(opts: Partial<ExtendedShapeOpt>, startPointShape: IMeasurableShape) {
+    constructor(opts: Partial<ExtendedShapeOpt>, startPointShape?: IMeasurableShape) {
         super(opts);
-        this.setStartPointShape(startPointShape);
+        if(startPointShape)
+            this.setStartPointShape(startPointShape);
+        
+        this.shape.setAttr(ERASABLE, true);
     }
 
     public setStartPointShape(startPointShape: IMeasurableShape) {
@@ -92,4 +97,12 @@ export class CutLine extends Line {
         const B = this.endPointShape?.extShape?.interpolatePoint(this.endPointPercentage);
         if (B) this.updateEndpoint("end", B)
     }
+
+    override toDieLine(): IDieLine {
+        return {
+            type: 'cut',
+            points: this.getPoints()
+        };
+    }
+
 }

@@ -28,9 +28,7 @@ import AdvancedSearch from '@/components/AdvancedSearch.vue'
 import DieCard from '@/components/DieCard.vue'
 import { useHttp } from '@/plugins/http'
 import Client from '@/plugins/http/openapi'
-import { all } from 'axios'
-import { ref } from 'vue'
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 
 const http = useHttp()
 

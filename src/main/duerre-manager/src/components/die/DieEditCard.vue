@@ -22,14 +22,14 @@
 </template>
 
 <script setup lang="ts">
-import { KonvaUtils } from '@/model/manager/konva-utils';
-import type { IDieDataDao } from '@/model/manager/models/idie-data-dao';
+import { CoreUtils } from '@/model/editor/core/core-utils';
+import type { IDieShapeExport } from '@/model/editor/core/shape/model/idie-shape-export';
 import { onBeforeUnmount, onMounted, provide, ref, watch } from 'vue';
 import DieEditorWrapper from './DieEditorWrapper.vue';
 
 const defaultShape = new URL('@/assets/images/polygon.png', import.meta.url).href
 
-const model = defineModel<IDieDataDao>();
+const model = defineModel<IDieShapeExport>();
 const props = withDefaults(defineProps<{ errorMessages?: string[] }>(), { errorMessages: () => [] as string[] })
 const error = ref("");
 const image = ref(defaultShape);
@@ -52,18 +52,16 @@ function edit() {
   console.log("onEdit", model.value, visible.value)
 }
 
-function close(data?: IDieDataDao) {
+function close(data?: IDieShapeExport) {
   model.value = data;
-  console.log(props);
-
-  console.log(props.errorMessages)
-
-  console.log("close", model.value, visible.value);
+  // console.log(props);
+  // console.log(props.errorMessages)
+  // console.log("close", model.value, visible.value);
 }
 
 function calculateImage() {
   if (model.value)
-    image.value = KonvaUtils.exportImage(model.value?.state, { border: 50 });
+    image.value = CoreUtils.exportImage(model.value, { border: 50 });
   else image.value = defaultShape
 }
 

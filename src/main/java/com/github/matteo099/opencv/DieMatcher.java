@@ -14,7 +14,7 @@ import org.opencv.imgproc.Imgproc;
 import com.github.matteo099.exceptions.MalformedDieException;
 import com.github.matteo099.model.entities.Die;
 import com.github.matteo099.model.interfaces.IDie;
-import com.github.matteo099.model.interfaces.IDieData;
+import com.github.matteo099.model.interfaces.IDieShapeExport;
 import com.github.matteo099.model.projections.DieSearchResult;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -31,7 +31,7 @@ public class DieMatcher {
         OpenCV.loadLocally();
     }
 
-    public List<DieSearchResult> searchSimilarDiesFrom(IDieData<?> dieData, float threshold, List<? extends IDie<?, ?>> savedDies)
+    public List<DieSearchResult> searchSimilarDiesFrom(IDieShapeExport<?> dieData, float threshold, List<? extends IDie<?, ?>> savedDies)
             throws MalformedDieException {
         if (dieData == null) {
             return savedDies.stream().map(e -> new DieSearchResult(e)).toList();
@@ -67,16 +67,16 @@ public class DieMatcher {
         return similarDies;
     }
 
-    public List<DieSearchResult> searchSimilarDies(IDieData<?> dieData, float threshold)
+    public List<DieSearchResult> searchSimilarDies(IDieShapeExport<?> dieData, float threshold)
             throws MalformedDieException {
         return this.searchSimilarDiesFrom(dieData, threshold, Die.listAll());
     }
 
-    public static Optional<MatOfPoint> extractContourn(IDieData<?> dieData) {
+    public static Optional<MatOfPoint> extractContourn(IDieShapeExport<?> dieData) {
         var finalPoints = new LinkedList<Point>();
         double minX = Double.POSITIVE_INFINITY;
         double minY = Double.POSITIVE_INFINITY;
-        for (var shape : dieData.getState()) {
+        for (var shape : dieData.getLines()) {
             if (shape.getType().equals("line")) {
                 var points = shape.getPoints();
                 if (points.size() != 4) {

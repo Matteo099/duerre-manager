@@ -3,7 +3,7 @@
     <v-text-field
       v-model="text"
       v-bind="textProps"
-      label="Text"
+      label="Parole Chiavi"
       placeholder="Ricerca per nome o alias"
       loading
     >
@@ -81,7 +81,7 @@ const props = withDefaults(defineProps<AdvancedSearchProps>(), {
 })
 
 const schema = yup.object({
-  text: yup.string().label('Text')
+  text: yup.string().label('Parole Chiavi')
 })
 const { defineField, handleSubmit, resetForm, meta } = useForm({
   validationSchema: schema

@@ -6,7 +6,7 @@ import type { ILiteEvent } from "../../event/ilite-event";
 import { LiteEvent } from "../../event/lite-event";
 import type { Point } from "../../math/point";
 import type { IDieLine } from "../model/idie-line";
-import type { IExtendedShape, ShapeChanged } from "./iextended-shape";
+import type { IExtendedShape, N, ShapeChanged, V2 } from "./iextended-shape";
 
 export type ExtendedShapeOpt = {
     initialPosition: Point | Konva.Vector2d,
@@ -44,7 +44,7 @@ export abstract class ExtendedShape<S extends Konva.Shape> implements IExtendedS
     abstract calculateClientRect(): Konva.Vector2d & { width: number, height: number };
     abstract calculatePointsGivenLength(length: number): { oldPoints: number[], newPoints: number[] };
     abstract getAnchorPoints(): Point[];
-    abstract computeCurvePoints<T extends number | Konva.Vector2d>(precision?: number): T[];
+    abstract computeCurvePoints<T extends number | Konva.Vector2d>(type: N | V2, precision?: number): T[];
     abstract getNearestPoint(pointer: Konva.Vector2d): Konva.Vector2d | undefined;
     abstract interpolatePoint(percentage: number): Vector2d;
     protected abstract createShape(opts: Partial<ExtendedShapeOpt>): S;

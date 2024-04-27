@@ -1,5 +1,5 @@
 import type Konva from "konva";
-import type { Point } from "../core/math/point";
+import { Point } from "../core/math/point";
 import { CutLine } from "../core/shape/cut-line";
 import { DieShape, type NearestVertex } from "../core/shape/die-shape";
 import type { IDieShapeExport } from "../core/shape/model/idie-shape-export";
@@ -13,6 +13,8 @@ import type { IDieLine } from "../core/shape/model/idie-line";
 import { MeasurableShape } from "../core/shape/wrappers/measurable-shape";
 import { Line } from "../core/shape/line";
 import { BezierLine } from "../core/shape/bezier-line";
+import { toVec2DArray, vec2DEquals } from "../core/math/vec2d";
+import { toast } from "vue3-toastify";
 
 export class StateManager extends GenericManager {
 
@@ -132,11 +134,51 @@ export class StateManager extends GenericManager {
 
     public load(die: IDieShapeImport): void {
         this.editor.clear();
+
+        const points: Point[] = [];
         die.lines.forEach(l => {
-            const drawingLine = new MeasurableShape<any>(this.editor, { x: 0, y: 0 }, l.type == 'line' ? Line : BezierLine);
-            drawingLine.updatePoints(l.points);
-            this.editor.layer.add(drawingLine.group);
-            this.add(drawingLine);
+            const vecs = toVec2DArray(l.points);
+            vecs.forEach(v => {
+                const index = points.findIndex(p => p.equalsByVector(v))
+                if (index == -1) {
+                    points.push(Point.from(v));
+                }
+            })
         });
+        console.log(points);
+
+        die.lines.forEach(l => {
+            if (l.type == 'line' || l.type == 'bezier') {
+                const vecs = toVec2DArray(l.points);
+                const shapePoints: Point[] = vecs.map(v => points.find(p => p.equalsByVector(v))!);
+                console.log(shapePoints);
+                const drawingLine = new MeasurableShape<Line | BezierLine>(this.editor, { x: 0, y: 0 }, l.type == 'line' ? Line : BezierLine);
+                drawingLine.updatePoints(l.points);
+                drawingLine.extShape.overrideStartPoint(shapePoints[0]);
+                drawingLine.extShape.overrideEndPoint(shapePoints[2] ?? shapePoints[1]);
+                this.editor.layer.add(drawingLine.group);
+                this.add(drawingLine);
+            }
+        });
+
+        let cutLineLoadError = false;
+        die.lines.forEach(l => {
+            if (l.type == 'cut') {
+                const [startPoint, endPoint] = toVec2DArray(l.points);
+                const startPointShape = this.findNearestVertex(startPoint);
+                const endPointShape = this.findNearestVertex(endPoint);
+                if (!startPointShape?.shape || !endPointShape?.shape) {
+                    cutLineLoadError = true;
+                } else {
+                    const cut = new CutLine({ initialPosition: startPoint, color: "#00FFCC" }, startPointShape.shape);
+                    cut.updateEndpoint('end', endPoint);
+                    cut.setEndPointShape(endPointShape.shape);
+                    this.add(cut);
+                    this.editor.layer.add(cut.shape);
+                }
+            }
+        });
+        if (cutLineLoadError)
+            toast.error("Impossibile caricare correttamente lo stampo. I dati sono incompleti o corrotti... (invalid cut lines)")
     }
 }

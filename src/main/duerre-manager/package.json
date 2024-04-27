@@ -1,6 +1,6 @@
 {
   "name": "duerre-manager",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,7 +14,8 @@
     "type-check": "vue-tsc --build --force",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "format": "prettier --write src/",
-    "apigen": "npx openapicmd typegen ./src/plugins/http/openapi.yaml > ./src/plugins/http/openapi.d.ts"
+    "apigen": "npx openapicmd typegen ./src/plugins/http/openapi.yaml > ./src/plugins/http/openapi.d.ts",
+    "apigenurl": "npx openapicmd typegen http://localhost:8080/q/openapi?format=json > ./src/plugins/http/openapi.d.ts"
   },
   "dependencies": {
     "@vee-validate/yup": "^4.12.6",

@@ -1,9 +1,0 @@
-@if (isLoading | async) {
-<div class="container">
-    <div class="d-flex justify-content-center align-items-center flex-column mb-3">
-        <mat-progress-spinner class="spinner" mode="indeterminate">
-        </mat-progress-spinner>
-        <span style="text-align: center;" class="mt-2 fs-3">{{(loadingMessage | async)}}</span>
-    </div>
-</div>
-}

@@ -8,8 +8,8 @@ import java.util.Random;
 import com.github.matteo099.exceptions.DieAlreadyExists;
 import com.github.matteo099.exceptions.MalformedDieException;
 import com.github.matteo099.model.dao.DieDao;
-import com.github.matteo099.model.dao.DieDataDao;
-import com.github.matteo099.model.dao.DieDataShapeDao;
+import com.github.matteo099.model.dao.DieShapeExport;
+import com.github.matteo099.model.dao.DieLineDao;
 import com.github.matteo099.model.dao.DieSearchDao;
 import com.github.matteo099.model.entities.Customer;
 import com.github.matteo099.model.entities.Die;
@@ -107,22 +107,22 @@ public class DieService {
             return buffer.toString();
         }
 
-        private static DieDataDao randomDieDataDao() {
+        private static DieShapeExport randomDieDataDao() {
             int numShapes = random.nextInt(5) + 1; // Random number of shapes, at least 1
-            List<DieDataShapeDao> shapes = new ArrayList<>();
+            List<DieLineDao> lines = new ArrayList<>();
             for (int i = 0; i < numShapes; i++) {
-                shapes.add(randomDieDataShapeDao());
+                lines.add(randomDieDataShapeDao());
             }
-            return DieDataDao.builder().state(shapes).build();
+            return DieShapeExport.builder().lines(lines).build();
         }
 
-        private static DieDataShapeDao randomDieDataShapeDao() {
+        private static DieLineDao randomDieDataShapeDao() {
             String type = randomShapeType();
             List<Double> points = new ArrayList<>();
             for (int i = 0; i < (type == "line" ? 4 : 6); i++) {
                 points.add(random.nextDouble() * 100);
             }
-            return DieDataShapeDao.builder().type(type).points(points).build();
+            return DieLineDao.builder().type(type).points(points).build();
         }
 
         private static String randomShapeType() {

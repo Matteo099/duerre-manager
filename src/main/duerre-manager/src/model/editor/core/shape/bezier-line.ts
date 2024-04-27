@@ -5,6 +5,7 @@ import type { Point } from "../math/point";
 import { Quad } from "../math/quad";
 import type { IDieLine } from "./model/idie-line";
 import { ExtendedShape, type ExtendedShapeOpt } from "./wrappers/extended-shape";
+import { N, V2 } from "./wrappers/iextended-shape";
 
 export class BezierLine extends ExtendedShape<Konva.Shape> {
 
@@ -105,14 +106,14 @@ export class BezierLine extends ExtendedShape<Konva.Shape> {
         ];
     }
 
-    public computeCurvePoints<T extends number | Konva.Vector2d>(precision?: number): T[] {
+    public computeCurvePoints<T extends number | Konva.Vector2d>(type: N | V2, precision?: number): T[] {
         const points: T[] = [];
         precision ??= this.numberOfPoints;
         for (let t = 0; t <= 1; t += 1 / precision) {
             const x = Math.pow(1 - t, 2) * this.quad.start.x + 2 * (1 - t) * t * this.quad.control.x + t * t * this.quad.end.x;
             const y = Math.pow(1 - t, 2) * this.quad.start.y + 2 * (1 - t) * t * this.quad.control.y + t * t * this.quad.end.y;
 
-            if (typeof points[0] === 'number') {
+            if (typeof type === 'number') {
                 points.push(x as T, y as T);
             } else {
                 points.push({ x, y } as T);
@@ -125,7 +126,7 @@ export class BezierLine extends ExtendedShape<Konva.Shape> {
     override getNearestPoint(pointer: Konva.Vector2d): Konva.Vector2d | undefined {
         let nearest: Konva.Vector2d | undefined;
         let minDistanceSquared = Infinity;
-        const points = this.computeCurvePoints<Konva.Vector2d>();
+        const points = this.computeCurvePoints<Konva.Vector2d>(V2);
         points.forEach((point: Konva.Vector2d) => {
             const distanceSquared = Math.pow(point.x - pointer.x, 2) + Math.pow(point.y - pointer.y, 2);
             if (distanceSquared < minDistanceSquared) {
@@ -236,6 +237,7 @@ export class BezierLine extends ExtendedShape<Konva.Shape> {
     }
 
     override calculateClientRect(): Konva.Vector2d & { width: number; height: number; } {
-        return super.calculateClientRectGivenPoints(this.computeCurvePoints());
+        debugger;
+        return super.calculateClientRectGivenPoints(this.computeCurvePoints<number>(N));
     }
 }

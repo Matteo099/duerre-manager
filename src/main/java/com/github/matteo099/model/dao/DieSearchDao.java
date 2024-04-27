@@ -17,7 +17,7 @@ import lombok.ToString;
 @ToString
 public class DieSearchDao {
     public String text;
-    public DieDataDao dieData;
+    public DieShapeExport dieData;
     public List<String> customers;
     public List<DieType> dieTypes;
     public List<MaterialType> materials;

@@ -51,7 +51,7 @@ export class CutToolHandler extends GenericToolHandler {
         this.showGitzmoOnPointer(pointer.point);
         this.isDrawing = true;
         this.drawingLine = new CutLine({ initialPosition: pointer.point, color: "#00FFCC" }, pointer.shape!);
-        this.drawingLine.shape.setAttr(ERASABLE, true);
+        // this.drawingLine.shape.setAttr(ERASABLE, true);
         this.editor.layer.add(this.drawingLine.shape);
 
         super.onMouseDown(event);

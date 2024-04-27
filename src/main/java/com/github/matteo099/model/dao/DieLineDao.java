@@ -2,7 +2,7 @@ package com.github.matteo099.model.dao;
 
 import java.util.List;
 
-import com.github.matteo099.model.interfaces.IDieData;
+import com.github.matteo099.model.interfaces.IDieLine;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DieDataDao implements IDieData<DieDataShapeDao> {
-    public List<DieDataShapeDao> state;
+public class DieLineDao implements IDieLine {
+    public String type;
+    public List<Double> points;
 }

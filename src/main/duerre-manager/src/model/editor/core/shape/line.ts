@@ -3,6 +3,8 @@ import { Point } from "../math/point";
 import { ExtendedShape, type ExtendedShapeOpt } from "./wrappers/extended-shape";
 import type { IDieLine } from "./model/idie-line";
 import { lengthOf, middlePointOf, pointOf } from "../math/vec2d";
+import { ERASABLE } from "../constants";
+import type { N, V2 } from "./wrappers/iextended-shape";
 
 export class Line extends ExtendedShape<Konva.Line> {
 
@@ -23,7 +25,6 @@ export class Line extends ExtendedShape<Konva.Line> {
             points: [position.x, position.y, position.x, position.y],
         });
         console.log("line", this.unscaleManager, this)
-
         this.unscaleManager?.registerShape(line);
         this.startPoint = Point.from(position);
         this.endPoint = new Point(position);
@@ -65,7 +66,7 @@ export class Line extends ExtendedShape<Konva.Line> {
         };
     }
 
-    override computeCurvePoints<T extends number | Konva.Vector2d>(precision: number = 10): T[] {
+    override computeCurvePoints<T extends number | Konva.Vector2d>(type: N | V2, precision: number = 10): T[] {
         const points: T[] = [];
         const [A, B] = [this.startPoint, this.endPoint];
 
@@ -74,7 +75,7 @@ export class Line extends ExtendedShape<Konva.Line> {
             const x = A.x + (B.x - A.x) * t;
             const y = A.y + (B.y - A.y) * t;
 
-            if (typeof points[0] === 'number') {
+            if (typeof type === 'number') {
                 points.push(x as T, y as T);
             } else {
                 points.push({ x, y } as T);

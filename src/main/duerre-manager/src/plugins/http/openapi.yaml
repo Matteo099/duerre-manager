@@ -225,7 +225,7 @@ components:
         name:
           type: string
         dieData:
-          $ref: '#/components/schemas/DieDataDao'
+          $ref: '#/components/schemas/DieShapeExport'
         customer:
           type: string
         aliases:
@@ -251,18 +251,11 @@ components:
     DieData:
       type: object
       properties:
-        state:
+        lines:
           type: array
           items:
-            $ref: '#/components/schemas/DieDataShape'
-    DieDataDao:
-      type: object
-      properties:
-        state:
-          type: array
-          items:
-            $ref: '#/components/schemas/DieDataShapeDao'
-    DieDataShape:
+            $ref: '#/components/schemas/DieDataLine'
+    DieDataLine:
       type: object
       properties:
         type:
@@ -272,7 +265,7 @@ components:
           items:
             format: double
             type: number
-    DieDataShapeDao:
+    DieLineDao:
       type: object
       properties:
         type:
@@ -288,7 +281,7 @@ components:
         text:
           type: string
         dieData:
-          $ref: '#/components/schemas/DieDataDao'
+          $ref: '#/components/schemas/DieShapeExport'
         customers:
           type: array
           items:
@@ -327,6 +320,13 @@ components:
         matchScore:
           format: double
           type: number
+    DieShapeExport:
+      type: object
+      properties:
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/DieLineDao'
     DieType:
       enum:
       - MONOCOLORE

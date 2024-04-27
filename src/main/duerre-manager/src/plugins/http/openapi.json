@@ -342,7 +342,7 @@
             "type" : "string"
           },
           "dieData" : {
-            "$ref" : "#/components/schemas/DieDataDao"
+            "$ref" : "#/components/schemas/DieShapeExport"
           },
           "customer" : {
             "type" : "string"
@@ -380,26 +380,15 @@
       "DieData" : {
         "type" : "object",
         "properties" : {
-          "state" : {
+          "lines" : {
             "type" : "array",
             "items" : {
-              "$ref" : "#/components/schemas/DieDataShape"
+              "$ref" : "#/components/schemas/DieDataLine"
             }
           }
         }
       },
-      "DieDataDao" : {
-        "type" : "object",
-        "properties" : {
-          "state" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/DieDataShapeDao"
-            }
-          }
-        }
-      },
-      "DieDataShape" : {
+      "DieDataLine" : {
         "type" : "object",
         "properties" : {
           "type" : {
@@ -414,7 +403,7 @@
           }
         }
       },
-      "DieDataShapeDao" : {
+      "DieLineDao" : {
         "type" : "object",
         "properties" : {
           "type" : {
@@ -436,7 +425,7 @@
             "type" : "string"
           },
           "dieData" : {
-            "$ref" : "#/components/schemas/DieDataDao"
+            "$ref" : "#/components/schemas/DieShapeExport"
           },
           "customers" : {
             "type" : "array",
@@ -491,6 +480,17 @@
           "matchScore" : {
             "format" : "double",
             "type" : "number"
+          }
+        }
+      },
+      "DieShapeExport" : {
+        "type" : "object",
+        "properties" : {
+          "lines" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DieLineDao"
+            }
           }
         }
       },

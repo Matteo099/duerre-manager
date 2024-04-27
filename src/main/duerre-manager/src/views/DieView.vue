@@ -68,7 +68,7 @@
         <v-card-text>
             <v-row>
                 <v-col cols="12" md="6">
-                    <DieEditor class="h-screen" v-model="die.dieData" :tools="[Tool.MOVE]" :can-save="false"
+                    <DieEditor class="h-screen" v-model="dieImport" :tools="[Tool.MOVE]" :can-save="false"
                         :can-clear="false" :can-close="false" :can-redo="false" :can-undo="false" />
                 </v-col>
 
@@ -81,8 +81,10 @@
                     </v-card>
 
                     <div class="mt-4" align="center">
-                        <v-chip class="ma-2 pa-2" color="indigo" prepend-icon="mdi-invert-colors">{{ die.dieType }}</v-chip>
-                        <v-chip class="ma-2 pa-2" color="success" prepend-icon="mdi-material-ui">{{ die.material }}</v-chip>
+                        <v-chip class="ma-2 pa-2" color="indigo" prepend-icon="mdi-invert-colors">{{ die.dieType
+                            }}</v-chip>
+                        <v-chip class="ma-2 pa-2" color="success" prepend-icon="mdi-material-ui">{{ die.material
+                            }}</v-chip>
 
                         <div v-if="!die.aliases || die.aliases.length == 0">Nessun alias presente</div>
                     </div>
@@ -112,7 +114,7 @@
 
 <script setup lang="ts">
 import DieEditor from '@/components/die/DieEditor.vue';
-import { Tool } from '@/model/manager/tools/tool';
+import { Tool } from '@/model/editor/tools/tool';
 import { useHttp } from '@/plugins/http';
 import Client from '@/plugins/http/openapi';
 import { onMounted, ref, watch } from 'vue';

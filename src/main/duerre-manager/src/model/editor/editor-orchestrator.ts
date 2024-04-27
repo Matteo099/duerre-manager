@@ -23,7 +23,7 @@ import { SnapManager } from "./managers/snap-manager";
 export class EditorOrchestrator {
 
     private static _instance: EditorOrchestrator;
-    public static get instance(): EditorOrchestrator { return this._instance; }
+    public static get instance(): EditorOrchestrator | undefined { return this._instance; }
 
     private _stage!: Konva.Stage;
     private _layer!: Konva.Layer;

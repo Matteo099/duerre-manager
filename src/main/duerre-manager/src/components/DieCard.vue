@@ -33,19 +33,18 @@
 
     <div class="text-center">
       <v-chip class="ma-2 pa-2" color="indigo" prepend-icon="mdi-invert-colors">{{ die.dieType }}</v-chip>
-                        <v-chip class="ma-2 pa-2" color="success" prepend-icon="mdi-material-ui">{{ die.material }}</v-chip>
+      <v-chip class="ma-2 pa-2" color="success" prepend-icon="mdi-material-ui">{{ die.material }}</v-chip>
     </div>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { FncWorker } from '@/model/fnc-worker'
-import { KonvaUtils } from '@/model/manager/konva-utils';
-import type { IDieDataShapeDao } from '@/model/manager/models/idie-data-shape-dao';
 import { useHttp } from '@/plugins/http'
 import Client from '@/plugins/http/openapi';
 import { watch } from 'vue';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { CoreUtils } from '@/model/editor/core/core-utils'
+import type { IDieLine } from '@/model/editor/core/shape/model/idie-line';
 
 export interface DieCardProp {
   die: Client.Components.Schemas.Die
@@ -67,7 +66,7 @@ watch(
 function calculateImage() {
   const data = props.die.dieData;
   if (data?.state)
-    image.value = KonvaUtils.exportImage(data.state as IDieDataShapeDao[], { border: 50 });
+    image.value = CoreUtils.exportImage({ lines: data.state as IDieLine[] }, { border: 50 });
   else image.value = "https://cdn.vuetifyjs.com/images/cards/docks.jpg"
 
   loading.value = false

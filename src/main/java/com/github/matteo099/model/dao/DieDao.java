@@ -16,9 +16,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DieDao implements IDie<DieDataDao, ICustomer> {
+public class DieDao implements IDie<DieShapeExport, ICustomer> {
     public String name;
-    public DieDataDao dieData;
+    public DieShapeExport dieData;
     public String customer;
     public List<String> aliases;
     public DieType dieType;

@@ -1,9 +1,8 @@
 package com.github.matteo099.model.entities;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import com.github.matteo099.model.interfaces.IDieShapeExport;
+import com.github.matteo099.model.interfaces.IDieLine;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.AccessLevel;
@@ -15,11 +14,13 @@ import lombok.Setter;
 @Setter
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class DieData implements IDieShapeExport<DieDataLine> {
+public class DieDataLine implements IDieLine {
 
-    private List<DieDataLine> lines = new ArrayList<>();
+    private String type;
+    private List<Double> points;
 
-    public DieData(IDieShapeExport<?> dieData) {
-        dieData.getLines().forEach(s -> lines.add(new DieDataLine(s)));
+    public DieDataLine(IDieLine dieDataShape) {
+        this.type = dieDataShape.getType();
+        this.points = dieDataShape.getPoints();
     }
 }

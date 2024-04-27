@@ -30,7 +30,7 @@ declare namespace Components {
         }
         export interface DieDao {
             name?: string;
-            dieData?: DieDataDao;
+            dieData?: DieShapeExport;
             customer?: string;
             aliases?: string[];
             dieType?: DieType;
@@ -41,22 +41,19 @@ declare namespace Components {
             crestWidth?: number; // double
         }
         export interface DieData {
-            state?: DieDataShape[];
+            lines?: DieDataLine[];
         }
-        export interface DieDataDao {
-            state?: DieDataShapeDao[];
-        }
-        export interface DieDataShape {
+        export interface DieDataLine {
             type?: string;
             points?: number /* double */[];
         }
-        export interface DieDataShapeDao {
+        export interface DieLineDao {
             type?: string;
             points?: number /* double */[];
         }
         export interface DieSearchDao {
             text?: string;
-            dieData?: DieDataDao;
+            dieData?: DieShapeExport;
             customers?: string[];
             dieTypes?: DieType[];
             materials?: MaterialType[];
@@ -70,6 +67,9 @@ declare namespace Components {
             textScore?: number; // double
             sizeScore?: number; // double
             matchScore?: number; // double
+        }
+        export interface DieShapeExport {
+            lines?: DieLineDao[];
         }
         export type DieType = "MONOCOLORE" | "BICOLORE" | "TRICOLORE";
         export interface ErrorWrapper {

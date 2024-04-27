@@ -5,5 +5,5 @@ import lombok.Getter;
 @Getter
 public class DieSimilarSearchDao {
     public String text;
-    public DieDataDao dieData;
+    public DieShapeExport dieData;
 }
