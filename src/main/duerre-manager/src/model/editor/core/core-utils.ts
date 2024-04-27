@@ -41,9 +41,7 @@ export class CoreUtils {
         unscaleManager?.setFlag(UPDATE, false);
 
         const shapes: ExtendedShape<any>[] = [];
-        die.lines.forEach(s => {
-            if(s.type =='bezier') debugger;
-            
+        die.lines.forEach(s => {            
             const extShape = s.type == 'line' ? new Line({ initialPosition: { x: 0, y: 0 } }) : s.type == 'cut'? new CutLine({ initialPosition: { x: 0, y: 0 }, color: 'purple' }) : new BezierLine({ initialPosition: { x: 0, y: 0 } })
             extShape.setPoints(s.points);
             shapes.push(extShape);

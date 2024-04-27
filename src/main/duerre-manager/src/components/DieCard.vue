@@ -45,6 +45,7 @@ import { watch } from 'vue';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { CoreUtils } from '@/model/editor/core/core-utils'
 import type { IDieLine } from '@/model/editor/core/shape/model/idie-line';
+import type { IDieShapeImport } from '@/model/editor/core/shape/model/idie-shape-import';
 
 export interface DieCardProp {
   die: Client.Components.Schemas.Die
@@ -65,8 +66,8 @@ watch(
 
 function calculateImage() {
   const data = props.die.dieData;
-  if (data?.state)
-    image.value = CoreUtils.exportImage({ lines: data.state as IDieLine[] }, { border: 50 });
+  if (data?.lines)
+    image.value = CoreUtils.exportImage(data as IDieShapeImport, { border: 50 });
   else image.value = "https://cdn.vuetifyjs.com/images/cards/docks.jpg"
 
   loading.value = false

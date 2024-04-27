@@ -68,7 +68,7 @@
         <v-card-text>
             <v-row>
                 <v-col cols="12" md="6">
-                    <DieEditor class="h-screen" v-model="dieImport" :tools="[Tool.MOVE]" :can-save="false"
+                    <DieEditor class="h-screen" v-model="die.dieData" :tools="[Tool.MOVE]" :can-save="false"
                         :can-clear="false" :can-close="false" :can-redo="false" :can-undo="false" />
                 </v-col>
 

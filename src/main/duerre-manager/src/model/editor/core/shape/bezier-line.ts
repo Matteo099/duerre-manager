@@ -237,7 +237,6 @@ export class BezierLine extends ExtendedShape<Konva.Shape> {
     }
 
     override calculateClientRect(): Konva.Vector2d & { width: number; height: number; } {
-        debugger;
         return super.calculateClientRectGivenPoints(this.computeCurvePoints<number>(N));
     }
 }
