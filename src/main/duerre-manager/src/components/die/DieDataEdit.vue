@@ -9,45 +9,21 @@
           <v-text-field v-model="name" v-bind="nameProps" label="Codice" />
         </v-row>
         <v-row no-glutters v-if="customerField.visible">
-          <v-combobox
-            clearable
-            v-model="customer"
-            v-bind="customerProps"
-            label="Cliente"
-            :items="customers"
-          ></v-combobox>
+          <v-combobox clearable v-model="customer" v-bind="customerProps" label="Cliente"
+            :items="customers"></v-combobox>
         </v-row>
         <v-row no-glutters v-if="aliasesField.visible">
-          <v-combobox
-            clearable
-            chips
-            multiple
-            label="Aliases"
-            v-model="aliases"
-            v-bind="aliasesProps"
-          ></v-combobox>
+          <v-combobox clearable chips multiple label="Aliases" v-model="aliases" v-bind="aliasesProps"></v-combobox>
         </v-row>
 
         <template v-if="availableSpace">
           <v-row no-glutters v-if="materialField.visible">
-            <v-select
-              v-bind="materialProps"
-              v-model="material"
-              label="Materiale"
-              :items="materials"
-              placeholder="Seleziona un materiale..."
-              required
-            ></v-select>
+            <v-select clearable v-bind="materialProps" v-model="material" label="Materiale" :items="materials"
+              placeholder="Seleziona un materiale..." required></v-select>
           </v-row>
           <v-row no-glutters v-if="dieTypeField.visible">
-            <v-select
-              v-bind="dieTypeProps"
-              v-model="dieType"
-              label="Colore"
-              :items="dieTypes"
-              placeholder="Seleziona un tipo di stampo..."
-              required
-            ></v-select>
+            <v-select clearable v-bind="dieTypeProps" v-model="dieType" label="Colore" :items="dieTypes"
+              placeholder="Seleziona un tipo di stampo..." required></v-select>
           </v-row>
         </template>
       </v-col>
@@ -55,63 +31,31 @@
 
     <v-row no-glutters v-if="!availableSpace">
       <v-col v-if="materialField.visible">
-        <v-select
-          v-bind="materialProps"
-          v-model="material"
-          label="Materiale"
-          :items="materials"
-          placeholder="Seleziona un materiale..."
-          required
-        ></v-select>
+        <v-select v-bind="materialProps" v-model="material" label="Materiale" :items="materials"
+          placeholder="Seleziona un materiale..." required></v-select>
       </v-col>
       <v-col v-if="dieTypeField.visible">
-        <v-select
-          v-bind="dieTypeProps"
-          v-model="dieType"
-          label="Colore"
-          :items="dieTypes"
-          placeholder="Seleziona un tipo di stampo..."
-          required
-        ></v-select>
+        <v-select v-bind="dieTypeProps" v-model="dieType" label="Colore" :items="dieTypes"
+          placeholder="Seleziona un tipo di stampo..." required></v-select>
       </v-col>
     </v-row>
 
     <v-row no-glutters>
       <v-col cols="12" sm="3" v-if="totalWidthField.visible">
-        <v-text-field
-          v-bind="totalWidthProps"
-          v-model="totalWidth"
-          label="Larghezza Totale"
-          suffix="mm"
-          type="number"
-        ></v-text-field>
+        <v-text-field v-bind="totalWidthProps" v-model="totalWidth" label="Larghezza Totale" suffix="mm"
+          type="number"></v-text-field>
       </v-col>
       <v-col cols="12" sm="3" v-if="totalHeightField.visible">
-        <v-text-field
-          v-bind="totalHeightProps"
-          v-model="totalHeight"
-          label="Altezza Totale"
-          suffix="mm"
-          type="number"
-        ></v-text-field>
+        <v-text-field v-bind="totalHeightProps" v-model="totalHeight" label="Altezza Totale" suffix="mm"
+          type="number"></v-text-field>
       </v-col>
       <v-col cols="12" sm="3" v-if="shoeWidthField.visible">
-        <v-text-field
-          v-bind="shoeWidthProps"
-          v-model="shoeWidth"
-          label="Larghezza Scarpetta"
-          suffix="mm"
-          type="number"
-        ></v-text-field>
+        <v-text-field v-bind="shoeWidthProps" v-model="shoeWidth" label="Larghezza Scarpetta" suffix="mm"
+          type="number"></v-text-field>
       </v-col>
       <v-col cols="12" sm="3" v-if="crestWidthField.visible">
-        <v-text-field
-          v-bind="crestWidthProps"
-          v-model="crestWidth"
-          label="Larghezza Cresta"
-          suffix="mm"
-          type="number"
-        ></v-text-field>
+        <v-text-field v-bind="crestWidthProps" v-model="crestWidth" label="Larghezza Cresta" suffix="mm"
+          type="number"></v-text-field>
       </v-col>
     </v-row>
 
@@ -138,6 +82,7 @@ import * as yup from 'yup'
 interface FieldProp {
   visible: boolean
   required?: boolean
+  value?: any
 }
 interface DieDataEditProps {
   editable?: boolean
@@ -180,7 +125,7 @@ const props = withDefaults(defineProps<DieDataEditProps>(), {
 const http = useHttp()
 const materials = ref<Client.Components.Schemas.MaterialType[]>(['TPU', 'PVC', 'TR', 'POLIETILENE'])
 const dieTypes = ref<Client.Components.Schemas.DieType[]>(['MONOCOLORE', 'BICOLORE', 'TRICOLORE'])
-const customers = ref<string[]>(['Test'])
+const customers = ref<string[]>([])
 const availableSpace = computed(() => {
   let availableUpperSpaces = 0
   availableUpperSpaces += props.nameField.visible ? 0 : 1
@@ -198,6 +143,30 @@ watch(
   () => loadDie(props.dieId)
 )
 
+const watchers = [
+  { prop: () => props.nameField, model: () => name },
+  { prop: () => props.aliasesField, model: () => aliases },
+  { prop: () => props.customerField, model: () => customer },
+  { prop: () => props.dieDataField, model: () => dieData },
+  { prop: () => props.materialField, model: () => material },
+  { prop: () => props.dieTypeField, model: () => dieType },
+  { prop: () => props.totalWidthField, model: () => totalWidth },
+  { prop: () => props.totalHeightField, model: () => totalHeight },
+  { prop: () => props.shoeWidthField, model: () => shoeWidth },
+  { prop: () => props.crestWidthField, model: () => crestWidth }
+];
+watchers.forEach(w => {
+  watch(
+    () => w.prop(),
+    () => {
+      if (w.prop().value)
+        w.model().value = w.prop().value
+    }
+  )
+})
+
+
+
 const emit = defineEmits<{
   (e: 'onSuccess', res?: GenericObject): void
   (e: 'onFail', res?: InvalidSubmissionContext<GenericObject>): void
@@ -213,90 +182,90 @@ const schema = yup.object({
   customer:
     props.customerField.visible && props.customerField.required
       ? yup.string().required('Il cliente è obbligatorio').label('Cliente')
-      : yup.string().label('Cliente'),
+      : yup.string().label('Cliente').nullable().optional(),
   dieData:
     props.dieDataField.visible && props.dieDataField.required
       ? yup
-          .object()
-          .required('Il disegno dello stampo è obbligatorio')
-          .test({
-            test: (v: any) => !!v && v.valid,
-            message: 'Il disegno dello stampo non è completo',
-            exclusive: false,
-            skipAbsent: true,
-            name: 'polygon'
-          })
-          .label('DieData')
+        .object()
+        .required('Il disegno dello stampo è obbligatorio')
+        .test({
+          test: (v: any) => !!v && v.valid,
+          message: 'Il disegno dello stampo non è completo',
+          exclusive: false,
+          skipAbsent: true,
+          name: 'polygon'
+        })
+        .label('DieData')
       : yup
-          .object()
-          .test({
-            test: (v: any) => !!v && v.valid,
-            message: 'Il disegno dello stampo non è completo',
-            exclusive: false,
-            skipAbsent: true,
-            name: 'polygon'
-          })
-          .label('DieData'),
+        .object()
+        .test({
+          test: (v: any) => !!v && v.valid,
+          message: 'Il disegno dello stampo non è completo',
+          exclusive: false,
+          skipAbsent: true,
+          name: 'polygon'
+        })
+        .label('DieData'),
   material:
     props.materialField.visible && props.materialField.required
       ? yup.string().required('Il materiale è obbligatorio').label('Materiale')
-      : yup.string().label('Materiale'),
+      : yup.string().label('Materiale').nullable().optional(),
   dieType:
     props.dieTypeField.visible && props.dieTypeField.required
       ? yup.string().required('Il tipo dello stampo è obbligatorio').label('Colore')
-      : yup.string().label('Colore'),
+      : yup.string().label('Colore').nullable().optional(),
   totalWidth:
     props.totalWidthField.visible && props.totalWidthField.required
       ? yup
-          .number()
-          .transform((value) => (isNaN(value) ? undefined : value))
-          .required('La larghezza totale è obbligatoria')
-          .positive('La larghezza totale deve essere positiva')
-          .label('Larghezza Totale')
+        .number()
+        .transform((value) => (isNaN(value) ? undefined : value))
+        .required('La larghezza totale è obbligatoria')
+        .positive('La larghezza totale deve essere positiva')
+        .label('Larghezza Totale')
       : yup
-          .number()
-          .transform((value) => (isNaN(value) ? undefined : value))
-          .positive('La larghezza totale deve essere positiva')
-          .label('Larghezza Totale'),
+        .number()
+        .transform((value) => (isNaN(value) ? undefined : value))
+        .positive('La larghezza totale deve essere positiva')
+        .label('Larghezza Totale'),
   totalHeight:
     props.totalHeightField.visible && props.totalHeightField.required
       ? yup
-          .number()
-          .transform((value) => (isNaN(value) ? undefined : value))
-          .required("L'altezza totale è obbligatoria")
-          .positive("L'altezza totale deve essere positiva")
-          .label('Altezza Totale')
+        .number()
+        .transform((value) => (isNaN(value) ? undefined : value))
+        .required("L'altezza totale è obbligatoria")
+        .positive("L'altezza totale deve essere positiva")
+        .label('Altezza Totale')
       : yup
-          .number()
-          .transform((value) => (isNaN(value) ? undefined : value))
-          .positive("L'altezza totale deve essere positiva")
-          .label('Altezza Totale'),
+        .number()
+        .transform((value) => (isNaN(value) ? undefined : value))
+        .positive("L'altezza totale deve essere positiva")
+        .label('Altezza Totale'),
   shoeWidth:
     props.shoeWidthField.visible && props.shoeWidthField.required
       ? yup
-          .number()
-          .transform((value) => (isNaN(value) ? undefined : value))
-          .required('La larghezza della scarpetta è obbligatoria')
-          .positive('La larghezza della scarpetta deve essere positiva')
-          .label('Larghezza Scarpetta')
+        .number()
+        .transform((value) => (isNaN(value) ? undefined : value))
+        .required('La larghezza della scarpetta è obbligatoria')
+        .positive('La larghezza della scarpetta deve essere positiva')
+        .label('Larghezza Scarpetta')
       : yup
-          .number()
-          .transform((value) => (isNaN(value) ? undefined : value))
-          .positive('La larghezza della scarpetta deve essere positiva')
-          .label('Larghezza Scarpetta'),
+        .number()
+        .transform((value) => (isNaN(value) ? undefined : value))
+        .positive('La larghezza della scarpetta deve essere positiva')
+        .label('Larghezza Scarpetta'),
   crestWidth:
     props.crestWidthField.visible && props.crestWidthField.required
       ? yup
-          .number()
-          .transform((value) => (isNaN(value) ? undefined : value))
-          .required('La larghezza della cresta è obbligatoria')
-          .positive('La larghezza della cresta deve essere positiva')
-          .label('Larghezza Cresta')
+        .number()
+        .transform((value) => (isNaN(value) ? undefined : value))
+        .required('La larghezza della cresta è obbligatoria')
+        .positive('La larghezza della cresta deve essere positiva')
+        .label('Larghezza Cresta')
       : yup
-          .number()
-          .transform((value) => (isNaN(value) ? undefined : value))
-          .positive('La larghezza della cresta deve essere positiva')
-          .label('Larghezza Cresta')
+        .number()
+        .transform((value) => (isNaN(value) ? undefined : value))
+        .positive('La larghezza della cresta deve essere positiva')
+        .label('Larghezza Cresta')
 })
 
 const { defineField, handleSubmit, resetForm, values, meta } = useForm({
@@ -339,11 +308,15 @@ const onSubmit = handleSubmit(
 function getFormValues() {
   return values
 }
+function setValues(item: Client.Components.Schemas.DieSearch) {
+  console.log(item)
+}
 defineExpose({
   onSubmit,
   getFormValues,
   handleSubmit,
-  resetForm
+  resetForm,
+  setValues
 })
 
 async function loadDie(id?: string) {
@@ -367,7 +340,16 @@ async function loadDie(id?: string) {
   crestWidth.value = die.crestWidth
 }
 
+async function loadCustomers() {
+  const client = await http.client
+  const res = await client.listCustomers()
+  if (res?.status == 200) {
+    customers.value = res.data.filter(c => !!c).map(c => c.name!);
+  }
+}
+
 onMounted(() => {
   loadDie(props.dieId)
+  loadCustomers();
 })
 </script>

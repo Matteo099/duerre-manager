@@ -24,7 +24,6 @@ export class Line extends ExtendedShape<Konva.Line> {
             // add point twice, so we have some drawings even on a simple click
             points: [position.x, position.y, position.x, position.y],
         });
-        console.log("line", this.unscaleManager, this)
         this.unscaleManager?.registerShape(line);
         this.startPoint = Point.from(position);
         this.endPoint = new Point(position);

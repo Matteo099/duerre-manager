@@ -68,9 +68,11 @@
 - [x] vista dettagliata dello stampo
 - [] possibilità di aggiungere etichette (label) ai lati dello stampo o alle regioni 
 - [] centrare lo stampo quando si apre l'editor
-- [] paginare la dashboard (caricare n stampi alla volta)
+- [x] paginare la dashboard (caricare n stampi alla volta)
+- [x] loading / skeleton sulla dashboard
 - [] salvare le ultime n ricerche effettuate (timespamp come chiave)
 - [] guidelines quando si traccia una cutline (linee interne allo stampo)
+- [] logo + versione sul menù
 
 ## FEATURES
 - [x] rimpiazare Konva.Layer con VirtualLayer (Konva warning: The stage has 6 layers. Recommended maximum number of layers is 3-5. Adding more layers into the stage may drop the performance. Rethink your tree structure, you can use Konva.Group.)

@@ -181,6 +181,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorWrapper'
+  /api/v1/die-controller/searches:
+    get:
+      tags:
+      - Die Resource
+      operationId: getSearches
+      parameters:
+      - name: pageSize
+        in: query
+        schema:
+          format: int32
+          default: "15"
+          type: integer
+      responses:
+        "200":
+          description: Get searches
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DieSearch'
+        "500":
+          description: Unable to get searches
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWrapper'
 components:
   schemas:
     Customer:
@@ -188,6 +215,10 @@ components:
       properties:
         name:
           type: string
+    Date:
+      format: date
+      type: string
+      example: 2022-03-10
     Die:
       type: object
       properties:
@@ -275,6 +306,43 @@ components:
           items:
             format: double
             type: number
+    DieSearch:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ObjectId'
+        text:
+          type: string
+        dieData:
+          $ref: '#/components/schemas/DieData'
+        customers:
+          type: array
+          items:
+            type: string
+        dieTypes:
+          type: array
+          items:
+            $ref: '#/components/schemas/DieType'
+        materials:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaterialType'
+        totalHeight:
+          format: double
+          type: number
+        totalWidth:
+          format: double
+          type: number
+        shoeWidth:
+          format: double
+          type: number
+        crestWidth:
+          format: double
+          type: number
+        name:
+          type: string
+        creationDate:
+          $ref: '#/components/schemas/LocalDateTime'
     DieSearchDao:
       type: object
       properties:
@@ -357,3 +425,19 @@ components:
       type: object
       properties:
         message: {}
+    ObjectId:
+      type: object
+      properties:
+        timestamp:
+          format: int32
+          type: integer
+        counter:
+          format: int32
+          type: integer
+        randomValue1:
+          format: int32
+          type: integer
+        randomValue2:
+          type: integer
+        date:
+          $ref: '#/components/schemas/Date'

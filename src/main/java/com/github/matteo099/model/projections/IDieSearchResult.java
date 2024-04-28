@@ -1,6 +1,6 @@
 package com.github.matteo099.model.projections;
 
-public interface IDieSearch {
+public interface IDieSearchResult {
     String getName();
     Double getTextScore();
     Double getSizeScore();

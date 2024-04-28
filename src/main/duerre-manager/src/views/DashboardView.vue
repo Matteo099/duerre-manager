@@ -13,13 +13,20 @@
       </v-col>
     </v-row> -->
 
-    <v-row no-gutters>
+    <v-row no-gutters v-if="loading">
+      <v-col v-for="i in 3" :key="i" cols="12" md="4" class="px-2">
+        <v-skeleton-loader :elevation="3" type="card"></v-skeleton-loader>
+      </v-col>
+    </v-row>
+    <v-row no-gutters v-else-if="dies.length != 0">
       <v-col v-for="die in dies" :key="die.name" cols="12" md="4" class="px-2">
         <DieCard :die="die" :to="'/die/' + die.name" />
       </v-col>
     </v-row>
+    <p class="text-center text-h5" v-else>Nessuno stampo trovato!</p>
 
-    <div class="text-center pb-6">
+
+    <div v-if="total > 0" class="text-center pb-6">
       <v-pagination v-model="page" :length="total" rounded="circle" :total-visible="4"
         @update:model-value="goToPage"></v-pagination>
     </div>
@@ -31,6 +38,7 @@
 <script setup lang="ts">
 import AdvancedSearch from '@/components/AdvancedSearch.vue'
 import DieCard from '@/components/DieCard.vue'
+import { delay } from '@/model/utils'
 import { useHttp } from '@/plugins/http'
 import Client from '@/plugins/http/openapi'
 import { onMounted, ref } from 'vue'
@@ -44,15 +52,18 @@ let diesToPaginate: Client.Components.Schemas.Die[] = [];
 const page = ref(1);
 const total = ref(0);
 const itemsPerPage = 12;
+const loading = ref(false);
 
 function randomAlias(): string[] {
   const length = Math.floor(Math.random() * 5)
   return Array.from({ length }, (x, i) => 'alias' + i)
 }
 async function loadDies() {
+  loading.value = true;
   const client = await http.client
   const res = await client.listDies()
   console.log(res)
+  await delay(500)
 
   if (res.status == 200) {
     allDies.length = 0;
@@ -62,8 +73,11 @@ async function loadDies() {
     if (page.value == 1) goToPage(1)
     else page.value = 1;
   }
+
+  loading.value = false;
 }
 async function searchDies(dieSearchDao: Client.Components.Schemas.DieSearchDao) {
+  loading.value = true;
   const client = await http.client
   const res = await client.searchDies(null, dieSearchDao)
   console.log(res)
@@ -76,6 +90,8 @@ async function searchDies(dieSearchDao: Client.Components.Schemas.DieSearchDao) 
     if (page.value == 1) goToPage(1)
     else page.value = 1;
   }
+
+  loading.value = false;
 }
 function reset() {
   diesToPaginate = allDies;
@@ -85,7 +101,6 @@ function reset() {
 }
 
 function goToPage(page: number) {
-  console.log("goToPage " + page)
   const start = (page - 1) * itemsPerPage
   const end = start + itemsPerPage
   dies.value = diesToPaginate.slice(start, end)

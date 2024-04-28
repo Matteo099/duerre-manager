@@ -11,6 +11,11 @@ declare namespace Components {
         export interface Customer {
             name?: string;
         }
+        /**
+         * example:
+         * 2022-03-10
+         */
+        export type Date = string; // date
         export interface Die {
             name?: string;
             aliases?: string[];
@@ -24,7 +29,7 @@ declare namespace Components {
             crestWidth?: number; // double
             creationDate?: /**
              * example:
-             * 2022-03-10T12:15:50.000Z
+             * 2022-03-10T12:15:50
              */
             LocalDateTime /* date-time */;
         }
@@ -50,6 +55,24 @@ declare namespace Components {
         export interface DieLineDao {
             type?: string;
             points?: number /* double */[];
+        }
+        export interface DieSearch {
+            id?: ObjectId;
+            text?: string;
+            dieData?: DieData;
+            customers?: string[];
+            dieTypes?: DieType[];
+            materials?: MaterialType[];
+            totalHeight?: number; // double
+            totalWidth?: number; // double
+            shoeWidth?: number; // double
+            crestWidth?: number; // double
+            name?: string;
+            creationDate?: /**
+             * example:
+             * 2022-03-10T12:15:50
+             */
+            LocalDateTime /* date-time */;
         }
         export interface DieSearchDao {
             text?: string;
@@ -80,12 +103,23 @@ declare namespace Components {
         }
         /**
          * example:
-         * 2022-03-10T12:15:50.000Z
+         * 2022-03-10T12:15:50
          */
         export type LocalDateTime = string; // date-time
         export type MaterialType = "TPU" | "PVC" | "TR" | "POLIETILENE";
         export interface MessageWrapper {
             message?: any;
+        }
+        export interface ObjectId {
+            timestamp?: number; // int32
+            counter?: number; // int32
+            randomValue1?: number; // int32
+            randomValue2?: number;
+            date?: /**
+             * example:
+             * 2022-03-10
+             */
+            Date /* date */;
         }
     }
 }
@@ -126,6 +160,18 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Schemas.Die;
             export type $404 = Components.Schemas.ErrorWrapper;
+            export type $500 = Components.Schemas.ErrorWrapper;
+        }
+    }
+    namespace GetSearches {
+        namespace Parameters {
+            export type PageSize = number; // int32
+        }
+        export interface QueryParameters {
+            pageSize?: Parameters.PageSize /* int32 */;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.DieSearch[];
             export type $500 = Components.Schemas.ErrorWrapper;
         }
     }
@@ -213,6 +259,14 @@ export interface OperationMethods {
     data?: Paths.SearchDies.RequestBody,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.SearchDies.Responses.$200>
+  /**
+   * getSearches
+   */
+  'getSearches'(
+    parameters?: Parameters<Paths.GetSearches.QueryParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetSearches.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -285,6 +339,16 @@ export interface PathsDictionary {
       data?: Paths.SearchDies.RequestBody,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.SearchDies.Responses.$200>
+  }
+  ['/api/v1/die-controller/searches']: {
+    /**
+     * getSearches
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetSearches.QueryParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetSearches.Responses.$200>
   }
 }
 

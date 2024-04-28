@@ -8,14 +8,21 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import com.github.matteo099.model.entities.DieType;
 import com.github.matteo099.model.entities.MaterialType;
+import com.github.matteo099.model.interfaces.IDieSearch;
 import com.mongodb.client.model.Filters;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @ToString
-public class DieSearchDao {
+public class DieSearchDao implements IDieSearch {
     public String text;
     public DieShapeExport dieData;
     public List<String> customers;

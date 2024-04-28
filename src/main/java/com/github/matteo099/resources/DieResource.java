@@ -12,6 +12,7 @@ import org.jboss.logging.Logger;
 import com.github.matteo099.model.dao.DieDao;
 import com.github.matteo099.model.dao.DieSearchDao;
 import com.github.matteo099.model.entities.Die;
+import com.github.matteo099.model.entities.DieSearch;
 import com.github.matteo099.model.projections.DieSearchResult;
 import com.github.matteo099.model.wrappers.ErrorWrapper;
 import com.github.matteo099.model.wrappers.IdWrapper;
@@ -137,22 +138,6 @@ public class DieResource {
         }
     }
 
-    // @PUT
-    // @Produces(MediaType.APPLICATION_JSON)
-    // @Path("/search-similar-dies")
-    // public Response searchSimilarDies(DieSimilarSearchDao dieSimilarSearchDao,
-    // @QueryParam("threshold") @DefaultValue("1000.0") Float threshold) {
-    // try {
-    // logger.info("searching similar dies " + threshold);
-    // var similarDies = dieService.searchSimilarDies(dieSimilarSearchDao,
-    // threshold);
-    // return Response.ok().entity(similarDies).build();
-    // } catch (Exception e) {
-    // e.printStackTrace();
-    // return Response.serverError().entity(ErrorWrapper.of(e)).build();
-    // }
-    // }
-
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/search-dies")
@@ -166,6 +151,23 @@ public class DieResource {
             logger.info("searching dies (with threshold " + threshold + "): " + searchDieDao.toString());
             var dies = dieService.searchDies(searchDieDao, threshold);
             return Response.ok().entity(dies).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.serverError().entity(ErrorWrapper.of(e)).build();
+        }
+    }
+    
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/searches")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Get searches", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(type = SchemaType.ARRAY, implementation = DieSearch.class))),
+            @APIResponse(responseCode = "500", description = "Unable to get searches", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorWrapper.class)))
+    })
+    public Response getSearches(@QueryParam("pageSize") @DefaultValue("15") Integer pageSize) {
+        try {
+            logger.info("finding last " + pageSize + " searches");
+            return Response.ok().entity(dieService.getSearches(pageSize)).build();
         } catch (Exception e) {
             e.printStackTrace();
             return Response.serverError().entity(ErrorWrapper.of(e)).build();

@@ -10,7 +10,7 @@ import lombok.ToString;
 @RegisterForReflection
 @Getter
 @ToString
-public class DieSearchResult implements Comparable<DieSearchResult>, IDieSearch {
+public class DieSearchResult implements Comparable<DieSearchResult>, IDieSearchResult {
 
     private String name;
     private Double textScore = null;
@@ -23,8 +23,8 @@ public class DieSearchResult implements Comparable<DieSearchResult>, IDieSearch 
 
     public DieSearchResult(IDie<?, ?> die, Double matchScore) {
         this(die.getName(), matchScore, null, null);
-        if (die instanceof IDieSearch) {
-            var sr = ((IDieSearch) die);
+        if (die instanceof IDieSearchResult) {
+            var sr = ((IDieSearchResult) die);
             this.textScore = sr.getTextScore();
             this.sizeScore = sr.getSizeScore();
             this.matchScore = matchScore == null ? sr.getMatchScore() : matchScore;

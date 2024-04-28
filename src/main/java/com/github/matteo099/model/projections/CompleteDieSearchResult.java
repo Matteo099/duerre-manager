@@ -24,7 +24,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @ProjectionFor(Die.class)
-public class CompleteDieSearchResult implements IDie<DieData, Customer>, IDieSearch {
+public class CompleteDieSearchResult implements IDie<DieData, Customer>, IDieSearchResult {
 
     @BsonId
     private String name;

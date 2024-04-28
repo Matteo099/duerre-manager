@@ -13,6 +13,7 @@ import com.github.matteo099.model.dao.DieLineDao;
 import com.github.matteo099.model.dao.DieSearchDao;
 import com.github.matteo099.model.entities.Customer;
 import com.github.matteo099.model.entities.Die;
+import com.github.matteo099.model.entities.DieSearch;
 import com.github.matteo099.model.entities.DieType;
 import com.github.matteo099.model.entities.MaterialType;
 import com.github.matteo099.model.interfaces.IDie;
@@ -21,6 +22,8 @@ import com.github.matteo099.model.projections.DieSearchResult;
 import com.github.matteo099.opencv.DieMatcher;
 import com.mongodb.client.model.Filters;
 
+import io.quarkus.panache.common.Page;
+import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -69,10 +72,24 @@ public class DieService {
                 .peek(e -> e.computeBaseScore(dieSearchDao))
                 .toList();
 
-        return dieMatcher.searchSimilarDiesFrom(dieSearchDao.getDieData(), threshold, diesByProperties)
+        var result = dieMatcher.searchSimilarDiesFrom(dieSearchDao.getDieData(), threshold, diesByProperties)
                 .stream()
                 .sorted()
                 .toList();
+
+        saveSearch(dieSearchDao);
+
+        return result;
+    }
+
+    public void saveSearch(DieSearchDao dieSearchDao) {
+        var dieSearch = new DieSearch(dieSearchDao);
+        System.out.println(dieSearch);
+        dieSearch.persist();
+    }
+
+    public List<DieSearch> getSearches(Integer pageSize) {
+        return DieSearch.findAll(Sort.by("creationDate")).page(Page.ofSize(pageSize)).list();
     }
 
     public Optional<Die> findDie(String id) {

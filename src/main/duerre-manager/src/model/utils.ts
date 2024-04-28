@@ -1,3 +1,6 @@
+export const delay = (delayInms: number) => {
+  return new Promise(resolve => setTimeout(resolve, delayInms));
+};
 export class Utils {
 
     public static generateRandomText(numParagraphs: number, numSentencesPerParagraph: number): string {
