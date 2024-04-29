@@ -3,7 +3,7 @@
     <v-navigation-drawer permanent v-model="drawer">
       <v-list-item height="64">
         <template v-slot:prepend>
-          <v-img contain :src="imageUrl" height="45" width="45"></v-img>
+          <v-img contain :src="appLogo" height="45" width="45"></v-img>
         </template>
         <v-list-item-title class="text-h6 ml-3">Andromeda</v-list-item-title>
         <v-list-item-subtitle class="ml-3 pb-1">Duerre Manager</v-list-item-subtitle>
@@ -25,14 +25,28 @@
           <v-list-item-title>Forme</v-list-item-title>
         </v-list-item>
       </v-list>
+
+      <template v-slot:append>
+        <v-footer height="45" class="px-0">
+          <v-row align-content="center" no-gutters class="text-caption">
+            <v-col align-self="center" cols="7">
+              <v-img :src="companyLogo" height="45" />
+            </v-col>
+            <v-col align-self="center" cols="1"></v-col>
+            <v-col align-self="center" class="d-flex" cols="3">
+              <v-icon start>mdi-alpha-v-circle</v-icon><span>{{ appVersion }}</span>
+            </v-col>
+          </v-row>
+        </v-footer>
+      </template>
     </v-navigation-drawer>
 
     <v-app-bar color="grey-darken-4">
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
       <v-app-bar-title style="margin-left: -10px">
-        <router-link to="/">
-          <v-img contain :src="imageUrlLogo" height="90" width="150"></v-img>
-        </router-link>
+        <!-- <router-link to="/">
+          <v-img contain :src="companyLogo" height="90" width="150"></v-img>
+        </router-link> -->
       </v-app-bar-title>
 
       <v-btn @click="toggleTheme" icon class="mr-2">
@@ -85,11 +99,12 @@ import { useSettingsStore } from './stores/settings'
 
 const settingsStore = useSettingsStore()
 const theme = useTheme()
-const imageUrl = new URL('@/assets/images/app_logo.png', import.meta.url).href
-const imageUrlLogo = new URL('@/assets/images/company_logo.png', import.meta.url).href
+const appLogo = new URL('@/assets/images/app_logo.png', import.meta.url).href
+const companyLogo = new URL('@/assets/images/company_logo.png', import.meta.url).href
 const drawer = ref(true)
 const userInitials = ref('AD')
 const userRoles = ref(['ADMIN'])
+const appVersion = import.meta.env.VITE_APP_VERSION
 
 function toggleTheme() {
   settingsStore.toggleDarkMode()
