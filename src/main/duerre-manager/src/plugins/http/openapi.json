@@ -116,6 +116,42 @@
         }
       }
     },
+    "/api/v1/die-controller/delete-search/{id}" : {
+      "delete" : {
+        "tags" : [ "Die Resource" ],
+        "operationId" : "deleteSearch",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Delete search",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MessageWrapper"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Unable to delete search",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorWrapper"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/die-controller/die/{id}" : {
       "get" : {
         "tags" : [ "Die Resource" ],
@@ -260,7 +296,7 @@
                 "schema" : {
                   "type" : "array",
                   "items" : {
-                    "$ref" : "#/components/schemas/DieSearchResult"
+                    "$ref" : "#/components/schemas/CompleteDieSearchResult"
                   }
                 }
               }
@@ -322,6 +358,67 @@
   },
   "components" : {
     "schemas" : {
+      "CompleteDieSearchResult" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "aliases" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "dieData" : {
+            "$ref" : "#/components/schemas/DieData"
+          },
+          "customer" : {
+            "$ref" : "#/components/schemas/Customer"
+          },
+          "dieType" : {
+            "$ref" : "#/components/schemas/DieType"
+          },
+          "material" : {
+            "$ref" : "#/components/schemas/MaterialType"
+          },
+          "totalHeight" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "totalWidth" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "shoeWidth" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "crestWidth" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "creationDate" : {
+            "$ref" : "#/components/schemas/LocalDateTime"
+          },
+          "textScore" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "sizeScore" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "matchScore" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "totalScore" : {
+            "format" : "double",
+            "type" : "number"
+          }
+        }
+      },
       "Customer" : {
         "type" : "object",
         "properties" : {
@@ -509,10 +606,13 @@
             "format" : "double",
             "type" : "number"
           },
-          "name" : {
+          "title" : {
             "type" : "string"
           },
-          "creationDate" : {
+          "subtitle" : {
+            "type" : "string"
+          },
+          "searchDate" : {
             "$ref" : "#/components/schemas/LocalDateTime"
           }
         }
@@ -557,26 +657,6 @@
             "type" : "number"
           },
           "crestWidth" : {
-            "format" : "double",
-            "type" : "number"
-          }
-        }
-      },
-      "DieSearchResult" : {
-        "type" : "object",
-        "properties" : {
-          "name" : {
-            "type" : "string"
-          },
-          "textScore" : {
-            "format" : "double",
-            "type" : "number"
-          },
-          "sizeScore" : {
-            "format" : "double",
-            "type" : "number"
-          },
-          "matchScore" : {
             "format" : "double",
             "type" : "number"
           }

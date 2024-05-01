@@ -2,12 +2,18 @@
   <v-form @submit="onSubmit">
 
     <v-combobox v-model="text" :items="lastSearches" class="mx-auto" density="comfortable" menu-icon=""
-      placeholder="Ricerca per nome o per alias" theme="light" variant="solo" :label="selectedSearch?.name ?? 'Ricerca'"
-      item-props loading @update:focused="onFocus">
+      placeholder="Ricerca per nome o per alias" theme="light" variant="solo"
+      :label="selectedSearch?.title ?? selectedSearch?.subtitle ?? 'Ricerca'" item-props :loading="searching"
+      @update:focused="onFocus">
 
       <template v-slot:item="{ props, item }">
-        <v-list-item v-bind="props" :title="item.raw.name" prepend-icon="mdi-clock-outline" @click="onSelectSearch(item.raw)"></v-list-item>
-        <!-- :prepend-avatar="item.raw.avatar"  -->
+        <v-list-item v-bind="props" prepend-icon="mdi-clock-outline" :title="item.raw.title"
+          :subtitle="item.raw.subtitle" @click="onSelectSearch(item.raw)">
+          <template v-slot:append>
+            <v-btn color="grey-lighten-1" icon="mdi-delete-outline" variant="text"
+              @click.stop.prevent="deleteSearch(item.raw)"></v-btn>
+          </template>
+        </v-list-item>
       </template>
 
       <template v-slot:prepend>
@@ -67,6 +73,7 @@ import type { Ref } from 'vue'
 import { onMounted, ref, watch } from 'vue'
 import * as yup from 'yup'
 import DieDataEdit from './die/DieDataEdit.vue'
+import { toast } from 'vue3-toastify'
 
 interface AdvancedSearchProps {
   searchDies: (searchOpts: Client.Components.Schemas.DieSearchDao) => Promise<any>
@@ -115,17 +122,17 @@ const emit = defineEmits<{
 }>()
 
 async function search(values: GenericObject) {
-  // const clonedObj = { ...values }
-  // console.log(clonedObj)
-  // Object.entries(clonedObj).forEach((entry) => {
-  //   const k = entry[0]
-  //   const v = entry[1]
-  //   if (v === undefined || v === '') {
-  //     delete clonedObj[k]
-  //   }
-  // })
-  console.log(values)
-  if (JSON.stringify(values) === '{}') {
+  const clonedObj = { ...values }
+  console.log(clonedObj)
+  Object.entries(clonedObj).forEach((entry) => {
+    const k = entry[0]
+    const v = entry[1]
+    if (v === undefined || v === '') {
+      delete clonedObj[k]
+    }
+  })
+  console.log(clonedObj)
+  if (JSON.stringify(clonedObj) === '{}') {
     return
   }
 
@@ -134,14 +141,14 @@ async function search(values: GenericObject) {
   }
 
   const searchOpts: Client.Components.Schemas.DieSearchDao = {
-    ...values,
+    ...clonedObj,
     customers: [],
     dieTypes: [],
     materials: [],
   }
-  if (values.customer) searchOpts.customers?.push(values.customer)
-  if (values.dieType) searchOpts.dieTypes?.push(values.dieType)
-  if (values.material) searchOpts.materials?.push(values.material)
+  if (clonedObj.customer) searchOpts.customers?.push(clonedObj.customer)
+  if (clonedObj.dieType) searchOpts.dieTypes?.push(clonedObj.dieType)
+  if (clonedObj.material) searchOpts.materials?.push(clonedObj.material)
   console.log(searchOpts)
 
   searching.value = true
@@ -166,7 +173,7 @@ function onDirty(dirty: boolean) {
 }
 
 function onFocus() {
-  console.log("onFocus",text)
+  console.log("onFocus", text)
   loadSearches()
 }
 
@@ -175,9 +182,8 @@ async function loadSearches() {
   const res = await client.getSearches()
   console.log(res)
 
-  if (res.status == 200) {
-    lastSearches.value.length = 0;
-    lastSearches.value.push(...res.data)
+  if (res?.status == 200) {
+    lastSearches.value = res.data
   }
 }
 
@@ -187,6 +193,20 @@ function onSelectSearch(item: Client.Components.Schemas.DieSearch) {
   console.log("onSelectSearch", item)
   selectedSearch.value = item;
   text.value = item.text ?? ''
+}
+
+async function deleteSearch(item: Client.Components.Schemas.DieSearch) {
+  console.log("deleteSearch", item)
+
+  const client = await http.client
+  const res = await client.deleteSearch(item.id as string)
+
+  if (res?.status == 200) {
+    const index = lastSearches.value.findIndex(i => i.id == item.id);
+    if (index != -1) lastSearches.value.splice(index, 1);
+  } else {
+    toast.warn("Impossibile eliminare questa ricerca...")
+  }
 }
 
 onMounted(() => loadSearches())

@@ -8,6 +8,27 @@ import type {
 
 declare namespace Components {
     namespace Schemas {
+        export interface CompleteDieSearchResult {
+            name?: string;
+            aliases?: string[];
+            dieData?: DieData;
+            customer?: Customer;
+            dieType?: DieType;
+            material?: MaterialType;
+            totalHeight?: number; // double
+            totalWidth?: number; // double
+            shoeWidth?: number; // double
+            crestWidth?: number; // double
+            creationDate?: /**
+             * example:
+             * 2022-03-10T12:15:50
+             */
+            LocalDateTime /* date-time */;
+            textScore?: number; // double
+            sizeScore?: number; // double
+            matchScore?: number; // double
+            totalScore?: number; // double
+        }
         export interface Customer {
             name?: string;
         }
@@ -67,8 +88,9 @@ declare namespace Components {
             totalWidth?: number; // double
             shoeWidth?: number; // double
             crestWidth?: number; // double
-            name?: string;
-            creationDate?: /**
+            title?: string;
+            subtitle?: string;
+            searchDate?: /**
              * example:
              * 2022-03-10T12:15:50
              */
@@ -84,12 +106,6 @@ declare namespace Components {
             totalWidth?: number; // double
             shoeWidth?: number; // double
             crestWidth?: number; // double
-        }
-        export interface DieSearchResult {
-            name?: string;
-            textScore?: number; // double
-            sizeScore?: number; // double
-            matchScore?: number; // double
         }
         export interface DieShapeExport {
             lines?: DieLineDao[];
@@ -132,6 +148,18 @@ declare namespace Paths {
         }
     }
     namespace DeleteDie {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.MessageWrapper;
+            export type $500 = Components.Schemas.ErrorWrapper;
+        }
+    }
+    namespace DeleteSearch {
         namespace Parameters {
             export type Id = string;
         }
@@ -196,7 +224,7 @@ declare namespace Paths {
         }
         export type RequestBody = Components.Schemas.DieSearchDao;
         namespace Responses {
-            export type $200 = Components.Schemas.DieSearchResult[];
+            export type $200 = Components.Schemas.CompleteDieSearchResult[];
             export type $500 = Components.Schemas.ErrorWrapper;
         }
     }
@@ -227,6 +255,14 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.DeleteDie.Responses.$200>
+  /**
+   * deleteSearch
+   */
+  'deleteSearch'(
+    parameters?: Parameters<Paths.DeleteSearch.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteSearch.Responses.$200>
   /**
    * getDie
    */
@@ -299,6 +335,16 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.DeleteDie.Responses.$200>
+  }
+  ['/api/v1/die-controller/delete-search/{id}']: {
+    /**
+     * deleteSearch
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteSearch.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteSearch.Responses.$200>
   }
   ['/api/v1/die-controller/die/{id}']: {
     /**

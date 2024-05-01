@@ -1,24 +1,32 @@
 package com.github.matteo099.services;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
+
+import org.bson.conversions.Bson;
+import org.bson.types.ObjectId;
 
 import com.github.matteo099.exceptions.DieAlreadyExists;
 import com.github.matteo099.exceptions.MalformedDieException;
 import com.github.matteo099.model.dao.DieDao;
-import com.github.matteo099.model.dao.DieShapeExport;
 import com.github.matteo099.model.dao.DieLineDao;
 import com.github.matteo099.model.dao.DieSearchDao;
+import com.github.matteo099.model.dao.DieShapeExport;
 import com.github.matteo099.model.entities.Customer;
 import com.github.matteo099.model.entities.Die;
 import com.github.matteo099.model.entities.DieSearch;
 import com.github.matteo099.model.entities.DieType;
 import com.github.matteo099.model.entities.MaterialType;
 import com.github.matteo099.model.interfaces.IDie;
+import com.github.matteo099.model.interfaces.IDieSearch;
 import com.github.matteo099.model.projections.CompleteDieSearchResult;
-import com.github.matteo099.model.projections.DieSearchResult;
+import com.github.matteo099.model.projections.IDieSearchResult;
 import com.github.matteo099.opencv.DieMatcher;
 import com.mongodb.client.model.Filters;
 
@@ -61,7 +69,7 @@ public class DieService {
         return Die.findByIdOptional(name).isPresent();
     }
 
-    public List<DieSearchResult> searchDies(DieSearchDao dieSearchDao, Float threshold)
+    public List<? extends IDieSearchResult<?>> searchDies(DieSearchDao dieSearchDao, Float threshold)
             throws MalformedDieException {
 
         var allFilters = dieSearchDao.getAllFilters();
@@ -75,7 +83,8 @@ public class DieService {
         var result = dieMatcher.searchSimilarDiesFrom(dieSearchDao.getDieData(), threshold, diesByProperties)
                 .stream()
                 .sorted()
-                .toList();
+                .collect(Collectors.toList());
+        Collections.reverse(result);
 
         saveSearch(dieSearchDao);
 
@@ -83,13 +92,43 @@ public class DieService {
     }
 
     public void saveSearch(DieSearchDao dieSearchDao) {
-        var dieSearch = new DieSearch(dieSearchDao);
-        System.out.println(dieSearch);
-        dieSearch.persist();
+        var savedDieSearch = findSearch(dieSearchDao);
+        DieSearch dieSearch;
+        if (savedDieSearch.isPresent()) {
+            dieSearch = savedDieSearch.get();
+            dieSearch.setSearchDate(LocalDateTime.now());
+            dieSearch.update();
+        } else {
+            dieSearch = new DieSearch(dieSearchDao);
+            dieSearch.persist();
+        }
     }
 
     public List<DieSearch> getSearches(Integer pageSize) {
-        return DieSearch.findAll(Sort.by("creationDate")).page(Page.ofSize(pageSize)).list();
+        return DieSearch.findAll(Sort.descending("searchDate")).page(Page.ofSize(pageSize)).list();
+    }
+
+    public Optional<DieSearch> findSearch(IDieSearch dieSearch) {
+        LinkedList<Bson> allFilters = new LinkedList<>();
+        if (dieSearch.getText() != null)
+            allFilters.add(Filters.eq("text", dieSearch.getText()));
+        if (dieSearch.getCustomers() != null && !dieSearch.getCustomers().isEmpty())
+            allFilters.add(Filters.in("customers", dieSearch.getCustomers()));
+        if (dieSearch.getMaterials() != null && !dieSearch.getMaterials().isEmpty())
+            allFilters.add(Filters.in("materials", dieSearch.getMaterials()));
+        if (dieSearch.getDieTypes() != null && !dieSearch.getDieTypes().isEmpty())
+            allFilters.add(Filters.in("dieTypes", dieSearch.getDieTypes()));
+        if (dieSearch.getTotalHeight() != null)
+            allFilters.add(Filters.in("totalHeight", dieSearch.getTotalHeight()));
+        if (dieSearch.getTotalWidth() != null)
+            allFilters.add(Filters.in("totalWidth", dieSearch.getTotalWidth()));
+        if (dieSearch.getShoeWidth() != null)
+            allFilters.add(Filters.in("shoeWidth", dieSearch.getShoeWidth()));
+        if (dieSearch.getCrestWidth() != null)
+            allFilters.add(Filters.in("crestWidth", dieSearch.getCrestWidth()));
+        if (allFilters.isEmpty())
+            return Optional.empty();
+        return DieSearch.find(Filters.and(allFilters).toBsonDocument().toString()).firstResultOptional();
     }
 
     public Optional<Die> findDie(String id) {
@@ -98,6 +137,10 @@ public class DieService {
 
     public boolean deleteDie(String id) {
         return Die.deleteById(id);
+    }
+
+    public boolean deleteSearch(String id) {
+        return DieSearch.deleteById(new ObjectId(id));
     }
 
     public class RandomDieService {

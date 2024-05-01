@@ -15,6 +15,7 @@ import com.github.matteo099.model.interfaces.IDie;
 
 import io.quarkus.mongodb.panache.common.ProjectionFor;
 import io.quarkus.runtime.annotations.RegisterForReflection;
+import io.smallrye.mutiny.tuples.Tuple2;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -24,7 +25,8 @@ import lombok.ToString;
 @Setter
 @ToString
 @ProjectionFor(Die.class)
-public class CompleteDieSearchResult implements IDie<DieData, Customer>, IDieSearchResult {
+public class CompleteDieSearchResult
+        implements IDie<DieData, Customer>, IDieSearchResult<DieData>, Comparable<IDieSearchResult<?>> {
 
     @BsonId
     private String name;
@@ -73,5 +75,48 @@ public class CompleteDieSearchResult implements IDie<DieData, Customer>, IDieSea
         var deltaSW = search.getShoeWidth() == null ? 0 : Math.abs(shoeWidth - search.getShoeWidth());
         var deltaCW = search.getCrestWidth() == null ? 0 : Math.abs(crestWidth - search.getCrestWidth());
         this.sizeScore = deltaTH + deltaTW + deltaSW + deltaCW;
+    }
+
+    public Double getTotalScore() {
+        return (this.matchScore == null ? 0d : this.matchScore) + (this.sizeScore == null ? 0d : this.sizeScore)
+                + (this.textScore == null ? 0d : this.textScore);
+    }
+
+    @Override
+    public int compareTo(IDieSearchResult<?> o) {
+        if (o == null)
+            return -1;
+
+        var normalizedTextScore = getNormalizedScore(this.textScore, o.getTextScore());
+        var normalizedSizeScore = getNormalizedScore(this.sizeScore, o.getSizeScore());
+        var normalizedMatchScore = getNormalizedScore(this.matchScore, o.getMatchScore());
+        return (normalizedTextScore.getItem1() + normalizedSizeScore.getItem1()
+                - normalizedMatchScore.getItem1()) > (normalizedTextScore.getItem2() + normalizedSizeScore.getItem2()
+                        - normalizedMatchScore.getItem2()) ? -1 : 1;
+    }
+
+    private Tuple2<Double, Double> getNormalizedScore(Double myScore, Double otherScore) {
+        Double myComputedScore = 0d;
+        Double otherComputedScore = 0d;
+
+        if (myScore == null) {
+            if (otherScore == null) {
+                myComputedScore = 0d;
+                otherComputedScore = 0d;
+            } else {
+                otherComputedScore = otherScore;
+                myComputedScore = otherScore + 1;
+            }
+        } else {
+            if (otherScore == null) {
+                myComputedScore = myScore;
+                otherComputedScore = myScore + 1;
+            } else {
+                myComputedScore = myScore;
+                otherComputedScore = otherScore;
+            }
+        }
+
+        return Tuple2.of(myComputedScore, otherComputedScore);
     }
 }

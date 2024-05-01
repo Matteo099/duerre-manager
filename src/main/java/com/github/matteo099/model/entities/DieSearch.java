@@ -33,8 +33,9 @@ public class DieSearch extends PanacheMongoEntity implements IDieSearch {
     private Double shoeWidth;
     private Double crestWidth;
 
-    private String name;
-    private LocalDateTime creationDate = LocalDateTime.now();
+    private String title;
+    private String subtitle;
+    private LocalDateTime searchDate = LocalDateTime.now();
 
     public DieSearch(IDieSearch iDieSearch) {
         text = iDieSearch.getText();
@@ -52,17 +53,20 @@ public class DieSearch extends PanacheMongoEntity implements IDieSearch {
 
     private void initName() {
         if (text != null)
-            name = text;
-        else if (customers != null && !customers.isEmpty())
-            name = "Cliente: " + String.join(",", customers);
+            title = text;
+        if (customers != null && !customers.isEmpty())
+            subtitle = "Cliente: " + String.join(",", customers) + " ...";
         else if (materials != null && !materials.isEmpty())
-            name = "Materiale: " + materials.stream().map(t -> t.name()).collect(Collectors.joining(","));
+            subtitle = "Materiale: " + materials.stream().map(t -> t.name()).collect(Collectors.joining(",")) + " ...";
         else if (dieTypes != null && !dieTypes.isEmpty())
-            name = "Colore: " + dieTypes.stream().map(t -> t.name()).collect(Collectors.joining(","));
+            subtitle = "Colore: " + dieTypes.stream().map(t -> t.name()).collect(Collectors.joining(",")) + " ...";
         else if (totalHeight != null || totalWidth != null || shoeWidth != null || crestWidth != null)
-            name = "Dimensioni: " + numberOrInterrogationChar(totalHeight) + "x" + numberOrInterrogationChar(totalWidth)
+            subtitle = "Dimensioni: " + numberOrInterrogationChar(totalHeight) + "x"
+                    + numberOrInterrogationChar(totalWidth)
                     + "x"
-                    + numberOrInterrogationChar(shoeWidth) + "x" + numberOrInterrogationChar(crestWidth);
+                    + numberOrInterrogationChar(shoeWidth) + "x" + numberOrInterrogationChar(crestWidth) + " ...";
+        else if (dieData != null)
+            subtitle = "Disegno dello stampo";
     }
 
     private String numberOrInterrogationChar(Number number) {

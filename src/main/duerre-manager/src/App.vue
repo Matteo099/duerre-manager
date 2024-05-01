@@ -100,7 +100,8 @@ import { useSettingsStore } from './stores/settings'
 const settingsStore = useSettingsStore()
 const theme = useTheme()
 const appLogo = new URL('@/assets/images/app_logo.png', import.meta.url).href
-const companyLogo = new URL('@/assets/images/company_logo.png', import.meta.url).href
+const companyLogo = new URL('@/assets/images/duerre.png', import.meta.url).href
+// const companyLogo = new URL('@/assets/images/company_logo.png', import.meta.url).href
 const drawer = ref(true)
 const userInitials = ref('AD')
 const userRoles = ref(['ADMIN'])

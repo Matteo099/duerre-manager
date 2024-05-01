@@ -17,15 +17,36 @@
     </v-card-item>
 
     <v-card-text>
-      <v-row align="center" class="mx-0">
-        <v-rating :model-value="4.5" color="amber" density="compact" size="small" half-increments readonly></v-rating>
+      <div v-if="die.textScore || die.sizeScore || die.matchScore || die.totalScore">
+        <div class="d-flex align-center flex-column my-auto">
+          <div class="text-h2 mt-5 mb-3">
+            {{ percentage(die.totalScore, maxTotalScore, 2) }}
+            <span class="text-h6 ml-n3">/100</span>
+          </div>
 
-        <div class="text-grey ms-4">4.5 (413)</div>
-      </v-row>
+          <v-progress-linear bg-color="surface-variant" class="mb-6" color="primary" height="10" max="100"
+            :model-value="percentage(die.totalScore, maxTotalScore, 2)" rounded="pill"></v-progress-linear>
+        </div>
 
-      <div class="my-4 text-subtitle-1">$ • Italian, Cafe</div>
+        <v-list bg-color="transparent" class="d-flex flex-column-reverse" density="compact">
+          <v-list-item v-for="rating, i in ratings" :key="i">
+            <v-progress-linear :model-value="rating.score" class="mx-n5" color="yellow-darken-3" height="20"
+              rounded></v-progress-linear>
 
-      <div v-if="alias">{{ alias }}</div>
+            <template v-slot:prepend>
+              <!-- <span>{{ rating.name }}</span> -->
+              <v-icon class="mx-3" :icon="rating.icon"></v-icon>
+            </template>
+
+            <template v-slot:append>
+              <div class="rating-values">
+                <span class="d-flex justify-end"> {{ rating.score }} </span>
+              </div>
+            </template>
+          </v-list-item>
+        </v-list>
+      </div>
+      <div v-else-if="alias">{{ alias }}</div>
       <div v-else>Nessun alias presente</div>
     </v-card-text>
 
@@ -39,16 +60,18 @@
 </template>
 
 <script setup lang="ts">
-import { useHttp } from '@/plugins/http'
-import Client from '@/plugins/http/openapi';
-import { watch } from 'vue';
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { CoreUtils } from '@/model/editor/core/core-utils'
-import type { IDieLine } from '@/model/editor/core/shape/model/idie-line';
+import { CoreUtils } from '@/model/editor/core/core-utils';
 import type { IDieShapeImport } from '@/model/editor/core/shape/model/idie-shape-import';
+import { useHttp } from '@/plugins/http';
+import Client from '@/plugins/http/openapi';
+import { computed, onMounted, ref, watch } from 'vue';
 
 export interface DieCardProp {
-  die: Client.Components.Schemas.Die
+  die: Client.Components.Schemas.Die | Client.Components.Schemas.CompleteDieSearchResult,
+  maxTotalScore?: number
+  maxTextScore?: number
+  maxSizeScore?: number
+  maxMatchScore?: number
 }
 const http = useHttp()
 
@@ -58,6 +81,11 @@ const image = ref("https://cdn.vuetifyjs.com/images/cards/docks.jpg")
 const alias = computed(() => {
   return props.die.aliases?.join(', ') || ''
 })
+const ratings = [
+  { name: "S", icon: "mdi-shape", score: percentage(props.die.matchScore ?? 0, props.maxMatchScore, 2), },
+  { name: "D", icon: "mdi-tape-measure", score: percentage(props.die.sizeScore ?? 0, props.maxSizeScore, 2), },
+  { name: "T", icon: "mdi-format-text", score: percentage(props.die.textScore ?? 0, props.maxTextScore, 2), },
+];
 
 watch(
   props.die,
@@ -73,10 +101,13 @@ function calculateImage() {
   loading.value = false
 }
 
+function percentage(value?: number, total?: number, precision?: number): string | number | undefined {
+  if (value == undefined) return 0;
+  const p = value * 100 / (total || 1);
+  return precision == undefined ? p : p.toFixed(precision);
+}
+
 onMounted(() => {
   calculateImage();
-})
-onBeforeUnmount(() => {
-
 })
 </script>

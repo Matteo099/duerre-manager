@@ -13,7 +13,7 @@ import com.github.matteo099.model.dao.DieDao;
 import com.github.matteo099.model.dao.DieSearchDao;
 import com.github.matteo099.model.entities.Die;
 import com.github.matteo099.model.entities.DieSearch;
-import com.github.matteo099.model.projections.DieSearchResult;
+import com.github.matteo099.model.projections.CompleteDieSearchResult;
 import com.github.matteo099.model.wrappers.ErrorWrapper;
 import com.github.matteo099.model.wrappers.IdWrapper;
 import com.github.matteo099.model.wrappers.MessageWrapper;
@@ -142,7 +142,7 @@ public class DieResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/search-dies")
     @APIResponses({
-            @APIResponse(responseCode = "200", description = "Search dies", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(type = SchemaType.ARRAY, implementation = DieSearchResult.class))),
+            @APIResponse(responseCode = "200", description = "Search dies", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(type = SchemaType.ARRAY, implementation = CompleteDieSearchResult.class))),
             @APIResponse(responseCode = "500", description = "Unable to search dies", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorWrapper.class)))
     })
     public Response searchDies(DieSearchDao searchDieDao,
@@ -168,6 +168,23 @@ public class DieResource {
         try {
             logger.info("finding last " + pageSize + " searches");
             return Response.ok().entity(dieService.getSearches(pageSize)).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.serverError().entity(ErrorWrapper.of(e)).build();
+        }
+    }
+
+    @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/delete-search/{id}")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Delete search", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = MessageWrapper.class))),
+            @APIResponse(responseCode = "500", description = "Unable to delete search", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorWrapper.class)))
+    })
+    public Response deleteSearch(String id) {
+        try {
+            logger.info("deleting search with id " + id);
+            return Response.ok().entity(MessageWrapper.of(dieService.deleteSearch(id))).build();
         } catch (Exception e) {
             e.printStackTrace();
             return Response.serverError().entity(ErrorWrapper.of(e)).build();
