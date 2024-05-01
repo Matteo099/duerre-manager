@@ -41,7 +41,7 @@ public class CompleteDieSearchResult
     private Double crestWidth;
     private LocalDateTime creationDate;
 
-    private Double textScore = 0d;
+    private Double textScore = null;
     private Double sizeScore = null;
     private Double matchScore = null;
 
@@ -70,11 +70,14 @@ public class CompleteDieSearchResult
                 textScore = null;
         }
 
-        var deltaTH = search.getTotalHeight() == null ? 0 : Math.abs(totalHeight - search.getTotalHeight());
-        var deltaTW = search.getTotalWidth() == null ? 0 : Math.abs(totalWidth - search.getTotalWidth());
-        var deltaSW = search.getShoeWidth() == null ? 0 : Math.abs(shoeWidth - search.getShoeWidth());
-        var deltaCW = search.getCrestWidth() == null ? 0 : Math.abs(crestWidth - search.getCrestWidth());
-        this.sizeScore = deltaTH + deltaTW + deltaSW + deltaCW;
+        if (search.getTotalHeight() != null || search.getTotalWidth() != null ||
+                search.getShoeWidth() != null || search.getCrestWidth() != null) {
+            var deltaTH = search.getTotalHeight() == null ? 0 : Math.abs(totalHeight - search.getTotalHeight());
+            var deltaTW = search.getTotalWidth() == null ? 0 : Math.abs(totalWidth - search.getTotalWidth());
+            var deltaSW = search.getShoeWidth() == null ? 0 : Math.abs(shoeWidth - search.getShoeWidth());
+            var deltaCW = search.getCrestWidth() == null ? 0 : Math.abs(crestWidth - search.getCrestWidth());
+            this.sizeScore = deltaTH + deltaTW + deltaSW + deltaCW;
+        }
     }
 
     @Override

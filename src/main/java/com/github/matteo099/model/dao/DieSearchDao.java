@@ -65,7 +65,7 @@ public class DieSearchDao implements IDieSearch {
     public List<Bson> getCustomersFilters() {
         if (customers == null || customers.isEmpty())
             return List.of();
-        return List.of(Filters.in("customer", customers));
+        return List.of(Filters.in("customer._id", customers));
     }
 
     @Schema(hidden = true)
