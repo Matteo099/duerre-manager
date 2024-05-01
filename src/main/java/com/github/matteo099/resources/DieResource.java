@@ -51,7 +51,7 @@ public class DieResource {
         try {
             logger.info("creating die");
             String id = dieService.createDie(die);
-            dieService.new RandomDieService().saveRamdonDies(20);
+            // dieService.new RandomDieService().saveRamdonDies(200);
             return Response.ok().entity(IdWrapper.of(id)).build();
         } catch (Exception e) {
             e.printStackTrace();

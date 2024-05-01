@@ -88,8 +88,8 @@ public class DieMatcher {
                 }
                 minX = Collections.min(List.of(minX, points.get(0), points.get(2)));
                 minY = Collections.min(List.of(minY, points.get(1), points.get(3)));
-                finalPoints.add(new Point(points.get(0), points.get(2)));
-                finalPoints.add(new Point(points.get(1), points.get(3)));
+                finalPoints.add(new Point(points.get(0), points.get(1)));
+                finalPoints.add(new Point(points.get(2), points.get(3)));
             } else if (shape.getType().equals("bezier")) {
                 var points = shape.getPoints();
                 if (points.size() != 6) {

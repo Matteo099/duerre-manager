@@ -17,15 +17,15 @@
     </v-card-item>
 
     <v-card-text>
-      <div v-if="die.textScore || die.sizeScore || die.matchScore || die.totalScore">
+      <div v-if="isSearchResult">
         <div class="d-flex align-center flex-column my-auto">
           <div class="text-h2 mt-5 mb-3">
-            {{ percentage(die.totalScore, maxTotalScore, 2) }}
+            {{ totalPercentage }}
             <span class="text-h6 ml-n3">/100</span>
           </div>
 
           <v-progress-linear bg-color="surface-variant" class="mb-6" color="primary" height="10" max="100"
-            :model-value="percentage(die.totalScore, maxTotalScore, 2)" rounded="pill"></v-progress-linear>
+            :model-value="totalPercentage" rounded="pill"></v-progress-linear>
         </div>
 
         <v-list bg-color="transparent" class="d-flex flex-column-reverse" density="compact">
@@ -82,10 +82,17 @@ const alias = computed(() => {
   return props.die.aliases?.join(', ') || ''
 })
 const ratings = [
-  { name: "S", icon: "mdi-shape", score: percentage(props.die.matchScore ?? 0, props.maxMatchScore, 2), },
+  { name: "S", icon: "mdi-shape", score: 100 - (percentage(props.die.matchScore ?? 0, props.maxMatchScore, 2) as number ?? 0), },
   { name: "D", icon: "mdi-tape-measure", score: percentage(props.die.sizeScore ?? 0, props.maxSizeScore, 2), },
   { name: "T", icon: "mdi-format-text", score: percentage(props.die.textScore ?? 0, props.maxTextScore, 2), },
 ];
+
+const isSearchResult = computed(() => props.die.textScore != undefined || props.die.sizeScore != undefined || props.die.matchScore != undefined || props.die.totalScore != undefined)
+const totalPercentage = computed(() => percentage(
+  (props.die.sizeScore + props.die.textScore + (props.maxMatchScore - props.die.matchScore)), 
+  props.maxTotalScore, 
+  2)
+)
 
 watch(
   props.die,

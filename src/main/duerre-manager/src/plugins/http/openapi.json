@@ -412,10 +412,6 @@
           "matchScore" : {
             "format" : "double",
             "type" : "number"
-          },
-          "totalScore" : {
-            "format" : "double",
-            "type" : "number"
           }
         }
       },

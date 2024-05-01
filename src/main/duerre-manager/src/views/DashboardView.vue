@@ -20,11 +20,8 @@
     </v-row>
     <v-row no-gutters v-else-if="dies.length != 0">
       <v-col v-for="die in dies" :key="die.name" cols="12" md="4" class="px-2">
-        <DieCard :die="die" :to="'/die/' + die.name" 
-        :maxTotalScore="maxTotalScore"
-        :maxTextScore="maxTextScore"
-        :maxSizeScore="maxSizeScore"
-        :maxMatchScore="maxMatchScore"  />
+        <DieCard :die="die" :to="'/die/' + die.name" :maxTotalScore="maxTotalScore" :maxTextScore="maxTextScore"
+          :maxSizeScore="maxSizeScore" :maxMatchScore="maxMatchScore" />
       </v-col>
     </v-row>
     <p class="text-center text-h5" v-else>Nessuno stampo trovato!</p>
@@ -98,11 +95,13 @@ async function searchDies(dieSearchDao: Client.Components.Schemas.DieSearchDao) 
     maxSizeScore.value = 0;
     maxMatchScore.value = 0;
     for (const die of searchedDies) {
-      maxTotalScore.value = Math.max(maxTotalScore.value, die.totalScore ?? 0);
       maxTextScore.value = Math.max(maxTextScore.value, die.textScore ?? 0);
       maxSizeScore.value = Math.max(maxSizeScore.value, die.sizeScore ?? 0);
       maxMatchScore.value = Math.max(maxMatchScore.value, die.matchScore ?? 0);
     }
+    for (const die of searchedDies)
+      maxTotalScore.value = Math.max(maxTotalScore.value, (die.sizeScore ?? 0) + (die.textScore ?? 0) + (maxMatchScore.value - (die.matchScore ?? maxMatchScore.value)));
+
     total.value = Math.ceil(searchedDies.length / itemsPerPage);
     diesToPaginate = searchedDies;
     if (page.value == 1) goToPage(1)

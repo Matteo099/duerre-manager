@@ -77,11 +77,6 @@ public class CompleteDieSearchResult
         this.sizeScore = deltaTH + deltaTW + deltaSW + deltaCW;
     }
 
-    public Double getTotalScore() {
-        return (this.matchScore == null ? 0d : this.matchScore) + (this.sizeScore == null ? 0d : this.sizeScore)
-                + (this.textScore == null ? 0d : this.textScore);
-    }
-
     @Override
     public int compareTo(IDieSearchResult<?> o) {
         if (o == null)

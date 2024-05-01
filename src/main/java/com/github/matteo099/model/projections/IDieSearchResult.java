@@ -8,6 +8,5 @@ public interface IDieSearchResult<D extends IDieShapeExport<?>> {
     Double getTextScore();
     Double getSizeScore();
     Double getMatchScore();
-    Double getTotalScore();
     void setMatchScore(Double matchScore);
 }

@@ -27,7 +27,6 @@ declare namespace Components {
             textScore?: number; // double
             sizeScore?: number; // double
             matchScore?: number; // double
-            totalScore?: number; // double
         }
         export interface Customer {
             name?: string;

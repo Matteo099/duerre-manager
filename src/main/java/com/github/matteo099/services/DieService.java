@@ -2,7 +2,6 @@ package com.github.matteo099.services;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -84,7 +83,7 @@ public class DieService {
                 .stream()
                 .sorted()
                 .collect(Collectors.toList());
-        Collections.reverse(result);
+        // Collections.reverse(result);
 
         saveSearch(dieSearchDao);
 
