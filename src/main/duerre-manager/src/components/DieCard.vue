@@ -81,16 +81,17 @@ const image = ref("https://cdn.vuetifyjs.com/images/cards/docks.jpg")
 const alias = computed(() => {
   return props.die.aliases?.join(', ') || ''
 })
+const dieSearchResult: Client.Components.Schemas.CompleteDieSearchResult = { ...props.die }
 const ratings = [
-  { name: "S", icon: "mdi-shape", score: 100 - (percentage(props.die.matchScore ?? 0, props.maxMatchScore, 2) as number ?? 0), },
-  { name: "D", icon: "mdi-tape-measure", score: percentage(props.die.sizeScore ?? 0, props.maxSizeScore, 2), },
-  { name: "T", icon: "mdi-format-text", score: percentage(props.die.textScore ?? 0, props.maxTextScore, 2), },
+  { name: "S", icon: "mdi-shape", score: props.maxMatchScore != undefined ? 100 - (percentage(dieSearchResult.matchScore ?? 0, props.maxMatchScore, 2) as number ?? 0) : 0, },
+  { name: "D", icon: "mdi-tape-measure", score: percentage(dieSearchResult.sizeScore ?? 0, props.maxSizeScore, 2), },
+  { name: "T", icon: "mdi-format-text", score: percentage(dieSearchResult.textScore ?? 0, props.maxTextScore, 2), },
 ];
 
-const isSearchResult = computed(() => props.die.textScore != undefined || props.die.sizeScore != undefined || props.die.matchScore != undefined || props.die.totalScore != undefined)
+const isSearchResult = computed(() => dieSearchResult.textScore != undefined || dieSearchResult.sizeScore != undefined || dieSearchResult.matchScore != undefined)
 const totalPercentage = computed(() => percentage(
-  (props.die.sizeScore + props.die.textScore + (props.maxMatchScore - props.die.matchScore)), 
-  props.maxTotalScore, 
+  (dieSearchResult.sizeScore ?? 0) + (dieSearchResult.textScore ?? 0) + ((props.maxMatchScore ?? 0) - (dieSearchResult.matchScore ?? props.maxMatchScore ?? 0)),
+  props.maxTotalScore,
   2)
 )
 

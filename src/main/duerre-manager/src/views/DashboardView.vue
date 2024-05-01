@@ -54,10 +54,10 @@ const page = ref(1);
 const total = ref(0);
 const itemsPerPage = 12;
 const loading = ref(false);
-const maxTotalScore = ref(0);
-const maxTextScore = ref(0);
-const maxSizeScore = ref(0);
-const maxMatchScore = ref(0);
+const maxTotalScore = ref<number | undefined>();
+const maxTextScore = ref<number | undefined>();
+const maxSizeScore = ref<number | undefined>();
+const maxMatchScore = ref<number | undefined>();
 
 function randomAlias(): string[] {
   const length = Math.floor(Math.random() * 5)
@@ -90,17 +90,19 @@ async function searchDies(dieSearchDao: Client.Components.Schemas.DieSearchDao) 
   if (res.status == 200) {
     searchedDies.length = 0;
     searchedDies.push(...res.data);
-    maxTotalScore.value = 0;
-    maxTextScore.value = 0;
-    maxSizeScore.value = 0;
-    maxMatchScore.value = 0;
+    maxTotalScore.value = undefined;
+    maxTextScore.value = undefined;
+    maxSizeScore.value = undefined;
+    maxMatchScore.value = undefined;
     for (const die of searchedDies) {
-      maxTextScore.value = Math.max(maxTextScore.value, die.textScore ?? 0);
-      maxSizeScore.value = Math.max(maxSizeScore.value, die.sizeScore ?? 0);
-      maxMatchScore.value = Math.max(maxMatchScore.value, die.matchScore ?? 0);
+      if (die.textScore) maxTextScore.value = Math.max(maxTextScore.value ?? 0, die.textScore);
+      if (die.sizeScore) maxSizeScore.value = Math.max(maxSizeScore.value ?? 0, die.sizeScore);
+      if (die.matchScore) maxMatchScore.value = Math.max(maxMatchScore.value ?? 0, die.matchScore);
     }
-    for (const die of searchedDies)
-      maxTotalScore.value = Math.max(maxTotalScore.value, (die.sizeScore ?? 0) + (die.textScore ?? 0) + (maxMatchScore.value - (die.matchScore ?? maxMatchScore.value)));
+    if (maxTextScore.value != undefined || maxSizeScore.value != undefined || maxMatchScore.value != undefined) {
+      for (const die of searchedDies)
+        maxTotalScore.value = Math.max(maxTotalScore.value ?? 0, (die.sizeScore ?? 0) + (die.textScore ?? 0) + ((maxMatchScore.value ?? 0) - (die.matchScore ?? maxMatchScore.value ?? 0)));
+    }
 
     total.value = Math.ceil(searchedDies.length / itemsPerPage);
     diesToPaginate = searchedDies;
