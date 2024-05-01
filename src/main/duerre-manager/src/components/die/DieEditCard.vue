@@ -26,6 +26,7 @@ import { CoreUtils } from '@/model/editor/core/core-utils';
 import type { IDieShapeExport } from '@/model/editor/core/shape/model/idie-shape-export';
 import { onBeforeUnmount, onMounted, provide, ref, watch } from 'vue';
 import DieEditorWrapper from './DieEditorWrapper.vue';
+import { StateManager } from '@/model/editor/managers/state-manager';
 
 const defaultShape = new URL('@/assets/images/polygon.png', import.meta.url).href
 
@@ -60,8 +61,12 @@ function close(data?: IDieShapeExport) {
 }
 
 function calculateImage() {
-  if (model.value)
+  console.log("calculateImage",  model.value);
+
+  if (model.value) {
+    model.value.valid = CoreUtils.validate(model.value).valid;
     image.value = CoreUtils.exportImage(model.value, { border: 50 });
+  }
   else image.value = defaultShape
 }
 

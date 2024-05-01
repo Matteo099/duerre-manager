@@ -132,7 +132,7 @@ export class StateManager extends GenericManager {
         return { lines, valid };
     }
 
-    public load(die: IDieShapeImport): void {
+    public load(die: IDieShapeImport): boolean {
         this.editor.clear();
 
         const points: Point[] = [];
@@ -180,5 +180,9 @@ export class StateManager extends GenericManager {
         });
         if (cutLineLoadError)
             toast.error("Impossibile caricare correttamente lo stampo. I dati sono incompleti o corrotti... (invalid cut lines)")
+    
+        
+        const valid = this.isDieCreated();
+        return valid;
     }
 }

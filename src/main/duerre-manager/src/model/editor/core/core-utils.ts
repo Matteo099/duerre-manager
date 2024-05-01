@@ -7,6 +7,8 @@ import { Line } from "./shape/line";
 import { ExtendedShape } from "./shape/wrappers/extended-shape";
 import type { IDieShapeImport } from "./shape/model/idie-shape-import";
 import { CutLine } from "./shape/cut-line";
+import type { IDieShapeExport } from "./shape/model/idie-shape-export";
+import { StateManager } from "../managers/state-manager";
 
 export interface ExportImageOpts {
     width: number,
@@ -15,6 +17,16 @@ export interface ExportImageOpts {
 }
 
 export class CoreUtils {
+    public static validate(die: IDieShapeImport): IDieShapeExport {
+        const container = document.createElement("div")
+        container.style.display = "none";
+        const editor = new EditorOrchestrator(container, false);
+        const valid = editor.getManager(StateManager)?.load(die) ?? false;
+        editor.destroy();
+        container.remove();
+        return { ...die, valid };
+    }
+
     public static exportImage(die: IDieShapeImport, opts?: Partial<ExportImageOpts>): string {
         const container = document.createElement("div"),
             width = opts?.width ?? 300,
@@ -41,8 +53,8 @@ export class CoreUtils {
         unscaleManager?.setFlag(UPDATE, false);
 
         const shapes: ExtendedShape<any>[] = [];
-        die.lines.forEach(s => {            
-            const extShape = s.type == 'line' ? new Line({ initialPosition: { x: 0, y: 0 } }) : s.type == 'cut'? new CutLine({ initialPosition: { x: 0, y: 0 }, color: 'purple' }) : new BezierLine({ initialPosition: { x: 0, y: 0 } })
+        die.lines.forEach(s => {
+            const extShape = s.type == 'line' ? new Line({ initialPosition: { x: 0, y: 0 } }) : s.type == 'cut' ? new CutLine({ initialPosition: { x: 0, y: 0 }, color: 'purple' }) : new BezierLine({ initialPosition: { x: 0, y: 0 } })
             extShape.setPoints(s.points);
             shapes.push(extShape);
             const shape: Konva.Shape = extShape.shape;

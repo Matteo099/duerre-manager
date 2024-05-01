@@ -1,24 +1,24 @@
 import Konva from "konva";
 import type { Ref } from "vue";
+import type { ILiteEvent } from "./core/event/ilite-event";
+import { LiteEvent } from "./core/event/lite-event";
 import { EManager } from "./managers/emanager";
 import { EventManager } from "./managers/event-manager";
 import type { GenericManager } from "./managers/generic-manager";
 import { GridManager } from "./managers/grid-manager";
-import type { GenericToolHandler } from "./tools/generic-tool-handler";
+import { GuidelinesManager } from "./managers/guidelines-manager";
+import { SnapManager } from "./managers/snap-manager";
+import { StateManager } from "./managers/state-manager";
 import { UndoRedoManager } from "./managers/undo-redo-manager";
 import { UnscaleManager } from "./managers/unscale-manager";
 import { ZoomManager } from "./managers/zoom-manager";
-import { GuidelinesManager } from "./managers/guidelines-manager";
-import { LiteEvent } from "./core/event/lite-event";
-import type { ILiteEvent } from "./core/event/ilite-event";
-import { Tool } from "./tools/tool";
-import { EditToolHandler } from "./tools/edit-tool-handler";
-import { DrawToolHandler } from "./tools/draw-tool-handler";
-import { EraserToolHandler } from "./tools/eraser-tool-handler";
-import { MoveToolHandler } from "./tools/move-tool-handler";
 import { CutToolHandler } from "./tools/cut-tool-handler";
-import { StateManager } from "./managers/state-manager";
-import { SnapManager } from "./managers/snap-manager";
+import { DrawToolHandler } from "./tools/draw-tool-handler";
+import { EditToolHandler } from "./tools/edit-tool-handler";
+import { EraserToolHandler } from "./tools/eraser-tool-handler";
+import type { GenericToolHandler } from "./tools/generic-tool-handler";
+import { MoveToolHandler } from "./tools/move-tool-handler";
+import { Tool } from "./tools/tool";
 
 export class EditorOrchestrator {
 
@@ -44,8 +44,8 @@ export class EditorOrchestrator {
     public get layer(): Konva.Layer { return this._layer; }
     public get selectedTool(): Tool | undefined { return this._selectedTool; }
 
-    constructor(stageContainer: Ref<HTMLDivElement>) {
-        EditorOrchestrator._instance = this;
+    constructor(stageContainer: HTMLDivElement, singleton = true) {
+        if(singleton) EditorOrchestrator._instance = this;
         this.createCanvas(stageContainer);
         this.createTools();
         this.createManagers();
@@ -53,11 +53,11 @@ export class EditorOrchestrator {
         this.setup();
     }
 
-    private createCanvas(stageContainer: Ref<HTMLDivElement>) {
+    private createCanvas(stageContainer: HTMLDivElement) {
         this._stage = new Konva.Stage({
-            container: stageContainer.value,
-            width: stageContainer.value.offsetWidth,
-            height: stageContainer.value.offsetHeight,
+            container: stageContainer,
+            width: stageContainer.offsetWidth,
+            height: stageContainer.offsetHeight,
             draggable: false
         });
 

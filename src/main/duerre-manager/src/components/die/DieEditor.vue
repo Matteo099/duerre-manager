@@ -6,46 +6,25 @@
         <v-btn icon="mdi-arrow-left" v-if="canClose" @click="close"></v-btn>
       </template>
 
-      <v-btn
-        icon="mdi-chart-line-variant"
-        v-if="canDrawLine"
-        :color="colors[0]"
-        @click="useDrawLineTool"
-      >
+      <v-btn icon="mdi-chart-line-variant" v-if="canDrawLine" :color="colors[0]" @click="useDrawLineTool">
       </v-btn>
       <v-btn icon="mdi-gesture" v-if="canDrawCurve" :color="colors[1]" @click="useDrawCurveTool">
       </v-btn>
-      <v-divider
-        class="mx-3 align-self-center"
-        v-if="canDrawLine || canDrawCurve"
-        length="24"
-        thickness="2"
-        vertical
-      ></v-divider>
+      <v-divider class="mx-3 align-self-center" v-if="canDrawLine || canDrawCurve" length="24" thickness="2"
+        vertical></v-divider>
       <v-btn icon="mdi-eraser" v-if="canErase" :color="colors[2]" @click="useEraserTool"> </v-btn>
       <v-btn icon="mdi-ray-start-vertex-end" v-if="canEdit" :color="colors[3]" @click="useEditTool">
       </v-btn>
       <v-btn icon="mdi-cursor-move" v-if="canMove" :color="colors[4]" @click="useMoveTool"> </v-btn>
       <v-btn icon="mdi-knife" v-if="canCut" :color="colors[5]" @click="useCutTool"></v-btn>
       <v-btn icon="mdi-select-off" v-if="canDeselectTool" @click="deselectTool"> </v-btn>
-      <v-divider
-        class="mx-3 align-self-center"
-        v-if="canErase || canEdit || canMove || canCut || canDeselectTool"
-        length="24"
-        thickness="2"
-        vertical
-      ></v-divider>
+      <v-divider class="mx-3 align-self-center" v-if="canErase || canEdit || canMove || canCut || canDeselectTool"
+        length="24" thickness="2" vertical></v-divider>
       <v-btn icon="mdi-magnify-plus" @click="zoomIn"> </v-btn>
       <!-- <v-btn icon="mdi-reply" @click="restoreZoom">
                   </v-btn> -->
       <v-btn icon="mdi-magnify-minus" @click="zoomOut"> </v-btn>
-      <v-divider
-        class="mx-3 align-self-center"
-        v-if="canSaveUndoRedo"
-        length="24"
-        thickness="2"
-        vertical
-      ></v-divider>
+      <v-divider class="mx-3 align-self-center" v-if="canSaveUndoRedo" length="24" thickness="2" vertical></v-divider>
       <v-btn icon="mdi-undo" v-if="canUndo" @click="undo"> </v-btn>
       <v-btn icon="mdi-content-save-outline" v-if="canSave"></v-btn>
       <v-btn icon="mdi-redo" v-if="canRedo" @click="redo"> </v-btn>
@@ -65,7 +44,7 @@ import { StateManager } from '@/model/editor/managers/state-manager';
 import { UndoRedoManager } from '@/model/editor/managers/undo-redo-manager';
 import { ZoomManager } from '@/model/editor/managers/zoom-manager';
 import { Tool } from '@/model/editor/tools/tool';
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { toast } from 'vue3-toastify'
 
 interface DieEditorProps {
@@ -149,7 +128,8 @@ function clear() {
 }
 function close() {
   const dieDataDao = editor.getManager(StateManager)?.save()
-  emit('close', dieDataDao)
+  const empty = dieDataDao?.lines.length == 0;
+  emit('close', empty ? undefined : dieDataDao)
 }
 function deselectTool() {
   editor.useTool()
@@ -170,7 +150,7 @@ function loadDieData() {
 }
 
 onMounted(() => {
-  editor = new EditorOrchestrator(konvaEditor)
+  editor = new EditorOrchestrator(konvaEditor.value)
   editor.AfterSwitchTool.subscribe(_ => updateColors())
   // editor.useTool(Tool.DRAW_CURVE)
   loadDieData()

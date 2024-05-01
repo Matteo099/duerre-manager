@@ -308,15 +308,11 @@ const onSubmit = handleSubmit(
 function getFormValues() {
   return values
 }
-function setValues(item: Client.Components.Schemas.DieSearch) {
-  console.log(item)
-}
 defineExpose({
   onSubmit,
   getFormValues,
   handleSubmit,
-  resetForm,
-  setValues
+  resetForm
 })
 
 async function loadDie(id?: string) {
