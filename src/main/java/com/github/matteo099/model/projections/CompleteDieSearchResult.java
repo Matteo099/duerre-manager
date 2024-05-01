@@ -88,8 +88,8 @@ public class CompleteDieSearchResult
         var normalizedTextScore = getNormalizedScore(this.textScore, o.getTextScore());
         var normalizedSizeScore = getNormalizedScore(this.sizeScore, o.getSizeScore());
         var normalizedMatchScore = getNormalizedScore(this.matchScore, o.getMatchScore());
-        return (normalizedTextScore.getItem1() + normalizedSizeScore.getItem1()
-                - normalizedMatchScore.getItem1()) > (normalizedTextScore.getItem2() + normalizedSizeScore.getItem2()
+        return (normalizedTextScore.getItem1() - normalizedSizeScore.getItem1()
+                - normalizedMatchScore.getItem1()) > (normalizedTextScore.getItem2() - normalizedSizeScore.getItem2()
                         - normalizedMatchScore.getItem2()) ? -1 : 1;
     }
 

@@ -84,13 +84,15 @@ const alias = computed(() => {
 const dieSearchResult: Client.Components.Schemas.CompleteDieSearchResult = { ...props.die }
 const ratings = [
   { name: "S", icon: "mdi-shape", score: props.maxMatchScore != undefined ? 100 - (percentage(dieSearchResult.matchScore ?? 0, props.maxMatchScore, 2) as number ?? 0) : 0, },
-  { name: "D", icon: "mdi-tape-measure", score: percentage(dieSearchResult.sizeScore ?? 0, props.maxSizeScore, 2), },
+  { name: "D", icon: "mdi-tape-measure", score: props.maxSizeScore != undefined ? 100 -(percentage(dieSearchResult.sizeScore ?? 0, props.maxSizeScore, 2) as number ?? 0) : 0, },
   { name: "T", icon: "mdi-format-text", score: percentage(dieSearchResult.textScore ?? 0, props.maxTextScore, 2), },
 ];
 
 const isSearchResult = computed(() => dieSearchResult.textScore != undefined || dieSearchResult.sizeScore != undefined || dieSearchResult.matchScore != undefined)
 const totalPercentage = computed(() => percentage(
-  (dieSearchResult.sizeScore ?? 0) + (dieSearchResult.textScore ?? 0) + ((props.maxMatchScore ?? 0) - (dieSearchResult.matchScore ?? props.maxMatchScore ?? 0)),
+  (dieSearchResult.textScore ?? 0) 
+  + ((props.maxSizeScore ?? 0) - (dieSearchResult.sizeScore ?? props.maxSizeScore ?? 0)) 
+  + ((props.maxMatchScore ?? 0) - (dieSearchResult.matchScore ?? props.maxMatchScore ?? 0)),
   props.maxTotalScore,
   2)
 )

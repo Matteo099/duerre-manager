@@ -101,7 +101,7 @@ async function searchDies(dieSearchDao: Client.Components.Schemas.DieSearchDao) 
     }
     if (maxTextScore.value != undefined || maxSizeScore.value != undefined || maxMatchScore.value != undefined) {
       for (const die of searchedDies)
-        maxTotalScore.value = Math.max(maxTotalScore.value ?? 0, (die.sizeScore ?? 0) + (die.textScore ?? 0) + ((maxMatchScore.value ?? 0) - (die.matchScore ?? maxMatchScore.value ?? 0)));
+        maxTotalScore.value = Math.max(maxTotalScore.value ?? 0, (die.textScore ?? 0) + ((maxSizeScore.value ?? 0) - (die.sizeScore ?? maxSizeScore.value ?? 0)) + ((maxMatchScore.value ?? 0) - (die.matchScore ?? maxMatchScore.value ?? 0)));
     }
 
     total.value = Math.ceil(searchedDies.length / itemsPerPage);
