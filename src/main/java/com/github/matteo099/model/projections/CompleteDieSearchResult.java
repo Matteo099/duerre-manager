@@ -48,6 +48,7 @@ public class CompleteDieSearchResult
     public void computeBaseScore(DieSearchDao search) {
 
         if (search.getText() != null) {
+            textScore = 0d;
             var texts = search.getText().split(" ");
             for (String string : texts) {
                 if (name.equals(string))
