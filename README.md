@@ -1,56 +1,23 @@
 # Duerre Manager
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+Duerre Manager is a management application designed to oversee the molds used in a guardoloficio (guardolo manufacturing) factory.
 
-If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
+This application offers intelligent mold management and search capabilities, enhancing efficiency in overseeing the production process.
 
-## Running the application in dev mode
+## Features
+Key features of the application include:
+- Mold dashboard for an overview of all molds.
+- Advanced mold search functionality, allowing searches by name, dimensions, or even by drawing a sketch.
+- Creation of molds using a specialized 2D CAD tool tailored for guardolo molds.
+- Mold management capabilities, including editing, deletion, and creation.
 
-You can run your application in dev mode that enables live coding using:
-```shell script
-./mvnw compile quarkus:dev
-```
+## Building the Native Executable
+To build the native executable, follow these steps:
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at http://localhost:8080/q/dev/.
+1. Ensure Docker is running.
+2. Open 'x64 Native Tools Command Prompt for VS 2022' as **administrator** (typically found at: C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Visual Studio 2022\Visual Studio Tools\VC).
+3. Navigate to the project's Quarkus folder that you want to build (e.g., cd D:\Desktop\Matteo\QuarkusWorkspace\duerre-manager).
+4. Run the command: `quarkus build --native`.
+5. The executable will be available in the target folder (\target\duerre-manager-1.0.0.exe).
 
-## Packaging and running the application
-
-The application can be packaged using:
-```shell script
-./mvnw package
-```
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
-
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
-
-If you want to build an _über-jar_, execute the following command:
-```shell script
-./mvnw package -Dquarkus.package.type=uber-jar
-```
-
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
-
-## Creating a native executable
-
-You can create a native executable using: 
-```shell script
-./mvnw package -Dnative
-```
-
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using: 
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
-```
-
-You can then execute your native executable with: `./target/duerre-manager-1.0.0-SNAPSHOT-runner`
-
-If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.
-
-## Provided Code
-
-### RESTEasy Reactive
-
-Easily start your Reactive RESTful Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
+For more detailed instructions, refer to the [building native image guide](https://quarkus.io/guides/building-native-image#producing-a-native-executable).

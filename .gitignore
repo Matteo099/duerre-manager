@@ -42,50 +42,5 @@ nb-configuration.xml
 # Plugin directory
 /.quarkus/cli/plugins/
 
-
-
-
-
-
-# See http://help.github.com/ignore-files/ for more about ignoring files.
-
-# Compiled output
-/src/main/webui/dist
-/src/main/webui/tmp
-/src/main/webui/out-tsc
-/src/main/webui/bazel-out
-
-# Node
-/src/main/webui/node_modules
-/src/main/webui/npm-debug.log
-/src/main/webui/yarn-error.log
-
-# IDEs and editors
-/src/main/webui/.idea/
-/src/main/webui/.project
-/src/main/webui/.classpath
-/src/main/webui/.c9/
-/src/main/webui/*.launch
-/src/main/webui/.settings/
-/src/main/webui/*.sublime-workspace
-
-# Visual Studio Code
-/src/main/webui/.vscode/*
-!/src/main/webui/.vscode/settings.json
-!/src/main/webui/.vscode/tasks.json
-!/src/main/webui/.vscode/launch.json
-!/src/main/webui/.vscode/extensions.json
-/src/main/webui/.history/*
-
-# Miscellaneous
-/src/main/webui/.angular/cache
-/src/main/webui/.sass-cache/
-/src/main/webui/connect.lock
-/src/main/webui/coverage
-/src/main/webui/libpeerconnection.log
-/src/main/webui/testem.log
-/src/main/webui/typings
-
-# System files
-/src/main/webui/.DS_Store
-/src/main/webui/Thumbs.db
+# Deploy Tool Folder
+/deploy/bundle/*

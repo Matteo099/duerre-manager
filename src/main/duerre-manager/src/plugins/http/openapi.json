@@ -1,0 +1,730 @@
+{
+  "openapi" : "3.0.3",
+  "info" : {
+    "title" : "duerre-manager API",
+    "version" : "1.0.0"
+  },
+  "servers" : [ {
+    "url" : "http://localhost:8080",
+    "description" : "Auto generated value"
+  }, {
+    "url" : "http://0.0.0.0:8080",
+    "description" : "Auto generated value"
+  } ],
+  "paths" : {
+    "/api/v1/customer-controller/list-customers" : {
+      "get" : {
+        "tags" : [ "Customer Resource" ],
+        "operationId" : "listCustomers",
+        "responses" : {
+          "200" : {
+            "description" : "List customers",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Customer"
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Unable to list customers",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorWrapper"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/die-controller/create-die" : {
+      "post" : {
+        "tags" : [ "Die Resource" ],
+        "operationId" : "createDie",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DieDao"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Die created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/IdWrapper"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Unable to create die",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorWrapper"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/die-controller/delete-die/{id}" : {
+      "delete" : {
+        "tags" : [ "Die Resource" ],
+        "operationId" : "deleteDie",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Delete die",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MessageWrapper"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Unable to delete die",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorWrapper"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/die-controller/delete-search/{id}" : {
+      "delete" : {
+        "tags" : [ "Die Resource" ],
+        "operationId" : "deleteSearch",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Delete search",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MessageWrapper"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Unable to delete search",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorWrapper"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/die-controller/die/{id}" : {
+      "get" : {
+        "tags" : [ "Die Resource" ],
+        "operationId" : "getDie",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Get die",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Die"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Die not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorWrapper"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Unable to get die",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorWrapper"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/die-controller/edit-die" : {
+      "post" : {
+        "tags" : [ "Die Resource" ],
+        "operationId" : "editDie",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DieDao"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Die modified",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/IdWrapper"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Unable to modify die",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorWrapper"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/die-controller/list-dies" : {
+      "get" : {
+        "tags" : [ "Die Resource" ],
+        "operationId" : "listDies",
+        "responses" : {
+          "200" : {
+            "description" : "List dies",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Die"
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Unable to list dies",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorWrapper"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/die-controller/search-dies" : {
+      "put" : {
+        "tags" : [ "Die Resource" ],
+        "operationId" : "searchDies",
+        "parameters" : [ {
+          "name" : "threshold",
+          "in" : "query",
+          "schema" : {
+            "format" : "float",
+            "default" : "1000.0",
+            "type" : "number"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DieSearchDao"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Search dies",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/CompleteDieSearchResult"
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Unable to search dies",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorWrapper"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/die-controller/searches" : {
+      "get" : {
+        "tags" : [ "Die Resource" ],
+        "operationId" : "getSearches",
+        "parameters" : [ {
+          "name" : "pageSize",
+          "in" : "query",
+          "schema" : {
+            "format" : "int32",
+            "default" : "15",
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Get searches",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/DieSearch"
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Unable to get searches",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorWrapper"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "CompleteDieSearchResult" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "aliases" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "dieData" : {
+            "$ref" : "#/components/schemas/DieData"
+          },
+          "customer" : {
+            "$ref" : "#/components/schemas/Customer"
+          },
+          "dieType" : {
+            "$ref" : "#/components/schemas/DieType"
+          },
+          "material" : {
+            "$ref" : "#/components/schemas/MaterialType"
+          },
+          "totalHeight" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "totalWidth" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "shoeWidth" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "crestWidth" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "creationDate" : {
+            "$ref" : "#/components/schemas/LocalDateTime"
+          },
+          "textScore" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "sizeScore" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "matchScore" : {
+            "format" : "double",
+            "type" : "number"
+          }
+        }
+      },
+      "Customer" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Date" : {
+        "format" : "date",
+        "type" : "string",
+        "example" : "2022-03-10"
+      },
+      "Die" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "aliases" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "dieData" : {
+            "$ref" : "#/components/schemas/DieData"
+          },
+          "customer" : {
+            "$ref" : "#/components/schemas/Customer"
+          },
+          "dieType" : {
+            "$ref" : "#/components/schemas/DieType"
+          },
+          "material" : {
+            "$ref" : "#/components/schemas/MaterialType"
+          },
+          "totalHeight" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "totalWidth" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "shoeWidth" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "crestWidth" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "creationDate" : {
+            "$ref" : "#/components/schemas/LocalDateTime"
+          }
+        }
+      },
+      "DieDao" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "dieData" : {
+            "$ref" : "#/components/schemas/DieShapeExport"
+          },
+          "customer" : {
+            "type" : "string"
+          },
+          "aliases" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "dieType" : {
+            "$ref" : "#/components/schemas/DieType"
+          },
+          "material" : {
+            "$ref" : "#/components/schemas/MaterialType"
+          },
+          "totalHeight" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "totalWidth" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "shoeWidth" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "crestWidth" : {
+            "format" : "double",
+            "type" : "number"
+          }
+        }
+      },
+      "DieData" : {
+        "type" : "object",
+        "properties" : {
+          "lines" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DieDataLine"
+            }
+          }
+        }
+      },
+      "DieDataLine" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string"
+          },
+          "points" : {
+            "type" : "array",
+            "items" : {
+              "format" : "double",
+              "type" : "number"
+            }
+          }
+        }
+      },
+      "DieLineDao" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string"
+          },
+          "points" : {
+            "type" : "array",
+            "items" : {
+              "format" : "double",
+              "type" : "number"
+            }
+          }
+        }
+      },
+      "DieSearch" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "$ref" : "#/components/schemas/ObjectId"
+          },
+          "text" : {
+            "type" : "string"
+          },
+          "dieData" : {
+            "$ref" : "#/components/schemas/DieData"
+          },
+          "customers" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "dieTypes" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DieType"
+            }
+          },
+          "materials" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/MaterialType"
+            }
+          },
+          "totalHeight" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "totalWidth" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "shoeWidth" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "crestWidth" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "subtitle" : {
+            "type" : "string"
+          },
+          "searchDate" : {
+            "$ref" : "#/components/schemas/LocalDateTime"
+          }
+        }
+      },
+      "DieSearchDao" : {
+        "type" : "object",
+        "properties" : {
+          "text" : {
+            "type" : "string"
+          },
+          "dieData" : {
+            "$ref" : "#/components/schemas/DieShapeExport"
+          },
+          "customers" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "dieTypes" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DieType"
+            }
+          },
+          "materials" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/MaterialType"
+            }
+          },
+          "totalHeight" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "totalWidth" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "shoeWidth" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "crestWidth" : {
+            "format" : "double",
+            "type" : "number"
+          }
+        }
+      },
+      "DieShapeExport" : {
+        "type" : "object",
+        "properties" : {
+          "lines" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DieLineDao"
+            }
+          }
+        }
+      },
+      "DieType" : {
+        "enum" : [ "MONOCOLORE", "BICOLORE", "TRICOLORE" ],
+        "type" : "string"
+      },
+      "ErrorWrapper" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string"
+          }
+        }
+      },
+      "IdWrapper" : {
+        "type" : "object",
+        "properties" : {
+          "id" : { }
+        }
+      },
+      "LocalDateTime" : {
+        "format" : "date-time",
+        "type" : "string",
+        "example" : "2022-03-10T12:15:50"
+      },
+      "MaterialType" : {
+        "enum" : [ "TPU", "PVC", "TR", "POLIETILENE" ],
+        "type" : "string"
+      },
+      "MessageWrapper" : {
+        "type" : "object",
+        "properties" : {
+          "message" : { }
+        }
+      },
+      "ObjectId" : {
+        "type" : "object",
+        "properties" : {
+          "timestamp" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "counter" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "randomValue1" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "randomValue2" : {
+            "type" : "integer"
+          },
+          "date" : {
+            "$ref" : "#/components/schemas/Date"
+          }
+        }
+      }
+    }
+  }
+}
