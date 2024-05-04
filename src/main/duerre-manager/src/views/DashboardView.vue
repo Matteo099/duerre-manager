@@ -19,7 +19,7 @@
       </v-col>
     </v-row>
     <v-row no-gutters v-else-if="dies.length != 0">
-      <v-col v-for="die in dies" :key="die.name" cols="12" md="4" class="px-2">
+      <v-col v-for="die in dies" :key="die.key" cols="12" md="4" class="px-2">
         <DieCard :die="die" :to="'/die/' + die.name" :maxTotalScore="maxTotalScore" :maxTextScore="maxTextScore"
           :maxSizeScore="maxSizeScore" :maxMatchScore="maxMatchScore" />
       </v-col>
@@ -46,7 +46,7 @@ import { onMounted, ref } from 'vue'
 
 const http = useHttp()
 
-const dies = ref<(Client.Components.Schemas.Die | Client.Components.Schemas.CompleteDieSearchResult)[]>([])
+const dies = ref<((Client.Components.Schemas.Die | Client.Components.Schemas.CompleteDieSearchResult) & { key: string })[]>([])
 const allDies: Client.Components.Schemas.Die[] = []
 const searchedDies: Client.Components.Schemas.CompleteDieSearchResult[] = []
 let diesToPaginate: Client.Components.Schemas.Die[] = []
@@ -74,7 +74,7 @@ async function loadDies() {
     allDies.length = 0;
     allDies.push(...res.data)
     total.value = Math.ceil(allDies.length / itemsPerPage);
-    diesToPaginate = allDies;
+    diesToPaginate = [...allDies];
     if (page.value == 1) goToPage(1)
     else page.value = 1;
   }
@@ -105,7 +105,7 @@ async function searchDies(dieSearchDao: Client.Components.Schemas.DieSearchDao) 
     }
 
     total.value = Math.ceil(searchedDies.length / itemsPerPage);
-    diesToPaginate = searchedDies;
+    diesToPaginate = [...searchedDies];
     if (page.value == 1) goToPage(1)
     else page.value = 1;
   }
@@ -113,7 +113,7 @@ async function searchDies(dieSearchDao: Client.Components.Schemas.DieSearchDao) 
   loading.value = false;
 }
 function reset() {
-  diesToPaginate = allDies;
+  diesToPaginate = [...allDies];
   total.value = Math.ceil(allDies.length / itemsPerPage);
   if (page.value == 1) goToPage(1)
   else page.value = 1;
@@ -122,7 +122,13 @@ function reset() {
 function goToPage(page: number) {
   const start = (page - 1) * itemsPerPage
   const end = start + itemsPerPage
-  dies.value = diesToPaginate.slice(start, end)
+  const tempDies = diesToPaginate.slice(start, end).map(d => ({...d, key: getKey(d)}));
+  dies.value = tempDies;
+}
+
+function getKey(die: Client.Components.Schemas.Die | Client.Components.Schemas.CompleteDieSearchResult | any) {
+  const search = die.textScore || die.sizeScore || die.matchScore ? 2 : 1;
+  return `${die.name}_${search}`;
 }
 
 onMounted(() => loadDies())
