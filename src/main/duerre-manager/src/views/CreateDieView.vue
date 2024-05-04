@@ -19,7 +19,7 @@ async function onSuccess(values?: GenericObject) {
   const client = await http.client
   const res = await client.createDie(null, die)
   console.log(res)
-  if (res.status == 200) {
+  if (res?.status == 200) {
     router.push('/die/' + res.data.id).then((_) => {
       toast.success('Lo stampo è stato creato!')
     })

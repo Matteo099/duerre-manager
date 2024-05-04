@@ -6,6 +6,7 @@ import type { EventSubscription } from "../event/lite-event";
 import type { ExtendedShapeOpt } from "./wrappers/extended-shape";
 import { ERASABLE } from "../constants";
 import type { IDieLine } from "./model/idie-line";
+import { V2 } from "./wrappers/iextended-shape";
 
 export class CutLine extends Line {
     private startPointShape?: IMeasurableShape;
@@ -69,7 +70,7 @@ export class CutLine extends Line {
     }
 
     private calculateBezierPercentage(bezieLine: IMeasurableShape, point: Konva.Vector2d): number {
-        const points = bezieLine.extShape.computeCurvePoints<Konva.Vector2d>();
+        const points = bezieLine.extShape.computeCurvePoints<Konva.Vector2d>(V2);
         for (let i = 0; i < points.length; i++) {
             const bp = points[i];
             if (bp.x == point.x && bp.y == point.y) {

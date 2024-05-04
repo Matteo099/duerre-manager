@@ -28,7 +28,7 @@ async function onSuccess(values?: GenericObject) {
   const res = await client.editDie(null, die)
 
   console.log(res);
-  if (res.status == 200) {
+  if (res?.status == 200) {
     router.push("/die/" + res.data.id).then(_ => {
       toast.success("Lo stampo è stato modificato!");
     })

@@ -136,7 +136,7 @@ async function remove() {
 
     const client = await http.client
     const res = await client.deleteDie({ id: die.value.name })
-    if (res.status == 200) {
+    if (res?.status == 200) {
         router.push("/").then(_ =>
             toast.success("Stampo eliminato!"));
     }
@@ -147,7 +147,7 @@ async function loadDie(id?: string) {
 
     const client = await http.client
     const res = await client.getDie({ id })
-    if (res.status == 200) {
+    if (res?.status == 200) {
         die.value = res.data
     }
 }

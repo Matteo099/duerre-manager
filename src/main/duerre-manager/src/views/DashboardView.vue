@@ -70,7 +70,7 @@ async function loadDies() {
   console.log(res)
   await delay(500)
 
-  if (res.status == 200) {
+  if (res?.status == 200) {
     allDies.length = 0;
     allDies.push(...res.data)
     total.value = Math.ceil(allDies.length / itemsPerPage);
@@ -87,7 +87,7 @@ async function searchDies(dieSearchDao: Client.Components.Schemas.DieSearchDao) 
   const res = await client.searchDies(null, dieSearchDao)
   console.log(res)
 
-  if (res.status == 200) {
+  if (res?.status == 200) {
     searchedDies.length = 0;
     searchedDies.push(...res.data);
     maxTotalScore.value = undefined;

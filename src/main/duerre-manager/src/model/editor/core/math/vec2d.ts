@@ -10,14 +10,14 @@ export const Vec2DZero: Vec2D = { x: 0, y: 0, source: 'grid' };
 // }
 
 export const vec2DEquals = function (...vecs: (Konva.Vector2d | undefined)[]): boolean {
-    if(vecs.length <= 1) return true;
+    if (vecs.length <= 1) return true;
 
     let ret = true;
     for (let i = 1; i < vecs.length; i++) {
         const v1 = vecs[i - 1];
         const v2 = vecs[i];
         ret &&= v1 == undefined || v2 == undefined ? false : (v1?.x == v2?.x && v1?.y == v2?.y);
-        if(!ret) return false;
+        if (!ret) return false;
     }
     return ret;
 }
@@ -62,7 +62,7 @@ export const lengthOf = function (object: number[] | Konva.Vector2d[] | Konva.Li
 export const middlePointOf = function (object: number[] | Konva.Vector2d[] | Konva.Line): Konva.Vector2d {
     const points = toVec2DArray(object);
     const A = points?.[0] ?? Vec2DZero
-    const B = points.at(-1) ?? A
+    const B = points?.[points.length - 1] ?? A
     return {
         x: A.x - (A.x - B.x) / 2,
         y: A.y - (A.y - B.y) / 2

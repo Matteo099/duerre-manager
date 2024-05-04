@@ -122,8 +122,8 @@ export class MeasurableShape<S extends ExtendedShape<any>> implements IMeasurabl
             const length = parseFloat(value);
             const points = this.extShape.calculatePointsGivenLength(length);
             this.updatePoints(points.newPoints);
-            //this.onLengthChange?.(KonvaUtils.pointsVector2d(points.oldPoints)[1], KonvaUtils.pointsVector2d(points.newPoints)[1]);
-            this.onLengthChanged.next({ oldPoint: toVec2DArray(points.oldPoints)[1], newPoint: toVec2DArray(points.newPoints)[1] });
+            // TODO: remove as any
+            this.onLengthChanged.next({ oldPoint: toVec2DArray(points.oldPoints)[1] as any, newPoint: toVec2DArray(points.newPoints)[1] });
         } catch (error) { }
     }
 

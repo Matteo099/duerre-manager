@@ -44,6 +44,7 @@ import { StateManager } from '@/model/editor/managers/state-manager';
 import { UndoRedoManager } from '@/model/editor/managers/undo-redo-manager';
 import { ZoomManager } from '@/model/editor/managers/zoom-manager';
 import { Tool } from '@/model/editor/tools/tool';
+import Client from '@/plugins/http/openapi';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { toast } from 'vue3-toastify'
 
@@ -58,7 +59,7 @@ interface DieEditorProps {
 }
 
 let editor: EditorOrchestrator
-const model = defineModel<IDieShapeImport>()
+const model = defineModel<IDieShapeImport | Client.Components.Schemas.DieData>()
 const konvaEditor = ref()
 const ro = new ResizeObserver(onResize)
 const colors = ref<string[]>([])

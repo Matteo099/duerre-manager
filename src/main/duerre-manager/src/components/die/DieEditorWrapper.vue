@@ -14,9 +14,9 @@
 import { inject } from 'vue';
 import DieEditor from './DieEditor.vue';
 import { ref } from 'vue';
-import type { IDieDataDao } from '@/model/manager/models/idie-data-dao';
+import type { IDieShapeExport } from '@/model/editor/core/shape/model/idie-shape-export';
 
-const model = defineModel<IDieDataDao>();
+const model = defineModel<IDieShapeExport>();
 
 interface DieEditorProps {
   dialog?: boolean
@@ -29,7 +29,7 @@ const emit = defineEmits(['close', 'visible'])
 const visible = inject("visible", false)
 const visibility = ref(visible);
 
-function close(data?: IDieDataDao) {
+function close(data?: IDieShapeExport) {
   model.value = data;
   visibility.value = false
   emit('close', data)
