@@ -34,16 +34,11 @@ public class UpdaterResource {
     public Response update() {
         logger.info("update");
         try {
-            updaterService.update();
-            return Response.ok().entity("Updating...").build();
+            var updating = updaterService.update(true);
+            return Response.ok().entity(updating ? "Aggiornamento in corso...": "Impossibile effettuare l'aggiornamento...").build();
         } catch (Exception e) {
             e.printStackTrace();
             return Response.serverError().entity(ErrorWrapper.of(e)).build();
         }
     }
-
-    // the new application starts
-    // in the main (before quarkus.run) check the if it is a temp application (in temp folder)
-    // if it a temp application clone the temp application and paste in the current application
-    // 
 }

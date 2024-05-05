@@ -21,3 +21,5 @@ To build the native executable, follow these steps:
 5. The executable will be available in the target folder (\target\duerre-manager-1.0.0.exe).
 
 For more detailed instructions, refer to the [building native image guide](https://quarkus.io/guides/building-native-image#producing-a-native-executable).
+
+## TODO

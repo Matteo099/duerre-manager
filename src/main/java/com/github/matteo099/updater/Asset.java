@@ -1,11 +1,15 @@
 package com.github.matteo099.updater;
 
+import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,64 +17,59 @@ import java.nio.file.Paths;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@RegisterForReflection
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Asset {
     private String name;
     private String content_type;
     private String browser_download_url;
 
-    private Path zipPath;
+    private Path assetPath;
 
-    protected Asset() {
-    }
+    public void download(Path path) throws IOException, URISyntaxException {
+        assetPath = path.resolve(name);
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getContent_type() {
-        return content_type;
-    }
-
-    public void setContent_type(String content_type) {
-        this.content_type = content_type;
-    }
-
-    public String getBrowser_download_url() {
-        return browser_download_url;
-    }
-
-    public void setBrowser_download_url(String browser_download_url) {
-        this.browser_download_url = browser_download_url;
-    }
-
-    public void download(String path) throws IOException {
-        zipPath = Paths.get(path, name);
-
-        // Download zip file
-        URL url = new URL(browser_download_url);
+        // Download file
+        URL url = new URI(browser_download_url).toURL();
         HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-        InputStream inputStream = httpURLConnection.getInputStream();
-        Files.copy(inputStream, zipPath);
+        // InputStream inputStream = httpURLConnection.getInputStream();
+        // Files.copy(inputStream, assetPath);
 
-        // Extract zip file
-        try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(name))) {
-            ZipEntry entry;
-            while ((entry = zipInputStream.getNextEntry()) != null) {
-                if (!entry.isDirectory() && entry.getName().endsWith(".zip")) {
-                    String fileName = Paths.get(entry.getName()).getFileName().toString();
-                    Files.copy(zipInputStream, Paths.get(fileName));
-                }
+        try (InputStream inputStream = new BufferedInputStream(httpURLConnection.getInputStream());
+                OutputStream outputStream = Files.newOutputStream(assetPath)) {
+            long fileSize = httpURLConnection.getContentLengthLong();
+            long downloadedSize = 0;
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+                downloadedSize += bytesRead;
+                // Calculate and print download progress
+                double progress = ((double) downloadedSize / fileSize) * 100;
+                System.out.printf("Downloaded %.2f%%\r", progress);
             }
+            System.out.println("Download completed.");
+        } finally {
+            httpURLConnection.disconnect();
         }
     }
 
     public void unzip(Path destDir) throws FileNotFoundException, IOException {
+        if (!content_type.equals("application/x-zip-compressed"))
+            return;
+
+        if (destDir == null) {
+            destDir = Paths.get(".");
+        }
         byte[] buffer = new byte[1024];
-        try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(zipPath.toFile()))) {
+        try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(assetPath.toFile()))) {
             ZipEntry entry = zipInputStream.getNextEntry();
             while (entry != null) {
                 String fileName = entry.getName();
