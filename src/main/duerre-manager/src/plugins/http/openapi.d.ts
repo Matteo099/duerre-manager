@@ -227,6 +227,12 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorWrapper;
         }
     }
+    namespace Update {
+        namespace Responses {
+            export interface $200 {
+            }
+        }
+    }
 }
 
 export interface OperationMethods {
@@ -302,6 +308,14 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSearches.Responses.$200>
+  /**
+   * update
+   */
+  'update'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.Update.Responses.$200>
 }
 
 export interface PathsDictionary {
@@ -394,6 +408,16 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSearches.Responses.$200>
+  }
+  ['/api/v1/updater-controller/update']: {
+    /**
+     * update
+     */
+    'put'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.Update.Responses.$200>
   }
 }
 

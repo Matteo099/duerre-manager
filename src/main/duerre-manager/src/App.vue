@@ -34,7 +34,8 @@
             </v-col>
             <v-col align-self="center" cols="1"></v-col>
             <v-col align-self="center" class="d-flex" cols="3">
-              <v-icon start>mdi-alpha-v-circle</v-icon><span>{{ appVersion }}</span>
+              <v-icon start>mdi-alpha-v-circle</v-icon>
+              <span>{{ appVersion }}</span>
             </v-col>
           </v-row>
         </v-footer>
@@ -49,19 +50,24 @@
         </router-link> -->
       </v-app-bar-title>
 
+      <v-tooltip v-if="updateAvailable" location="bottom">
+        <template v-slot:activator="{ props }">
+          <v-btn v-bind="props" @click="dialog=true" class="mr-2 text-none" icon>
+            <v-badge color="warning" content="!">
+              <v-icon>mdi-bell-outline</v-icon>
+            </v-badge>
+          </v-btn>
+        </template>
+        <span>Nuova versione disponibile</span>
+      </v-tooltip>
+
       <v-btn @click="toggleTheme" icon class="mr-2">
         <v-icon right>mdi-theme-light-dark</v-icon>
       </v-btn>
 
       <v-tooltip location="bottom">
         <template v-slot:activator="{ props }">
-          <v-avatar
-            size="40"
-            color="lime-darken-4"
-            v-bind="props"
-            key="Default"
-            class="mr-2"
-          >
+          <v-avatar size="40" color="lime-darken-4" v-bind="props" key="Default" class="mr-2">
             <span>{{ userInitials }}</span>
           </v-avatar>
         </template>
@@ -90,12 +96,18 @@
       </v-container>
     </v-main>
   </v-app>
+
+  <div class="text-center pa-4">
+    <UpdateApp :new-app-version="newAppVersion" v-model="dialog"/>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useTheme } from 'vuetify'
 import { useSettingsStore } from './stores/settings'
+import axios from 'axios';
+import UpdateApp from './components/UpdateApp.vue';
 
 const settingsStore = useSettingsStore()
 const theme = useTheme()
@@ -105,10 +117,37 @@ const drawer = ref(true)
 const userInitials = ref('AD')
 const userRoles = ref(['ADMIN'])
 const appVersion = import.meta.env.VITE_APP_VERSION
+const updateAvailable = ref(false);
+const dialog = ref(false);
+let newAppVersion = appVersion;
 
 function toggleTheme() {
   settingsStore.toggleDarkMode()
   theme.global.name.value =
     theme.global.name.value == 'myCustomDarkTheme' ? 'myCustomLightTheme' : 'myCustomDarkTheme'
 }
+
+async function checkForUpdates() {
+  const repoOwner = "Matteo099"
+  const repoName = "duerre-manager"
+  const latestReleaseUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/releases/latest`
+
+  try {
+    const res = await axios.get(latestReleaseUrl);
+    if (res?.status == 200) {
+      // Handle the response here
+      const data = res.data;
+      newAppVersion = data.tag_name.replace("v", "") + "v";
+      updateAvailable.value = newAppVersion != appVersion;
+    }
+  } catch (error) {
+    // Handle errors
+    console.error('Error fetching latest commit:', error);
+  }
+}
+
+
+onMounted(() => {
+  checkForUpdates()
+})
 </script>

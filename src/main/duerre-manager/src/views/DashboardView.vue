@@ -19,7 +19,7 @@
       </v-col>
     </v-row>
     <v-row no-gutters v-else-if="dies.length != 0">
-      <v-col v-for="die in dies" :key="die.key" cols="12" md="4" class="px-2">
+      <v-col v-for="die in dies" :key="getKey(die)" cols="12" md="4" class="px-2">
         <DieCard :die="die" :to="'/die/' + die.name" :maxTotalScore="maxTotalScore" :maxTextScore="maxTextScore"
           :maxSizeScore="maxSizeScore" :maxMatchScore="maxMatchScore" />
       </v-col>
@@ -46,7 +46,7 @@ import { onMounted, ref } from 'vue'
 
 const http = useHttp()
 
-const dies = ref<((Client.Components.Schemas.Die | Client.Components.Schemas.CompleteDieSearchResult) & { key: string })[]>([])
+const dies = ref<((Client.Components.Schemas.Die | Client.Components.Schemas.CompleteDieSearchResult) /* & { key: string } */)[]>([])
 const allDies: Client.Components.Schemas.Die[] = []
 const searchedDies: Client.Components.Schemas.CompleteDieSearchResult[] = []
 let diesToPaginate: Client.Components.Schemas.Die[] = []
@@ -122,7 +122,7 @@ function reset() {
 function goToPage(page: number) {
   const start = (page - 1) * itemsPerPage
   const end = start + itemsPerPage
-  const tempDies = diesToPaginate.slice(start, end).map(d => ({...d, key: getKey(d)}));
+  const tempDies = diesToPaginate.slice(start, end)//.map(d => ({...d, key: getKey(d)}));
   dies.value = tempDies;
 }
 

@@ -354,6 +354,17 @@
           }
         }
       }
+    },
+    "/api/v1/updater-controller/update" : {
+      "put" : {
+        "tags" : [ "Updater Resource" ],
+        "operationId" : "update",
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        }
+      }
     }
   },
   "components" : {
