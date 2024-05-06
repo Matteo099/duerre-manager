@@ -44,3 +44,4 @@ nb-configuration.xml
 
 # Deploy Tool Folder
 /deploy/bundle/*
+/tmp/*
