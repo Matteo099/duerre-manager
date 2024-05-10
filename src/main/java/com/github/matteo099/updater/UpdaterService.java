@@ -12,6 +12,7 @@ import com.github.matteo099.utils.FileUtils;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import lombok.Getter;
 
 @ApplicationScoped
 public class UpdaterService {
@@ -34,13 +35,17 @@ public class UpdaterService {
 
     private String os = System.getProperty("os.name");
     private Boolean isWindows = os.toLowerCase().contains("windows");
+    @Getter
     private boolean updateInProgress = false;
+
+    private Exception updateError;
 
     // download application
     // save in a temp folder
     // start the temp application
     public boolean update(boolean skipDownload) throws Exception {
-        if(updateInProgress) return false;
+        if (updateInProgress)
+            return false;
 
         Release latestRelease = gitHubService.getLatestRelease(repoOwner, repoName);
         String latestVersion = latestRelease.getTag_name().replace("v", "");
@@ -48,13 +53,28 @@ public class UpdaterService {
         if (!latestVersion.equals(version) || true) {
             updateInProgress = true;
 
-            if(skipDownload) downloadAndSaveToTemp(latestRelease);
-            startTempApplication(latestVersion);
-            appLifecycleBean.forceStopApplication(1500L);
+            new Thread(() -> {
+                try {
+                    if (skipDownload)
+                        downloadAndSaveToTemp(latestRelease);
+                    startTempApplication(latestVersion);
+                    appLifecycleBean.forceStopApplication(1500L);
+                    updateInProgress = false;
+                    updateError = null;
+                } catch (Exception e) {
+                    updateError = e;
+                }
+            }).start();
         }
 
-        updateInProgress = false;
         return true;
+    }
+
+    public boolean updateAvailable() {
+        Release latestRelease = gitHubService.getLatestRelease(repoOwner, repoName);
+        String latestVersion = latestRelease.getTag_name().replace("v", "");
+
+        return !latestVersion.equals(version);
     }
 
     private void downloadAndSaveToTemp(Release release) throws Exception {
@@ -83,11 +103,10 @@ public class UpdaterService {
     }
 
     private void startTempApplication(String version) throws IOException, InterruptedException {
-        if (isWindows){
+        if (isWindows) {
             Path executablePath = Paths.get("./tmp/duerre-manager-" + version + "-runner.exe");
             executeCommand(executablePath.toString());
-        }
-        else
+        } else
             executeCommand("java -jar ./tmp/quarkus-app.jar");
     }
 
