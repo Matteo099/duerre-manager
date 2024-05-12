@@ -106,6 +106,7 @@ public class Updater {
     private static void copyTempFileToMainDirectory() throws IOException {
         Path currentDirectory = Paths.get("");
         Path parentDirectory = currentDirectory.getParent();
+
         // Iterate over the files and directories in the current directory
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(currentDirectory)) {
             for (Path entry : stream) {

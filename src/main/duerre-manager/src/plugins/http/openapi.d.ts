@@ -136,9 +136,31 @@ declare namespace Components {
              */
             Date /* date */;
         }
+        export type UpdatePhase = "UNSET" | "STARTING" | "DOWNLOADING" | "INSTALLING";
+        export interface UpdateStatus {
+            phase?: UpdatePhase;
+            progress?: number; // double
+            updating?: boolean;
+            error?: string;
+            onFieldChanged?: {
+                [key: string]: any;
+            };
+        }
     }
 }
 declare namespace Paths {
+    namespace AckUpdateError {
+        namespace Responses {
+            export interface $200 {
+            }
+        }
+    }
+    namespace CheckForUpdates {
+        namespace Responses {
+            export type $200 = boolean;
+            export type $500 = Components.Schemas.ErrorWrapper;
+        }
+    }
     namespace CreateDie {
         export type RequestBody = Components.Schemas.DieDao;
         namespace Responses {
@@ -233,6 +255,17 @@ declare namespace Paths {
             }
         }
     }
+    namespace UpdateProgress {
+        namespace Responses {
+            export type $200 = Components.Schemas.UpdateStatus[];
+        }
+    }
+    namespace UpdateStatus {
+        namespace Responses {
+            export type $200 = Components.Schemas.UpdateStatus;
+            export type $500 = Components.Schemas.ErrorWrapper;
+        }
+    }
 }
 
 export interface OperationMethods {
@@ -308,6 +341,38 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSearches.Responses.$200>
+  /**
+   * ackUpdateError
+   */
+  'ackUpdateError'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.AckUpdateError.Responses.$200>
+  /**
+   * checkForUpdates
+   */
+  'checkForUpdates'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CheckForUpdates.Responses.$200>
+  /**
+   * updateProgress
+   */
+  'updateProgress'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateProgress.Responses.$200>
+  /**
+   * updateStatus
+   */
+  'updateStatus'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.UpdateStatus.Responses.$200>
   /**
    * update
    */
@@ -408,6 +473,46 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSearches.Responses.$200>
+  }
+  ['/api/v1/updater-controller/ack-error']: {
+    /**
+     * ackUpdateError
+     */
+    'put'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.AckUpdateError.Responses.$200>
+  }
+  ['/api/v1/updater-controller/check-update']: {
+    /**
+     * checkForUpdates
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CheckForUpdates.Responses.$200>
+  }
+  ['/api/v1/updater-controller/sse']: {
+    /**
+     * updateProgress
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateProgress.Responses.$200>
+  }
+  ['/api/v1/updater-controller/status']: {
+    /**
+     * updateStatus
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.UpdateStatus.Responses.$200>
   }
   ['/api/v1/updater-controller/update']: {
     /**

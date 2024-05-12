@@ -17,7 +17,10 @@ import java.nio.file.Paths;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.jboss.logging.Logger;
+
 import io.quarkus.runtime.annotations.RegisterForReflection;
+import jakarta.json.bind.annotation.JsonbTransient;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,20 +30,25 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Asset {
+
+    @JsonbTransient
+    Logger logger = Logger.getLogger(Asset.class);
+
     private String name;
     private String content_type;
     private String browser_download_url;
 
     private Path assetPath;
 
-    public void download(Path path) throws IOException, URISyntaxException {
+    public void download(Path path, UpdateStatus updateStatus)
+            throws IOException, URISyntaxException {
         assetPath = path.resolve(name);
 
         // Download file
         URL url = new URI(browser_download_url).toURL();
         HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-        // InputStream inputStream = httpURLConnection.getInputStream();
-        // Files.copy(inputStream, assetPath);
+
+        logger.info("Start downloading");
 
         try (InputStream inputStream = new BufferedInputStream(httpURLConnection.getInputStream());
                 OutputStream outputStream = Files.newOutputStream(assetPath)) {
@@ -51,11 +59,12 @@ public class Asset {
             while ((bytesRead = inputStream.read(buffer)) != -1) {
                 outputStream.write(buffer, 0, bytesRead);
                 downloadedSize += bytesRead;
-                // Calculate and print download progress
-                double progress = ((double) downloadedSize / fileSize) * 100;
-                System.out.printf("Downloaded %.2f%%\r", progress);
+                double progress = (double) downloadedSize / fileSize;
+                updateStatus.setProgress(progress);
+                if(progress >= 0.2) 
+                    throw new IOException("Some error");
             }
-            System.out.println("Download completed.");
+            logger.info("Download completed.");
         } finally {
             httpURLConnection.disconnect();
         }

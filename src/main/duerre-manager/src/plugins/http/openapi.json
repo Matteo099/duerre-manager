@@ -355,6 +355,17 @@
         }
       }
     },
+    "/api/v1/updater-controller/ack-error" : {
+      "put" : {
+        "tags" : [ "Updater Resource" ],
+        "operationId" : "ackUpdateError",
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        }
+      }
+    },
     "/api/v1/updater-controller/check-update" : {
       "get" : {
         "tags" : [ "Updater Resource" ],
@@ -395,8 +406,36 @@
                 "schema" : {
                   "type" : "array",
                   "items" : {
-                    "$ref" : "#/components/schemas/UPD"
+                    "$ref" : "#/components/schemas/UpdateStatus"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/updater-controller/status" : {
+      "get" : {
+        "tags" : [ "Updater Resource" ],
+        "operationId" : "updateStatus",
+        "responses" : {
+          "200" : {
+            "description" : "Check if update is available",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UpdateStatus"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Unable to check for updates",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorWrapper"
                 }
               }
             }
@@ -785,11 +824,28 @@
           }
         }
       },
-      "UPD" : {
+      "UpdatePhase" : {
+        "enum" : [ "UNSET", "STARTING", "DOWNLOADING", "INSTALLING" ],
+        "type" : "string"
+      },
+      "UpdateStatus" : {
         "type" : "object",
         "properties" : {
-          "t" : {
+          "phase" : {
+            "$ref" : "#/components/schemas/UpdatePhase"
+          },
+          "progress" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "updating" : {
+            "type" : "boolean"
+          },
+          "error" : {
             "type" : "string"
+          },
+          "onFieldChanged" : {
+            "type" : "object"
           }
         }
       }
