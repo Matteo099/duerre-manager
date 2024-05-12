@@ -61,8 +61,6 @@ public class Asset {
                 downloadedSize += bytesRead;
                 double progress = (double) downloadedSize / fileSize;
                 updateStatus.setProgress(progress);
-                if(progress >= 0.2) 
-                    throw new IOException("Some error");
             }
             logger.info("Download completed.");
         } finally {

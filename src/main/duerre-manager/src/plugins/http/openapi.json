@@ -2,7 +2,7 @@
   "openapi" : "3.0.3",
   "info" : {
     "title" : "duerre-manager API",
-    "version" : "1.0.0"
+    "version" : "1.1.0"
   },
   "servers" : [ {
     "url" : "http://localhost:8080",
@@ -376,7 +376,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "boolean"
+                  "$ref" : "#/components/schemas/UpdateAvailable"
                 }
               }
             }
@@ -824,6 +824,17 @@
           }
         }
       },
+      "UpdateAvailable" : {
+        "type" : "object",
+        "properties" : {
+          "available" : {
+            "type" : "boolean"
+          },
+          "version" : {
+            "type" : "string"
+          }
+        }
+      },
       "UpdatePhase" : {
         "enum" : [ "UNSET", "STARTING", "DOWNLOADING", "INSTALLING" ],
         "type" : "string"
@@ -843,9 +854,6 @@
           },
           "error" : {
             "type" : "string"
-          },
-          "onFieldChanged" : {
-            "type" : "object"
           }
         }
       }

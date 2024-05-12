@@ -1,5 +1,6 @@
 package com.github.matteo099.updater;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,13 +39,9 @@ public class UpdaterService {
 
     private String os = System.getProperty("os.name");
     private Boolean isWindows = os.toLowerCase().contains("windows");
-    private boolean debug = true;
 
     @Getter
     private final UpdateStatus updateStatus = new UpdateStatus(this::pushStatus);
-    // private volatile boolean updateInProgress = false;
-    // private Exception updateError;
-    // private UpdatePhase updatePhase;
 
     @Getter
     private SubmissionPublisher<UpdateStatus> flowPublisher = new SubmissionPublisher<>();
@@ -64,7 +61,7 @@ public class UpdaterService {
         Release latestRelease = gitHubService.getLatestRelease(repoOwner, repoName);
         String latestVersion = latestRelease.getTag_name().replace("v", "");
 
-        if (!latestVersion.equals(version) || debug) {
+        if (!latestVersion.equals(version)) {
             updateStatus.setUpdating(true);
             updateStatus.setError(null);
             updateStatus.setPhase(UpdatePhase.STARTING);
@@ -83,8 +80,8 @@ public class UpdaterService {
                 downloadAndSaveToTemp(latestRelease);
             }
             updateStatus.setPhase(UpdatePhase.INSTALLING);
-            // startTempApplication(latestVersion);
-            // forceStopApplication(1500L);
+            startTempApplication(latestVersion);
+            forceStopApplication(1500L);
             updateStatus.setUpdating(false);
             updateStatus.setError(null);
         } catch (Exception e) {
@@ -92,11 +89,11 @@ public class UpdaterService {
         }
     }
 
-    public boolean updateAvailable() {
+    public UpdateAvailable updateAvailable() {
         Release latestRelease = gitHubService.getLatestRelease(repoOwner, repoName);
         String latestVersion = latestRelease.getTag_name().replace("v", "");
 
-        return !latestVersion.equals(version);
+        return UpdateAvailable.builder().available(!latestVersion.equals(version)).version(latestVersion).build();
     }
 
     private void downloadAndSaveToTemp(Release release) throws Exception {
@@ -126,26 +123,27 @@ public class UpdaterService {
 
     private void startTempApplication(String version) throws IOException, InterruptedException {
         if (isWindows) {
-            Path executablePath = Paths.get("./tmp/duerre-manager-" + version + "-runner.exe");
-            executeCommand(executablePath.toString());
+            executeCommand("duerre-manager-" + version + "-runner.exe", Paths.get("tmp"));
         } else
-            executeCommand("java -jar ./tmp/quarkus-app.jar");
+            executeCommand("java -jar /quarkus-app.jar", Paths.get("tmp"));
     }
 
-    private void executeCommand(String command) throws IOException, InterruptedException {
+    private void executeCommand(String command, Path pwd) throws IOException, InterruptedException {
         try {
+            logger.info("Executing command: " + command);
             // Define the command to launch a new process
             ProcessBuilder processBuilder = new ProcessBuilder(command);
 
             // Set the working directory if needed
-            // processBuilder.directory(new File("path/to/working/directory"));
+            if (pwd != null)
+                processBuilder.directory(new File(pwd.toString()));
 
             // Start the process
             Process process = processBuilder.start();
-            System.out.println("Process started with pid: " + process.pid());
+            logger.info("Process started with pid: " + process.pid());
 
             // Print a message to indicate that the process has started
-            System.out.println("Independent process started successfully.");
+            logger.info("Independent process started successfully.");
         } catch (IOException e) {
             e.printStackTrace();
         }

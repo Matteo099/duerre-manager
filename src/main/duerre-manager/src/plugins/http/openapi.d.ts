@@ -136,15 +136,16 @@ declare namespace Components {
              */
             Date /* date */;
         }
+        export interface UpdateAvailable {
+            available?: boolean;
+            version?: string;
+        }
         export type UpdatePhase = "UNSET" | "STARTING" | "DOWNLOADING" | "INSTALLING";
         export interface UpdateStatus {
             phase?: UpdatePhase;
             progress?: number; // double
             updating?: boolean;
             error?: string;
-            onFieldChanged?: {
-                [key: string]: any;
-            };
         }
     }
 }
@@ -157,7 +158,7 @@ declare namespace Paths {
     }
     namespace CheckForUpdates {
         namespace Responses {
-            export type $200 = boolean;
+            export type $200 = Components.Schemas.UpdateAvailable;
             export type $500 = Components.Schemas.ErrorWrapper;
         }
     }

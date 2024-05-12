@@ -1,6 +1,7 @@
 package com.github.matteo099.updater;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
+import jakarta.json.bind.annotation.JsonbTransient;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ public class UpdateStatus {
     private Boolean updating = false;
     private String error;
 
+    @JsonbTransient
     private final Runnable onFieldChanged;
 
     public void setError(String error) {

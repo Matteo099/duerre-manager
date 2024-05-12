@@ -2,7 +2,7 @@
 openapi: 3.0.3
 info:
   title: duerre-manager API
-  version: 1.0.0
+  version: 1.1.0
 servers:
 - url: http://localhost:8080
   description: Auto generated value
@@ -251,7 +251,7 @@ paths:
           content:
             application/json:
               schema:
-                type: boolean
+                $ref: '#/components/schemas/UpdateAvailable'
         "500":
           description: Unable to check for updates
           content:
@@ -559,6 +559,13 @@ components:
           type: integer
         date:
           $ref: '#/components/schemas/Date'
+    UpdateAvailable:
+      type: object
+      properties:
+        available:
+          type: boolean
+        version:
+          type: string
     UpdatePhase:
       enum:
       - UNSET
@@ -578,5 +585,3 @@ components:
           type: boolean
         error:
           type: string
-        onFieldChanged:
-          type: object

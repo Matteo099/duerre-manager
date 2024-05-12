@@ -5,7 +5,7 @@
         <template v-slot:prepend>
           <v-img contain :src="appLogo" height="45" width="45"></v-img>
         </template>
-        <v-list-item-title class="text-h6 ml-3">Andromeda</v-list-item-title>
+        <v-list-item-title class="text-h6 ml-3">Andromeda LOCALE</v-list-item-title>
         <v-list-item-subtitle class="ml-3 pb-1">Duerre Manager</v-list-item-subtitle>
       </v-list-item>
 
@@ -52,7 +52,7 @@
 
       <v-tooltip v-if="updateAvailable" location="bottom">
         <template v-slot:activator="{ props }">
-          <v-btn v-bind="props" @click="dialog=true" class="mr-2 text-none" icon>
+          <v-btn v-bind="props" @click="dialog = true" class="mr-2 text-none" icon>
             <v-badge color="warning" content="!">
               <v-icon>mdi-bell-outline</v-icon>
             </v-badge>
@@ -98,7 +98,7 @@
   </v-app>
 
   <div class="text-center pa-4">
-    <UpdateApp :new-app-version="newAppVersion" v-model="dialog"/>
+    <UpdateApp :new-app-version="newAppVersion" v-model="dialog" />
   </div>
 </template>
 
@@ -108,6 +108,7 @@ import { useTheme } from 'vuetify'
 import { useSettingsStore } from './stores/settings'
 import axios from 'axios';
 import UpdateApp from './components/UpdateApp.vue';
+import { useHttp } from './plugins/http';
 
 const settingsStore = useSettingsStore()
 const theme = useTheme()
@@ -119,7 +120,8 @@ const userRoles = ref(['ADMIN'])
 const appVersion = import.meta.env.VITE_APP_VERSION
 const updateAvailable = ref(false);
 const dialog = ref(false);
-let newAppVersion = appVersion;
+const http = useHttp();
+const newAppVersion = ref(appVersion);
 
 function toggleTheme() {
   settingsStore.toggleDarkMode()
@@ -128,21 +130,13 @@ function toggleTheme() {
 }
 
 async function checkForUpdates() {
-  const repoOwner = "Matteo099"
-  const repoName = "duerre-manager"
-  const latestReleaseUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/releases/latest`
 
-  try {
-    const res = await axios.get(latestReleaseUrl);
-    if (res?.status == 200) {
-      // Handle the response here
-      const data = res.data;
-      newAppVersion = data.tag_name.replace("v", "") + "v";
-      updateAvailable.value = newAppVersion != appVersion;
-    }
-  } catch (error) {
-    // Handle errors
-    console.error('Error fetching latest commit:', error);
+  const client = await http.client;
+  const res = await client.checkForUpdates();
+
+  if (res?.status == 200) {
+    updateAvailable.value = res.data.available ?? false;
+    newAppVersion.value = res.data.version;
   }
 }
 

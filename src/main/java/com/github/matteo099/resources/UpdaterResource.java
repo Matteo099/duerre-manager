@@ -8,6 +8,7 @@ import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestStreamElementType;
 
 import com.github.matteo099.model.wrappers.ErrorWrapper;
+import com.github.matteo099.updater.UpdateAvailable;
 import com.github.matteo099.updater.UpdateStatus;
 import com.github.matteo099.updater.UpdaterService;
 
@@ -57,7 +58,7 @@ public class UpdaterResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/check-update")
     @APIResponses({
-            @APIResponse(responseCode = "200", description = "Check if update is available", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Boolean.class))),
+            @APIResponse(responseCode = "200", description = "Check if update is available", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UpdateAvailable.class))),
             @APIResponse(responseCode = "500", description = "Unable to check for updates", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorWrapper.class)))
     })
     public Response checkForUpdates() {
