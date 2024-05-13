@@ -18,7 +18,15 @@
           </template>
           <v-list-item-title>Home</v-list-item-title>
         </v-list-item>
-        <v-list-item v-if="hasRole(Role.HANDLE_DIE)" to="/dashboard" color="lime-darken-4">
+
+        <v-list-item v-if="hasRole(Role.HANDLE_ORDER)" to="/order-dashboard" color="lime-darken-4">
+          <template v-slot:prepend>
+            <v-icon icon="mdi-clipboard-text"></v-icon>
+          </template>
+          <v-list-item-title>Ordini</v-list-item-title>
+        </v-list-item>
+
+        <v-list-item v-if="hasRole(Role.HANDLE_DIE)" to="/die-dashboard" color="lime-darken-4">
           <template v-slot:prepend>
             <v-icon icon="mdi-file-tree"></v-icon>
           </template>
