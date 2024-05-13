@@ -1,6 +1,5 @@
 package com.github.matteo099.updater;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,6 +11,7 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.logging.Logger;
 
 import com.github.matteo099.utils.FileUtils;
+import com.github.matteo099.utils.ProcessUtils;
 
 import io.smallrye.mutiny.Multi;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -37,13 +37,9 @@ public class UpdaterService {
     @Inject
     Logger logger;
 
-    private String os = System.getProperty("os.name");
-    private Boolean isWindows = os.toLowerCase().contains("windows");
-
     @Getter
     private final UpdateStatus updateStatus = new UpdateStatus(this::pushStatus);
 
-    @Getter
     private SubmissionPublisher<UpdateStatus> flowPublisher = new SubmissionPublisher<>();
 
     /**
@@ -81,9 +77,9 @@ public class UpdaterService {
             }
             updateStatus.setPhase(UpdatePhase.INSTALLING);
             startTempApplication(latestVersion);
-            forceStopApplication(1500L);
             updateStatus.setUpdating(false);
             updateStatus.setError(null);
+            forceStopApplication(100L);
         } catch (Exception e) {
             updateStatus.setError(e.getMessage());
         }
@@ -97,11 +93,11 @@ public class UpdaterService {
     }
 
     private void downloadAndSaveToTemp(Release release) throws Exception {
-        Path tmpPath = Paths.get("./tmp");
+        Path tmpPath = Paths.get(Updater.UPDATE_DIRECTORY);
         FileUtils.deleteDirectory(tmpPath);
         Files.createDirectory(tmpPath);
 
-        if (isWindows) {
+        if (ProcessUtils.isWindows()) {
             // download exe
             var optExe = release.getAssets().stream()
                     .filter(a -> a.getContent_type().equals("application/x-msdownload")).findFirst();
@@ -122,31 +118,11 @@ public class UpdaterService {
     }
 
     private void startTempApplication(String version) throws IOException, InterruptedException {
-        if (isWindows) {
-            executeCommand("duerre-manager-" + version + "-runner.exe", Paths.get("tmp"));
-        } else
-            executeCommand("java -jar /quarkus-app.jar", Paths.get("tmp"));
-    }
-
-    private void executeCommand(String command, Path pwd) throws IOException, InterruptedException {
-        try {
-            logger.info("Executing command: " + command);
-            // Define the command to launch a new process
-            ProcessBuilder processBuilder = new ProcessBuilder(command);
-
-            // Set the working directory if needed
-            if (pwd != null)
-                processBuilder.directory(new File(pwd.toString()));
-
-            // Start the process
-            Process process = processBuilder.start();
-            logger.info("Process started with pid: " + process.pid());
-
-            // Print a message to indicate that the process has started
-            logger.info("Independent process started successfully.");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        if (ProcessUtils.isWindows())
+            ProcessUtils.executeCommand(FileUtils.buildFileName(version, "exe"), Paths.get(Updater.UPDATE_DIRECTORY));
+        else
+            ProcessUtils.executeCommand("java -jar " + FileUtils.buildFileName(version, "jar"),
+                    Paths.get(Updater.UPDATE_DIRECTORY));
     }
 
     public void pushStatus() {

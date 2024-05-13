@@ -6,9 +6,9 @@ import java.io.PrintWriter;
 import java.util.LinkedList;
 import java.util.List;
 
-public class LoggerUtil {
+public class LoggerUtils {
 
-    public static LoggerUtil instance = new LoggerUtil();
+    public static LoggerUtils instance = new LoggerUtils();
 
     // private Logger logger = Logger.getLogger(getClass());
 
@@ -18,6 +18,14 @@ public class LoggerUtil {
         // logger.info(message);
         System.out.println(message);
         messages.add(message);
+        save();
+    }
+
+    public void exception(Exception exception) {
+        exception.printStackTrace();
+        messages.add(exception.toString() + " - " + exception.getMessage());
+        for (StackTraceElement st : exception.getStackTrace())
+            messages.add("\tat " + st);
         save();
     }
 

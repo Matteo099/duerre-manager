@@ -24,4 +24,8 @@ public class FileUtils {
                 }
             });
     }
+
+    public static String buildFileName(String version, String extension) {
+        return "duerre-manager-" + version + "-runner." + extension;
+    }
 }
