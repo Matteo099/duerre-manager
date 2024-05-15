@@ -108,6 +108,7 @@ interface Order {
   quantity: number
   description?: string
   creationDate: string
+  expirationDate?: string
   completitionDate?: string
   cancelled: boolean
   status: 'TODO' | 'IN_PROGRESS' | 'DONE'
@@ -168,6 +169,10 @@ const orderMapper: { [key: string]: any } = {
   },
   completitionDate: {
     name: 'Data di Completamento',
+    process: (v: any) => v
+  },
+  expirationDate: {
+    name: 'Data di Scadenza',
     process: (v: any) => v
   },
   cancelled: {
