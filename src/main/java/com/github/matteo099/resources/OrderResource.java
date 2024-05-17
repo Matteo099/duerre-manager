@@ -2,6 +2,7 @@ package com.github.matteo099.resources;
 
 import java.util.NoSuchElementException;
 
+import org.bson.types.ObjectId;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -11,6 +12,7 @@ import org.jboss.logging.Logger;
 
 import com.github.matteo099.model.dao.OrderDao;
 import com.github.matteo099.model.entities.Order;
+import com.github.matteo099.model.entities.OrderStatus;
 import com.github.matteo099.model.wrappers.ErrorWrapper;
 import com.github.matteo099.model.wrappers.IdWrapper;
 import com.github.matteo099.model.wrappers.MessageWrapper;
@@ -73,16 +75,16 @@ public class OrderResource {
 
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/change-status-order")
+    @Path("/change-order-status/{id}/{status}")
     @APIResponses({
-            @APIResponse(responseCode = "200", description = "Order modified", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = IdWrapper.class))),
+            @APIResponse(responseCode = "200", description = "Order modified", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Order.class))),
             @APIResponse(responseCode = "500", description = "Unable to modify order", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorWrapper.class)))
     })
-    public Response changeStatusOrder(OrderDao order) {
+    public Response changeOrderStatus(String id, OrderStatus status) {
         try {
-            logger.info("editing order");
-            String id = orderService.editOrder(order);
-            return Response.ok().entity(IdWrapper.of(id)).build();
+            logger.info("changing order status id=" + id + " status=" + status);
+            var order = orderService.updateOrderStatus(id, status);
+            return Response.ok().entity(order).build();
         } catch (Exception e) {
             e.printStackTrace();
             return Response.serverError().entity(ErrorWrapper.of(e)).build();
@@ -119,7 +121,7 @@ public class OrderResource {
     public Response getOrder(String id) {
         try {
             logger.info("finding order with id " + id);
-            return Response.ok().entity(orderService.findOrder(id).orElseThrow()).build();
+            return Response.ok().entity(orderService.findOrder(new ObjectId(id)).orElseThrow()).build();
         } catch (NoSuchElementException e) {
             e.printStackTrace();
             return Response.status(404).entity(ErrorWrapper.of(e)).build();
@@ -139,7 +141,7 @@ public class OrderResource {
     public Response deleteOrder(String id) {
         try {
             logger.info("deleting order with id " + id);
-            return Response.ok().entity(MessageWrapper.of(orderService.deleteOrder(id))).build();
+            return Response.ok().entity(MessageWrapper.of(orderService.deleteOrder(new ObjectId(id)))).build();
         } catch (Exception e) {
             e.printStackTrace();
             return Response.serverError().entity(ErrorWrapper.of(e)).build();

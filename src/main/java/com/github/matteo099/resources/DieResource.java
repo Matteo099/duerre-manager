@@ -23,6 +23,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -107,8 +108,11 @@ public class DieResource {
     public Response getDie(String id) {
         try {
             logger.info("finding die with id " + id);
-            return Response.ok().entity(dieService.findDie(id).orElseThrow()).build();
-        } catch (NoSuchElementException e) {
+            return Response.ok()
+                    .entity(dieService.findDie(id)
+                            .orElseThrow(() -> new NotFoundException("Nessuno stampo trovato con codice " + id + "!")))
+                    .build();
+        } catch (NoSuchElementException | NotFoundException e) {
             e.printStackTrace();
             return Response.status(404).entity(ErrorWrapper.of(e)).build();
         } catch (Exception e) {
@@ -122,17 +126,21 @@ public class DieResource {
     @Path("/delete-die/{id}")
     @APIResponses({
             @APIResponse(responseCode = "200", description = "Delete die", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = MessageWrapper.class))),
-            //@APIResponse(responseCode = "404", description = "Die not found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorWrapper.class))),
+            // @APIResponse(responseCode = "404", description = "Die not found", content =
+            // @Content(mediaType = MediaType.APPLICATION_JSON, schema =
+            // @Schema(implementation = ErrorWrapper.class))),
             @APIResponse(responseCode = "500", description = "Unable to delete die", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorWrapper.class)))
     })
     public Response deleteDie(String id) {
         try {
             logger.info("deleting die with id " + id);
             return Response.ok().entity(MessageWrapper.of(dieService.deleteDie(id))).build();
-        } /*catch (NoSuchElementException e) {
-            e.printStackTrace();
-            return Response.status(404).entity(ErrorWrapper.of(e)).build();
-        }*/ catch (Exception e) {
+        } /*
+           * catch (NoSuchElementException e) {
+           * e.printStackTrace();
+           * return Response.status(404).entity(ErrorWrapper.of(e)).build();
+           * }
+           */ catch (Exception e) {
             e.printStackTrace();
             return Response.serverError().entity(ErrorWrapper.of(e)).build();
         }
@@ -156,7 +164,7 @@ public class DieResource {
             return Response.serverError().entity(ErrorWrapper.of(e)).build();
         }
     }
-    
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/searches")

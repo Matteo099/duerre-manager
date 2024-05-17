@@ -1,7 +1,7 @@
 package com.github.matteo099.model.entities;
 
 import java.time.LocalDateTime;
-import java.util.Date;
+import java.time.ZoneOffset;
 
 import com.github.matteo099.model.interfaces.IOrder;
 
@@ -27,11 +27,11 @@ public class Order extends PanacheMongoEntity implements IOrder<Customer> {
     private Long quantity;
     private String description;
     private LocalDateTime creationDate;
-    private Date expirationDate;
-    private Date completitionDate;
-    private Boolean cancelled;
+    private LocalDateTime expirationDate;
+    private LocalDateTime completitionDate;
+    private LocalDateTime startDate;
     private OrderStatus status;
-    private Long completitionTime;
+    private Long duration;
 
     public Order(IOrder<?> order, Customer customer) {
         this.customer = customer;
@@ -41,11 +41,18 @@ public class Order extends PanacheMongoEntity implements IOrder<Customer> {
         expirationDate = order.getExpirationDate();
         creationDate = LocalDateTime.now();
         status = OrderStatus.TODO;
-        cancelled = false;
     }
 
     @Override
-    public String getId() {
+    public String getOrderId() {
         return id.toString();
+    }
+
+    public void calculateCompletitionTime() {
+        if (startDate == null || completitionDate == null)
+            return;
+        var startTime = startDate.atZone(ZoneOffset.systemDefault()).toInstant().toEpochMilli();
+        var completitionTime = startDate.atZone(ZoneOffset.systemDefault()).toInstant().toEpochMilli();
+        duration = completitionTime - startTime;
     }
 }

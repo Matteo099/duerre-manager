@@ -22,12 +22,12 @@ export class GaussService {
             definition: import.meta.env.VITE_VUE_APP_OPENAPI_URL
         })
         const client = await api.init<DuerreManagerClient>();
-        
+
         // api.withServer({
         //     url: "", //import.meta.env.VITE_VUE_APP_REST_API_URL,
         //     description: 'Duerre Manager Backend'
         // })
-        
+
         //const client = await api.getClient<DuerreManagerClient>()
 
         // **** REQUEST
@@ -52,12 +52,13 @@ export class GaussService {
     private async handleResponseError(error: AxiosError) {
         console.error('axios response error', error)
         // console.log('axios response error.response?.status = ', error.response?.status)
+        const headers = error.config?.headers;
+        const skip = headers?.get("skip-not-found")
 
-
-        if (error.response?.status === 404) {
+        if (error.response?.status === 404 && !skip) {
             this.router?.push("/not-found");
-        }
-        else if (error.response?.status === 401 || error.response?.status === 403) {
+        } else
+        if (error.response?.status === 401 || error.response?.status === 403) {
             // const store = useAuthStore()
             // store.keycloak?.logout()
         } else {

@@ -32,6 +32,8 @@
       item-value="id"
       no-data-text="Nessun ordine disponibile!"
       show-expand
+      expand-on-click
+      hover
     >
       <!-- <template v-slot:top>
         <v-toolbar flat>
@@ -55,32 +57,79 @@
         </span>
       </template>
       <template v-slot:item.status="{ value, item }">
-        <v-icon v-if="item.cancelled" color="error">mdi-cancel</v-icon>
-        <v-icon v-else :color="statusMapper[value].color">{{ statusMapper[value].icon }}</v-icon>
+        <v-icon :color="statusMapper[value].color">{{ statusMapper[value].icon }}</v-icon>
       </template>
       <template v-slot:expanded-row="{ columns, item }">
         <tr>
           <td :colspan="columns.length">
-            <v-container fluid>
-              <v-card class="mx-auto" max-width="800">
-                <v-row class="my-2 mx-10 justify-space-between" v-for="(v, k) of item">
-                  <v-col cols="auto">
-                    <b>{{ orderMapper[k].name }}</b>
-                  </v-col>
-                  <v-col cols="auto">{{ orderMapper[k].process(v) }}</v-col>
-                </v-row>
-                <v-card-actions>
-                  <v-btn
-                    color="primary"
-                    text="Visualizza"
-                    variant="text"
-                    :to="`/order/${item.id}`"
-                  ></v-btn>
-                </v-card-actions>
-              </v-card>
-            </v-container>
+            <v-row class="my-10">
+              <v-col>
+                <v-card class="mx-auto" max-width="800">
+                  <v-row class="my-2 mx-10 justify-space-between" v-for="(v, k) of orderMapper">
+                    <v-col cols="auto" v-if="item[k] && !v.hide">
+                      <b>{{ v.name }}</b>
+                    </v-col>
+                    <v-col cols="auto" v-if="item[k] && !v.hide">
+                      {{ v.process(item[k]) }}
+                    </v-col>
+                  </v-row>
+                  <v-card-actions>
+                    <v-btn
+                      v-if="item.status == 'TODO' || item.status == 'CANCELLED'"
+                      @click="startOrder(item.orderId)"
+                      class="ma-2"
+                      color="primary"
+                      text="Avvia"
+                      variant="text"
+                    ></v-btn>
+                    <v-btn
+                      v-if="item.status == 'IN_PROGRESS'"
+                      @click="completeOrder(item.orderId)"
+                      class="ma-2"
+                      color="success"
+                      text="Completa"
+                      variant="text"
+                    ></v-btn>
+                    <v-btn
+                      v-if="item.status == 'IN_PROGRESS'"
+                      @click="cancelOrder(item.orderId)"
+                      class="ma-2"
+                      color="error"
+                      text="Annulla"
+                      variant="text"
+                    ></v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-col>
+              <v-col v-if="item.dieName">
+                <AsyncDieCard :id="item.dieName" />
+              </v-col>
+            </v-row>
           </td>
         </tr>
+      </template>
+
+      <template v-slot:item.actions="{ item }">
+        <v-icon class="me-2" size="small" @click="editOrder(item.orderId)"> mdi-pencil </v-icon>
+        <v-dialog v-model="dialog" max-width="400" persistent>
+          <template v-slot:activator="{ props: activatorProps }">
+            <v-icon class="me-2" size="small" v-bind="activatorProps"> mdi-delete </v-icon>
+          </template>
+
+          <v-card
+            prepend-icon="mdi-trash-can-outline"
+            :text="`Sei sicuro di voler eliminare l'ordine ${item.orderId}? Una volta eliminato non sarà possibile recuperarlo!`"
+            title="Eliminare ordine?"
+          >
+            <template v-slot:actions>
+              <v-spacer></v-spacer>
+
+              <v-btn @click="dialog = false"> Annulla </v-btn>
+
+              <v-btn @click="deleteOrder(item.orderId)"> Elimina </v-btn>
+            </template>
+          </v-card>
+        </v-dialog>
       </template>
     </v-data-table>
 
@@ -99,34 +148,26 @@
 </template>
 
 <script setup lang="ts">
+import AsyncDieCard from '@/components/AsyncDieCard.vue'
+import { useHttp } from '@/plugins/http'
+import Client from '@/plugins/http/openapi'
 import { onMounted, ref } from 'vue'
 
-interface Order {
-  id: string | number
-  name: string
-  customer: string
-  quantity: number
-  description?: string
-  creationDate: string
-  expirationDate?: string
-  completitionDate?: string
-  cancelled: boolean
-  status: 'TODO' | 'IN_PROGRESS' | 'DONE'
-  completitionTime?: number
-}
-
-const orders = ref<Order[]>([])
+const http = useHttp()
+const orders = ref<Client.Components.Schemas.Order[]>([])
 const page = ref(1)
 const total = ref(0)
 const itemsPerPage = 12
 const loading = ref(false)
+const dialog = ref(false)
 const expanded = ref<any>([])
 const headers = [
-  { title: 'Articolo', key: 'name' },
-  { title: 'Cliente', key: 'customer' },
+  { title: 'Articolo', key: 'dieName' },
+  { title: 'Cliente', key: 'customer.name' },
   { title: 'Quantità (m)', key: 'quantity' },
   { title: 'Descrizione', key: 'description' },
-  { title: 'Stato', key: 'status' }
+  { title: 'Stato', key: 'status' },
+  { title: 'Actions', key: 'actions', sortable: false },
 ]
 const statusMapper: { [key: string]: any } = {
   TODO: {
@@ -140,20 +181,31 @@ const statusMapper: { [key: string]: any } = {
   DONE: {
     icon: 'mdi-check-decagram',
     color: 'success'
+  },
+  CANCELLED: {
+    icon: 'mdi-cancel',
+    color: 'error'
   }
 }
-const orderMapper: { [key: string]: any } = {
+type OrderKeys = keyof Client.Components.Schemas.Order
+
+const orderMapper: { [key in OrderKeys]: any } = {
   id: {
+    name: 'Codice Ordine',
+    process: (v: any) => v,
+    hide: true
+  },
+  orderId: {
     name: 'Codice Ordine',
     process: (v: any) => v
   },
-  name: {
+  dieName: {
     name: 'Articolo',
     process: (v: any) => v
   },
   customer: {
     name: 'Cliente',
-    process: (v: any) => v
+    process: (v: any) => v.name
   },
   quantity: {
     name: 'Quantità',
@@ -167,6 +219,10 @@ const orderMapper: { [key: string]: any } = {
     name: 'Data di Creazione',
     process: (v: any) => v
   },
+  startDate: {
+    name: 'Data di Inizio',
+    process: (v: any) => v
+  },
   completitionDate: {
     name: 'Data di Completamento',
     process: (v: any) => v
@@ -175,17 +231,20 @@ const orderMapper: { [key: string]: any } = {
     name: 'Data di Scadenza',
     process: (v: any) => v
   },
-  cancelled: {
-    name: 'Annullato',
-    process: (v: any) => (v ? 'Si' : 'No')
-  },
   status: {
     name: 'Stato di Avanzamento',
-    process: (v: any) => (v == 'TODO' ? 'Da fare' : v == 'IN_PROGRESS' ? 'In Corso' : 'Completato')
+    process: (v: any) =>
+      v == 'TODO'
+        ? 'Da fare'
+        : v == 'IN_PROGRESS'
+          ? 'In Corso'
+          : v == 'DONE'
+            ? 'Completato'
+            : 'Annullato'
   },
-  completitionTime: {
+  duration: {
     name: 'Tempo Richiesto',
-    process: (v: any) => v + ' minuti'
+    process: (s: any) => `${s / 3600}:${(s % 3600) / 60}:${s % 60}`
   }
 }
 
@@ -197,54 +256,47 @@ function goToPage(page: number) {
 }
 
 async function loadOrders() {
-  orders.value = [
-    {
-      id: 1,
-      name: '2',
-      customer: 'C1',
-      quantity: 100,
-      cancelled: false,
-      creationDate: '',
-      status: 'IN_PROGRESS'
-    },
-    {
-      id: 2,
-      name: '3',
-      customer: 'ASB',
-      quantity: 1345,
-      description: 'some description about color, type, stitching and so on',
-      creationDate: '',
-      completitionDate: '',
-      cancelled: false,
-      status: 'TODO'
-    },
-    {
-      id: 3,
-      name: '4',
-      customer: 'ASB',
-      quantity: 1345,
-      description: 'some description about color, type, stitching and so on',
-      creationDate: '',
-      completitionDate: '',
-      cancelled: false,
-      status: 'DONE',
-      completitionTime: 129
-    },
-    {
-      id: 4,
-      name: '3',
-      customer: 'ASB',
-      quantity: 1345,
-      description: 'some description about color, type, stitching and so on',
-      creationDate: '',
-      completitionDate: '',
-      cancelled: true,
-      status: 'TODO'
-    }
-  ]
+  const client = await http.client
+  const res = await client.listOrders()
+
+  if (res?.status == 200) {
+    console.log(res.data)
+    orders.value = res.data
+  }
+}
+
+function startOrder(id?: string) {
+  updateOrderStatus(id, 'IN_PROGRESS')
+}
+function completeOrder(id?: string) {
+  updateOrderStatus(id, 'DONE')
+}
+function cancelOrder(id?: string) {
+  updateOrderStatus(id, 'CANCELLED')
+}
+
+async function updateOrderStatus(
+  id: string | undefined,
+  status: Client.Components.Schemas.OrderStatus
+) {
+  if (id === undefined) return
+
+  const client = await http.client
+  const res = await client.changeOrderStatus({ id, status })
+
+  if (res?.status == 200) {
+    const index = orders.value.findIndex((o) => o.id == id)
+    if (index !== -1) orders.value[index] = res.data
+  }
 }
 
 function onSubmit() {}
+
+function editOrder(id?: string) {}
+
+function deleteOrder(id?: string) {
+  dialog.value = false
+}
 
 onMounted(() => loadOrders())
 </script>

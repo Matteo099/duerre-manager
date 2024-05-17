@@ -1,12 +1,12 @@
 package com.github.matteo099.model.interfaces;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public interface IOrder<C extends ICustomer> {
-    String getId();
+    String getOrderId();
     String getDieName();
     C getCustomer();
     Long getQuantity();
     String getDescription();
-    Date getExpirationDate();
+    LocalDateTime getExpirationDate();
 }

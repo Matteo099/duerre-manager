@@ -1,5 +1,5 @@
 package com.github.matteo099.model.entities;
 
 public enum OrderStatus {
-    TODO, IN_PROGRESS, DONE
+    TODO, IN_PROGRESS, DONE, CANCELLED
 }

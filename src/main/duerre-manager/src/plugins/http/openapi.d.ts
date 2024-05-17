@@ -118,6 +118,11 @@ declare namespace Components {
         }
         /**
          * example:
+         * 2022-03-10T16:15:50Z
+         */
+        export type Instant = string; // date-time
+        /**
+         * example:
          * 2022-03-10T12:15:50
          */
         export type LocalDateTime = string; // date-time
@@ -136,6 +141,50 @@ declare namespace Components {
              */
             Date /* date */;
         }
+        export interface Order {
+            id?: ObjectId;
+            dieName?: string;
+            customer?: Customer;
+            quantity?: number; // int64
+            description?: string;
+            creationDate?: /**
+             * example:
+             * 2022-03-10T12:15:50
+             */
+            LocalDateTime /* date-time */;
+            expirationDate?: /**
+             * example:
+             * 2022-03-10T12:15:50
+             */
+            LocalDateTime /* date-time */;
+            completitionDate?: /**
+             * example:
+             * 2022-03-10T12:15:50
+             */
+            LocalDateTime /* date-time */;
+            startDate?: /**
+             * example:
+             * 2022-03-10T12:15:50
+             */
+            LocalDateTime /* date-time */;
+            status?: OrderStatus;
+            duration?: number; // int64
+            orderId?: string;
+        }
+        export interface OrderDao {
+            dieName?: string;
+            customer?: string;
+            quantity?: number; // int64
+            description?: string;
+            expirationDate?: /**
+             * example:
+             * 2022-03-10T16:15:50Z
+             */
+            Instant /* date-time */;
+            status?: OrderStatus;
+            orderId?: string;
+        }
+        export type OrderStatus = "TODO" | "IN_PROGRESS" | "DONE" | "CANCELLED";
         export interface UpdateAvailable {
             available?: boolean;
             version?: string;
@@ -156,6 +205,20 @@ declare namespace Paths {
             }
         }
     }
+    namespace ChangeOrderStatus {
+        namespace Parameters {
+            export type Id = string;
+            export type Status = Components.Schemas.OrderStatus;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+            status: Parameters.Status;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Order;
+            export type $500 = Components.Schemas.ErrorWrapper;
+        }
+    }
     namespace CheckForUpdates {
         namespace Responses {
             export type $200 = Components.Schemas.UpdateAvailable;
@@ -169,7 +232,26 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorWrapper;
         }
     }
+    namespace CreateOrder {
+        export type RequestBody = Components.Schemas.OrderDao;
+        namespace Responses {
+            export type $200 = Components.Schemas.IdWrapper;
+            export type $500 = Components.Schemas.ErrorWrapper;
+        }
+    }
     namespace DeleteDie {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.MessageWrapper;
+            export type $500 = Components.Schemas.ErrorWrapper;
+        }
+    }
+    namespace DeleteOrder {
         namespace Parameters {
             export type Id = string;
         }
@@ -200,6 +282,13 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorWrapper;
         }
     }
+    namespace EditOrder {
+        export type RequestBody = Components.Schemas.OrderDao;
+        namespace Responses {
+            export type $200 = Components.Schemas.IdWrapper;
+            export type $500 = Components.Schemas.ErrorWrapper;
+        }
+    }
     namespace GetDie {
         namespace Parameters {
             export type Id = string;
@@ -209,6 +298,19 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.Die;
+            export type $404 = Components.Schemas.ErrorWrapper;
+            export type $500 = Components.Schemas.ErrorWrapper;
+        }
+    }
+    namespace GetOrder {
+        namespace Parameters {
+            export type Id = string;
+        }
+        export interface PathParameters {
+            id: Parameters.Id;
+        }
+        namespace Responses {
+            export type $200 = Components.Schemas.Order;
             export type $404 = Components.Schemas.ErrorWrapper;
             export type $500 = Components.Schemas.ErrorWrapper;
         }
@@ -234,6 +336,12 @@ declare namespace Paths {
     namespace ListDies {
         namespace Responses {
             export type $200 = Components.Schemas.Die[];
+            export type $500 = Components.Schemas.ErrorWrapper;
+        }
+    }
+    namespace ListOrders {
+        namespace Responses {
+            export type $200 = Components.Schemas.Order[];
             export type $500 = Components.Schemas.ErrorWrapper;
         }
     }
@@ -342,6 +450,54 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSearches.Responses.$200>
+  /**
+   * changeOrderStatus
+   */
+  'changeOrderStatus'(
+    parameters?: Parameters<Paths.ChangeOrderStatus.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ChangeOrderStatus.Responses.$200>
+  /**
+   * createOrder
+   */
+  'createOrder'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.CreateOrder.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.CreateOrder.Responses.$200>
+  /**
+   * deleteOrder
+   */
+  'deleteOrder'(
+    parameters?: Parameters<Paths.DeleteOrder.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.DeleteOrder.Responses.$200>
+  /**
+   * editOrder
+   */
+  'editOrder'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: Paths.EditOrder.RequestBody,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.EditOrder.Responses.$200>
+  /**
+   * listOrders
+   */
+  'listOrders'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.ListOrders.Responses.$200>
+  /**
+   * getOrder
+   */
+  'getOrder'(
+    parameters?: Parameters<Paths.GetOrder.PathParameters> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetOrder.Responses.$200>
   /**
    * ackUpdateError
    */
@@ -474,6 +630,66 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSearches.Responses.$200>
+  }
+  ['/api/v1/order-controller/change-order-status/{id}/{status}']: {
+    /**
+     * changeOrderStatus
+     */
+    'put'(
+      parameters?: Parameters<Paths.ChangeOrderStatus.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ChangeOrderStatus.Responses.$200>
+  }
+  ['/api/v1/order-controller/create-order']: {
+    /**
+     * createOrder
+     */
+    'post'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.CreateOrder.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.CreateOrder.Responses.$200>
+  }
+  ['/api/v1/order-controller/delete-order/{id}']: {
+    /**
+     * deleteOrder
+     */
+    'delete'(
+      parameters?: Parameters<Paths.DeleteOrder.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.DeleteOrder.Responses.$200>
+  }
+  ['/api/v1/order-controller/edit-order']: {
+    /**
+     * editOrder
+     */
+    'put'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: Paths.EditOrder.RequestBody,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.EditOrder.Responses.$200>
+  }
+  ['/api/v1/order-controller/list-orders']: {
+    /**
+     * listOrders
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.ListOrders.Responses.$200>
+  }
+  ['/api/v1/order-controller/order/{id}']: {
+    /**
+     * getOrder
+     */
+    'get'(
+      parameters?: Parameters<Paths.GetOrder.PathParameters> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetOrder.Responses.$200>
   }
   ['/api/v1/updater-controller/ack-error']: {
     /**

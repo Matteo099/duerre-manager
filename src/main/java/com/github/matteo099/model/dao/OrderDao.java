@@ -1,6 +1,8 @@
 package com.github.matteo099.model.dao;
 
-import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import com.github.matteo099.model.entities.OrderStatus;
 import com.github.matteo099.model.interfaces.ICustomer;
@@ -21,12 +23,8 @@ public class OrderDao implements IOrder<ICustomer> {
     public String customer;
     public Long quantity;
     public String description;
-    public Date creationDate;
-    public Date expirationDate;
-    public Date completitionDate;
-    public Boolean cancelled;
+    public Instant expirationDate;
     public OrderStatus status;
-    public Long completitionTime;
 
     @Override
     public ICustomer getCustomer() {
@@ -38,8 +36,14 @@ public class OrderDao implements IOrder<ICustomer> {
         };
     }
 
+    
     @Override
-    public String getId() {
+    public LocalDateTime getExpirationDate() {
+        return LocalDateTime.ofInstant(expirationDate, ZoneId.systemDefault());
+    }
+
+    @Override
+    public String getOrderId() {
         return null;
     }
 }
