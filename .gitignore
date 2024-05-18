@@ -43,4 +43,7 @@ nb-configuration.xml
 /.quarkus/cli/plugins/
 
 # Deploy Tool Folder
-/deploy/bundle/*
+deploy/bundle/*
+tmp/
+*.log
+*.log.*

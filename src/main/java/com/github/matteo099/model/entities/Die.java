@@ -49,5 +49,6 @@ public class Die extends PanacheMongoEntityBase implements IDie<DieData, Custome
         totalWidth = iDie.getTotalWidth();
         shoeWidth = iDie.getShoeWidth();
         crestWidth = iDie.getCrestWidth();
+        creationDate = LocalDateTime.now();
     }
 }

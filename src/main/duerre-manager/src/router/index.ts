@@ -9,10 +9,22 @@ const router = createRouter({
       name: 'home',
       component: HomeView
     },
+
     {
-      path: '/dashboard',
-      name: 'dashboard',
-      component: () => import('../views/DashboardView.vue')
+      path: '/order-dashboard',
+      name: 'orderDashboard',
+      component: () => import('../views/OrderDashboardView.vue')
+    },
+    {
+      path: '/create-order',
+      name: 'createOrder',
+      component: () => import('../views/CreateOrderView.vue')
+    },
+
+    {
+      path: '/die-dashboard',
+      name: 'dieDashboard',
+      component: () => import('../views/DieDashboardView.vue')
     },
     {
       path: '/create-die',
@@ -29,6 +41,7 @@ const router = createRouter({
       name: 'visualizeDie',
       component: () => import('../views/DieView.vue')
     },    
+
     {
       path: "/:pathMatch(.*)*",
       component: () => import('../views/NotFoundView.vue'),

@@ -4,12 +4,19 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.SubmissionPublisher;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.jboss.logging.Logger;
 
+import com.github.matteo099.utils.FileUtils;
+import com.github.matteo099.utils.ProcessUtils;
+
+import io.smallrye.mutiny.Multi;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import lombok.Getter;
 
 @ApplicationScoped
 public class UpdaterService {
@@ -18,14 +25,8 @@ public class UpdaterService {
     @RestClient
     GithubService gitHubService;
 
-    @ConfigProperty(name = "application.jar-directory.path")
-    String jarDirectoryPath;
-
-    @ConfigProperty(name = "application.nginx-directory.path")
-    String nginxHtmlDirectoryPath;
-
-    @ConfigProperty(name = "application.version.path")
-    String currentVersionFilePath;
+    @ConfigProperty(name = "quarkus.application.version", defaultValue = "1.0.0")
+    String version;
 
     @ConfigProperty(name = "github.repo.owner")
     String repoOwner;
@@ -33,109 +34,141 @@ public class UpdaterService {
     @ConfigProperty(name = "github.repo.name")
     String repoName;
 
-    @ConfigProperty(name = "services.duerre-manager.name")
-    String duerreManagerService;
+    @Inject
+    Logger logger;
 
-    @ConfigProperty(name = "services.nginx.name")
-    String nginxService;
+    @Getter
+    private final UpdateStatus updateStatus = new UpdateStatus(this::pushStatus);
 
-    public String update() throws Exception {
-        Release latestRelease = gitHubService.getLatestRelease(repoOwner, repoName);
-        String latestVersion = latestRelease.getTag_name();
+    private SubmissionPublisher<UpdateStatus> flowPublisher = new SubmissionPublisher<>();
 
-        if (!latestVersion.equals(this.getCurrentVersion())) {
-            stopServices();
-            downloadAndInstallRelease(latestRelease);
-            updateTextVersion(latestVersion);
-            startServices();
-            return "Updated to version " + latestVersion;
-        }
-
-        return "Already up to date";
-    }
-    
-    private void stopServices() throws IOException, InterruptedException {
-        executeCommand("sc stop " + duerreManagerService);
-        executeCommand("sc stop " + nginxService);
-    }
-
-    private void startServices() throws IOException, InterruptedException {
-        executeCommand("sc start " + nginxService);
-        executeCommand("sc start " + duerreManagerService);
-    }
-
-    private void executeCommand(String command) throws IOException, InterruptedException {
-        Process process = Runtime.getRuntime().exec(command);
-        process.waitFor();
-    }
-
-    private String getCurrentVersion() {
-        try {
-            return Files.readString(Paths.get(currentVersionFilePath));
-        } catch (IOException e) {
-            return "v0.0.0";
-        }
-    }
-
-    private void updateTextVersion(String latestVersion) {
-        try {
-            Files.writeString(Paths.get(currentVersionFilePath), latestVersion);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void downloadAndInstallRelease(Release release) throws Exception {
-        String tmpPath = "./tmp";
-        for (Asset asset : release.getAssets()) {
-            asset.download(tmpPath);
-            Path location = null;
-            if (asset.getName().startsWith("duerre-manager")) {
-                location = Paths.get(jarDirectoryPath);
-            } else if (asset.getName().startsWith("dist")) {
-                location = Paths.get(nginxHtmlDirectoryPath);
-            }
-
-            if (location != null) {
-                Files.deleteIfExists(location);
-                asset.unzip(location);
-            }
-        }
-    }
-
-    /*
-     * private void test() {
-     * // Move jar file to desired location
-     * Files.move(Paths.get(jarFileName), Paths.get("duerre_manager/" +
-     * jarFileName),
-     * StandardCopyOption.REPLACE_EXISTING);
+    /**
+     * download application
+     * save in a temp folder
+     * start the temp application
      * 
-     * // Move extracted website to nginx html folder
-     * Path htmlFolder = Paths.get("/usr/share/nginx/html");
-     * File[] files = htmlFolder.toFile().listFiles();
-     * if (files != null) {
-     * for (File file : files) {
-     * if (file.isDirectory()) {
-     * deleteDirectory(file);
-     * } else {
-     * Files.deleteIfExists(file.toPath());
-     * }
-     * }
-     * }
-     * }
-     * 
-     * private void deleteDirectory(File directory) {
-     * File[] files = directory.listFiles();
-     * if (files != null) {
-     * for (File file : files) {
-     * if (file.isDirectory()) {
-     * deleteDirectory(file);
-     * } else {
-     * file.delete();
-     * }
-     * }
-     * }
-     * directory.delete();
-     * }
+     * @param skipDownload for testing only
+     * @return
      */
+    public boolean update(boolean skipDownload) {
+        if (updateStatus.getUpdating())
+            return false;
+
+        Release latestRelease = gitHubService.getLatestRelease(repoOwner, repoName);
+        String latestVersion = latestRelease.getTag_name().replace("v", "");
+
+        if (!latestVersion.equals(version)) {
+            updateStatus.setUpdating(true);
+            updateStatus.setError(null);
+            updateStatus.setPhase(UpdatePhase.STARTING);
+            new Thread(() -> performUpdate(skipDownload, latestRelease, latestVersion)).start();
+        } else {
+            resetUpdate();
+        }
+
+        return true;
+    }
+
+    private void performUpdate(boolean skipDownload, Release latestRelease, String latestVersion) {
+        try {
+            if (!skipDownload) {
+                updateStatus.setPhase(UpdatePhase.DOWNLOADING);
+                downloadAndSaveToTemp(latestRelease);
+            }
+            updateStatus.setPhase(UpdatePhase.INSTALLING);
+            startTempApplication(latestVersion);
+            updateStatus.setUpdating(false);
+            updateStatus.setError(null);
+            forceStopApplication(100L);
+        } catch (Exception e) {
+            updateStatus.setError(e.getMessage());
+        }
+    }
+
+    public UpdateAvailable updateAvailable() {
+        Release latestRelease = gitHubService.getLatestRelease(repoOwner, repoName);
+        String latestVersion = latestRelease.getTag_name().replace("v", "");
+
+        return UpdateAvailable.builder().available(!latestVersion.equals(version)).version(latestVersion).build();
+    }
+
+    private void downloadAndSaveToTemp(Release release) throws Exception {
+        Path tmpPath = Paths.get(Updater.UPDATE_DIRECTORY);
+        FileUtils.deleteDirectory(tmpPath);
+        Files.createDirectory(tmpPath);
+
+        if (ProcessUtils.isWindows()) {
+            logger.info("Start downloading exe file...");
+            // download exe
+            var optExe = release.getAssets().stream()
+                    .filter(a -> a.getContent_type().equals("application/x-msdownload")).findFirst();
+            if (optExe.isPresent()) {
+                var exe = optExe.get();
+                exe.download(tmpPath, updateStatus);
+            } else {
+                logger.warn("Exe file not found for download...");
+                throw new Exception("No exe file found");
+            }
+        } else {
+            // download jar (zip)
+            logger.info("Start downloading jar file...");
+            var optZip = release.getAssets().stream()
+                    .filter(a -> a.getContent_type().equals("application/x-zip-compressed")).findFirst();
+            if (optZip.isPresent()) {
+                var zip = optZip.get();
+                zip.download(tmpPath, updateStatus);
+                zip.unzip(null);
+            } else {
+                logger.warn("Jar file not found for download...");
+                throw new Exception("No jar file found");
+            }
+        }
+    }
+
+    private void startTempApplication(String version) throws IOException, InterruptedException {
+        ProcessUtils.setInfoLogger(logger::info);
+        final var updateDir = Paths.get(Updater.UPDATE_DIRECTORY);
+        
+        if (ProcessUtils.isWindows()) {
+            final var tmpApp = FileUtils.buildFileName(version, "exe");
+            logger.info("Starting temp application = " + tmpApp);
+
+            ProcessUtils.executeCommand(updateDir.resolve(tmpApp).toAbsolutePath().toString(), updateDir);
+        } else {
+            final var tmpApp = FileUtils.buildFileName(version, "jar");
+            logger.info("Starting temp application = " + tmpApp);
+            ProcessUtils.executeCommand("java -jar " + updateDir.resolve(tmpApp).toAbsolutePath().toString(), updateDir);
+        }
+    }
+
+    public void pushStatus() {
+        flowPublisher.submit(updateStatus);
+        logger.debug(updateStatus);
+    }
+
+    public Multi<UpdateStatus> getStream() {
+        return Multi.createFrom().publisher(flowPublisher);
+    }
+
+    public void resetUpdate() {
+        updateStatus.setError(null);
+        updateStatus.setPhase(null);
+        updateStatus.setProgress(null);
+        updateStatus.setUpdating(false);
+    }
+
+    private void forceStopApplication(Long millis) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                logger.info("About to system exit.");
+                try {
+                    Thread.sleep(millis);
+                    System.exit(0);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
 }
