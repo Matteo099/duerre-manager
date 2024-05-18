@@ -24,6 +24,7 @@ public class Updater {
 
     public static final String UPDATE_DIRECTORY = "tmp";
     public static final String BACKUP_DIRECTORY = "backup";
+    public static final int QUARKUS_PORT = 8079;
 
     private static String fileName;
     private static boolean backupDone = false;
@@ -81,7 +82,7 @@ public class Updater {
         boolean quarkusRunning = false;
         ServerSocket serverSocket = null;
         try {
-            serverSocket = new ServerSocket(8080);
+            serverSocket = new ServerSocket(QUARKUS_PORT);
         } catch (IOException e) {
             quarkusRunning = true; // Port is already in use, Quarkus is running
         } finally {
@@ -146,16 +147,19 @@ public class Updater {
     }
 
     private static void moveFilesToBackup() throws IOException {
-        LoggerUtils.instance.info("Copying files to backup directory");
+        LoggerUtils.instance.info("Copying files to backup directory...");
         Path currentDirectory = Paths.get("").toAbsolutePath();
         Path mainDir = currentDirectory.getParent();
         Path backupDir = mainDir.resolve(BACKUP_DIRECTORY);
         Files.createDirectories(backupDir);
 
+        LoggerUtils.instance.info("Copying files to backup directory: currentDirectory=" + currentDirectory.toString()
+                + ", mainDir=" + mainDir.toString() + ", backupDir=" + backupDir.toString());
+
         Files.walkFileTree(mainDir, new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                if (dir.equals(mainDir) || dir.equals(backupDir) || dir.endsWith(UPDATE_DIRECTORY)) {
+                if (dir.equals(backupDir) || dir.endsWith(UPDATE_DIRECTORY)) {
                     return FileVisitResult.SKIP_SUBTREE;
                 }
                 return FileVisitResult.CONTINUE;
@@ -183,7 +187,7 @@ public class Updater {
     }
 
     private static void copyTempFileToMainDirectory() throws IOException {
-        LoggerUtils.instance.info("Comping temp file to parent directory");
+        LoggerUtils.instance.info("Comping temp file to parent directory...");
 
         Path currentDirectory = Paths.get("").toAbsolutePath();
         Path mainDir = currentDirectory.getParent();
@@ -212,10 +216,11 @@ public class Updater {
         if (fileName != null) {
             LoggerUtils.instance.info("Starting updated app: " + fileName);
             Path executablePath = Paths.get("").toAbsolutePath().getParent();
+            String app = executablePath.resolve(fileName).toAbsolutePath().toString();
             if (ProcessUtils.isWindows()) {
-                ProcessUtils.executeCommand(fileName, executablePath);
+                ProcessUtils.executeCommand(app, executablePath);
             } else {
-                ProcessUtils.executeCommand("java -jar " + fileName, executablePath);
+                ProcessUtils.executeCommand("java -jar " + app, executablePath);
             }
         } else {
             LoggerUtils.instance.info("Unable to start app becuse the fileName is null");
@@ -228,19 +233,22 @@ public class Updater {
     }
 
     private static void startOldApp() throws Exception {
-        LoggerUtils.instance.info("Starting backup (older) app");
-        Path executablePath = Paths.get("").toAbsolutePath().getParent();
+        LoggerUtils.instance.info("Starting backup (older) app...");
         String backupFileName = getBackupFileName();
+        Path executablePath = Paths.get("").toAbsolutePath().getParent();
+        String app = executablePath.resolve(backupFileName).toAbsolutePath().toString();
+
+        LoggerUtils.instance.info("Starting backup (older) app at " + app);
 
         if (ProcessUtils.isWindows()) {
-            ProcessUtils.executeCommand(backupFileName, executablePath);
+            ProcessUtils.executeCommand(app, executablePath);
         } else {
-            ProcessUtils.executeCommand("java -jar " + backupFileName, executablePath);
+            ProcessUtils.executeCommand("java -jar " + app, executablePath);
         }
     }
 
     private static void restoreBackup() throws IOException {
-        LoggerUtils.instance.info("Restoring backup");
+        LoggerUtils.instance.info("Restoring backup...");
 
         Path currentDirectory = Paths.get("").toAbsolutePath();
         Path mainDir = currentDirectory.getParent();
@@ -249,7 +257,7 @@ public class Updater {
         Files.walkFileTree(mainDir, new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                if (dir.equals(mainDir) || dir.equals(backupDir) || dir.endsWith(UPDATE_DIRECTORY)) {
+                if (dir.equals(backupDir) || dir.endsWith(UPDATE_DIRECTORY)) {
                     return FileVisitResult.SKIP_SUBTREE;
                 }
                 return FileVisitResult.CONTINUE;
@@ -316,7 +324,7 @@ public class Updater {
             LoggerUtils.instance.info("Removing update folder");
             FileUtils.deleteDirectory(tempDir);
         } catch (IOException e) {
-            e.printStackTrace();
+            LoggerUtils.instance.exception(e);
         }
     }
 }

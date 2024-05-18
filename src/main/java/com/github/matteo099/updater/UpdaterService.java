@@ -98,31 +98,47 @@ public class UpdaterService {
         Files.createDirectory(tmpPath);
 
         if (ProcessUtils.isWindows()) {
+            logger.info("Start downloading exe file...");
             // download exe
             var optExe = release.getAssets().stream()
                     .filter(a -> a.getContent_type().equals("application/x-msdownload")).findFirst();
             if (optExe.isPresent()) {
                 var exe = optExe.get();
                 exe.download(tmpPath, updateStatus);
+            } else {
+                logger.warn("Exe file not found for download...");
+                throw new Exception("No exe file found");
             }
         } else {
             // download jar (zip)
+            logger.info("Start downloading jar file...");
             var optZip = release.getAssets().stream()
                     .filter(a -> a.getContent_type().equals("application/x-zip-compressed")).findFirst();
             if (optZip.isPresent()) {
                 var zip = optZip.get();
                 zip.download(tmpPath, updateStatus);
                 zip.unzip(null);
+            } else {
+                logger.warn("Jar file not found for download...");
+                throw new Exception("No jar file found");
             }
         }
     }
 
     private void startTempApplication(String version) throws IOException, InterruptedException {
-        if (ProcessUtils.isWindows())
-            ProcessUtils.executeCommand(FileUtils.buildFileName(version, "exe"), Paths.get(Updater.UPDATE_DIRECTORY));
-        else
-            ProcessUtils.executeCommand("java -jar " + FileUtils.buildFileName(version, "jar"),
-                    Paths.get(Updater.UPDATE_DIRECTORY));
+        ProcessUtils.setInfoLogger(logger::info);
+        final var updateDir = Paths.get(Updater.UPDATE_DIRECTORY);
+        
+        if (ProcessUtils.isWindows()) {
+            final var tmpApp = FileUtils.buildFileName(version, "exe");
+            logger.info("Starting temp application = " + tmpApp);
+
+            ProcessUtils.executeCommand(updateDir.resolve(tmpApp).toAbsolutePath().toString(), updateDir);
+        } else {
+            final var tmpApp = FileUtils.buildFileName(version, "jar");
+            logger.info("Starting temp application = " + tmpApp);
+            ProcessUtils.executeCommand("java -jar " + updateDir.resolve(tmpApp).toAbsolutePath().toString(), updateDir);
+        }
     }
 
     public void pushStatus() {

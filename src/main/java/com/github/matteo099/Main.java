@@ -1,5 +1,7 @@
 package com.github.matteo099;
 
+import java.io.IOException;
+
 import com.github.matteo099.updater.Updater;
 import com.github.matteo099.utils.LoggerUtils;
 
@@ -10,16 +12,15 @@ import io.quarkus.runtime.annotations.QuarkusMain;
 @QuarkusMain
 public class Main {
 
-    public static void main(String... args) {
+    public static void main(String... args) throws IOException, InterruptedException {
         LoggerUtils.instance.info("Start application!");
-        LoggerUtils.instance.info("Working Directory = " +System.getProperty("user.dir"));
+        LoggerUtils.instance.info("Working Directory = " + System.getProperty("user.dir"));
 
         if (Updater.isTempApplication()) {
             LoggerUtils.instance.info("Temp application recognized!");
             Updater.start();
         } else {
-            // TODO: remove comment
-            // Updater.cleanDirectory();
+            Updater.cleanDirectory();
             Quarkus.run(MyApp.class, args);
         }
     }

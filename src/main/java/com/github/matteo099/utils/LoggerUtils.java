@@ -3,6 +3,8 @@ package com.github.matteo099.utils;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -10,12 +12,13 @@ public class LoggerUtils {
 
     public static LoggerUtils instance = new LoggerUtils();
 
-    // private Logger logger = Logger.getLogger(getClass());
-
     private List<String> messages = new LinkedList<>();
+    private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss.SSS");
 
     public void info(String message) {
-        // logger.info(message);
+        final var now = new Date();
+        message = "[ " + simpleDateFormat.format(now) + " ] [INFO] " + message;
+
         System.out.println(message);
         messages.add(message);
         save();
@@ -23,7 +26,10 @@ public class LoggerUtils {
 
     public void exception(Exception exception) {
         exception.printStackTrace();
-        messages.add(exception.toString() + " - " + exception.getMessage());
+
+        final var now = new Date();
+        var message = "[ " + simpleDateFormat.format(now) + " ] [INFO] " + exception.toString() + " - " + exception.getMessage();
+        messages.add(message);
         for (StackTraceElement st : exception.getStackTrace())
             messages.add("\tat " + st);
         save();
