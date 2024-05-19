@@ -38,44 +38,15 @@ To build the fat jar, follow these steps:
 ## Usage
 
 ### Linux
+An example could be found inside in the repository in the [linux deploy folder](https://github.com/Matteo099/duerre-manager/tree/main/deploy/linux). 
+
+**N.B.** the jar is a placeholder (0 byte)!
+
 To run the application on Linux, follow these steps:
 
-1. Download the `duerre-manager-x.x.x-runner.jar` from latest release
-2. Create a folder `duerre-manager` and inside create another folder `main`; move the .jar inside the folder `main` 
-3. Create a `run.sh` script inside the `duerre-manager` directory (this script lookup for the first jar inside a directory)
-``` sh
-#!/bin/sh
-
-# Directory to search for the JAR file
-SEARCH_DIR=$1
-
-# Check if a directory is provided
-if [ -z "$SEARCH_DIR" ]; then
-  echo "Usage: $0 <search_directory>"
-  exit 1
-fi
-
-# Find the first JAR file in the specified directory (excluding subdirectories)
-JAR_FILE=$(find "$SEARCH_DIR" -maxdepth 1 -name "*.jar" | head -n 1)
-
-# Check if a JAR file is found
-if [ -z "$JAR_FILE" ]; then
-  echo "No JAR file found in the directory: $SEARCH_DIR"
-  exit 1
-fi
-
-# Extract the directory from the JAR file path
-JAR_DIR=$(dirname "$JAR_FILE")
-
-# Change to the directory of the JAR file
-cd "$JAR_DIR" || exit
-
-# Start the JAR file
-echo "Starting JAR file: $JAR_FILE"
-java -jar "$(basename "$JAR_FILE")"
-```
-
-4. create a service (to start the application on server boot): `sudo nano /etc/systemd/system/duerre-manager.service`
+1. Download the `duerre-manager-runner.jar` from latest release
+2. Create a folder `duerre-manager` and move the .jar inside the folder
+3. Create a service (to start the application on server boot): `sudo nano /etc/systemd/system/duerre-manager.service` (update the path!)
 
 ``` sh
 [Unit]
@@ -86,8 +57,8 @@ Requires=mongod.service
 [Service]
 Type=simple
 WorkingDirectory=/home/server/duerre-manager
-ExecStart=/home/server/duerre-manager/run.sh ./main
-Restart=always
+ExecStart=/bin/java -jar /home/server/duerre-manager/duerre-manager-runner.jar
+Restart=no
 StandardOutput=syslog
 StandardError=syslog
 SyslogIdentifier=duerre-manager
@@ -102,71 +73,31 @@ WantedBy=multi-user.target
 
 
 ### Windows
-1. Download the `duerre-manager-x.x.x-runner.exe` from latest release
-2. Create a folder `duerre-manager` and inside create another folder `main`; move the .exe inside the folder `main` 
-3. Create a `run.cmd` script inside the `duerre-manager` directory (this script lookup for the first exe inside a directory)
+An example could be found inside in the repository in the [windows deploy folder](https://github.com/Matteo099/duerre-manager/tree/main/deploy/windows).
 
-``` bash
-@echo off
+**N.B.** the exe is a placeholder (0 byte)!
 
-REM Directory to search for the EXE file
-set SEARCH_DIR=%1
+1. Download the `duerre-manager-runner.exe` from latest release
 
-REM Check if a directory is provided
-if "%SEARCH_DIR%"=="" (
-    echo Usage: %0 ^<search_directory^>
-    exit /b 1
-)
+2. Create the folders `duerre-manager` and `main` and move the .exe inside the **main** folder
 
-REM Find the first EXE file in the specified directory (excluding subdirectories)
-for %%F in ("%SEARCH_DIR%\*.exe") do (
-    set "EXE_FILE=%%F"
-    goto :found
-)
+3. Download [nssm](https://nssm.cc/download) and move `nssm.exe` in the  `duerre-manager` directory
 
-:found
-REM Check if an EXE file is found
-if "%EXE_FILE%"=="" (
-    echo No EXE file found in the directory: %SEARCH_DIR%
-    exit /b 1
-)
+4. Create the Service with NSSM:
+    - Open a Command Prompt with administrative privileges.
+    - Run the following command to create the service using NSSM:
 
-REM Extract the directory from the EXE file path
-set "EXE_DIR=%~dpEXE_FILE%"
+    ``` shell
+    D:\Desktop\duerre-manager\nssm.exe install DuerreManager
+    ```
 
-REM Change to the directory of the EXE file
-cd /d "%EXE_DIR%" || exit /b 1
+5. Configure the Service 
+    - Application Path: Point to your `duerre-manager-runner.exe` file.
+    - Startup Directory: Set this to the directory containing your executable (e.g., `D:\Desktop\duerre-manager\main`).
+    - Exit Actions: set restart to Nothing (compatible srvany)
 
-REM Start the EXE file
-echo Starting EXE file: %EXE_FILE%
-"%EXE_FILE%"
-
-```
-
-4. create a service (to start the application on server boot): `sudo nano /etc/systemd/system/duerre-manager.service`
-
-``` sh
-[Unit]
-Description=Duerre Manager Service
-After=network.target mongod.service
-Requires=mongod.service
-
-[Service]
-Type=simple
-WorkingDirectory=/home/server/duerre-manager
-ExecStart=/home/server/duerre-manager/run.sh ./main
-Restart=always
-StandardOutput=syslog
-StandardError=syslog
-SyslogIdentifier=duerre-manager
-
-[Install]
-WantedBy=multi-user.target
-```
-
-5. start the service:
-    - `sudo systemctl daemon-reload`
-    - `sudo systemctl start duerre-manager.service`
+6. (Optional) Start the service:
+    - open services, find `DuerreManager` and start it.
 
 ## TODO
 - Dashboard with monitor about total orders, molds, timing...
