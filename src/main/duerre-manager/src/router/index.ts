@@ -20,6 +20,11 @@ const router = createRouter({
       name: 'createOrder',
       component: () => import('../views/CreateOrderView.vue')
     },
+    {
+      path: '/edit-order/:id',
+      name: 'editOrder',
+      component: () => import('../views/EditOrderView.vue')
+    },
 
     {
       path: '/die-dashboard',

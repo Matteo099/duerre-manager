@@ -110,10 +110,23 @@
       </template>
 
       <template v-slot:item.actions="{ item }">
-        <v-icon class="me-2" size="small" @click="editOrder(item.orderId)"> mdi-pencil </v-icon>
+        <v-btn
+          class="me-2"
+          size="small"
+          @click.stop
+          :to="'/edit-order/' + item.orderId"
+          variant="text"
+          icon="mdi-pencil"
+        ></v-btn>
         <v-dialog v-model="dialog" max-width="400" persistent>
           <template v-slot:activator="{ props: activatorProps }">
-            <v-icon class="me-2" size="small" v-bind="activatorProps"> mdi-delete </v-icon>
+            <v-btn
+              class="me-2"
+              size="small"
+              v-bind="activatorProps"
+              variant="text"
+              icon="mdi-delete"
+            ></v-btn>
           </template>
 
           <v-card
@@ -152,6 +165,7 @@ import AsyncDieCard from '@/components/AsyncDieCard.vue'
 import { useHttp } from '@/plugins/http'
 import Client from '@/plugins/http/openapi'
 import { onMounted, ref } from 'vue'
+import { toast } from 'vue3-toastify'
 
 const http = useHttp()
 const orders = ref<Client.Components.Schemas.Order[]>([])
@@ -167,7 +181,7 @@ const headers = [
   { title: 'Quantità (m)', key: 'quantity' },
   { title: 'Descrizione', key: 'description' },
   { title: 'Stato', key: 'status' },
-  { title: 'Actions', key: 'actions', sortable: false },
+  { title: 'Actions', key: 'actions', sortable: false }
 ]
 const statusMapper: { [key: string]: any } = {
   TODO: {
@@ -292,10 +306,18 @@ async function updateOrderStatus(
 
 function onSubmit() {}
 
-function editOrder(id?: string) {}
-
-function deleteOrder(id?: string) {
+async function deleteOrder(id?: string) {
   dialog.value = false
+
+  if (!id) {
+    toast.warning("Impossibile elimianre l'ordine: l'ID non esiste")
+    return
+  }
+  const client = await http.client
+  const res = await client.deleteOrder({ id })
+  if (res?.status == 200) {
+    toast.success("L'ordine è stato eliminato!")
+  }
 }
 
 onMounted(() => loadOrders())
