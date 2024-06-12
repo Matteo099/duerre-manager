@@ -58,12 +58,10 @@
 </template>
 
 <script setup lang="ts">
-import DieEditCard from '@/components/die/DieEditCard.vue'
+import { Utils } from '@/model/utils';
 import { useHttp } from '@/plugins/http'
-import Client from '@/plugins/http/openapi'
 import { useForm, type GenericObject, type InvalidSubmissionContext } from 'vee-validate'
-import { computed } from 'vue'
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import * as yup from 'yup'
 
 interface FieldProp {
@@ -209,7 +207,7 @@ async function loadOrder(id?: string) {
   customer.value = order.customer?.name
   quantity.value = order.quantity
   description.value = order.description
-  expirationDate.value = order.expirationDate
+  expirationDate.value = order.expirationDate ? Utils.toDate(order.expirationDate) : undefined;
 }
 
 async function loadCustomers() {

@@ -13,6 +13,7 @@ import org.jboss.logging.Logger;
 import com.github.matteo099.utils.FileUtils;
 import com.github.matteo099.utils.ProcessUtils;
 
+import io.quarkus.runtime.Quarkus;
 import io.smallrye.mutiny.Multi;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -110,14 +111,13 @@ public class UpdaterService {
                 throw new Exception("No exe file found");
             }
         } else {
-            // download jar (zip)
+            // download jar
             logger.info("Start downloading jar file...");
-            var optZip = release.getAssets().stream()
-                    .filter(a -> a.getContent_type().equals("application/x-zip-compressed")).findFirst();
-            if (optZip.isPresent()) {
-                var zip = optZip.get();
-                zip.download(tmpPath, updateStatus);
-                zip.unzip(null);
+            var optJar = release.getAssets().stream()
+                    .filter(a -> a.getContent_type().equals("application/java-archive")).findFirst();
+            if (optJar.isPresent()) {
+                var jar = optJar.get();
+                jar.download(tmpPath, updateStatus);
             } else {
                 logger.warn("Jar file not found for download...");
                 throw new Exception("No jar file found");
@@ -128,16 +128,17 @@ public class UpdaterService {
     private void startTempApplication(String version) throws IOException, InterruptedException {
         ProcessUtils.setInfoLogger(logger::info);
         final var updateDir = Paths.get(Updater.UPDATE_DIRECTORY);
-        
+
         if (ProcessUtils.isWindows()) {
-            final var tmpApp = FileUtils.buildFileName(version, "exe");
+            final var tmpApp = Updater.getFileName("exe");
             logger.info("Starting temp application = " + tmpApp);
 
             ProcessUtils.executeCommand(updateDir.resolve(tmpApp).toAbsolutePath().toString(), updateDir);
         } else {
-            final var tmpApp = FileUtils.buildFileName(version, "jar");
+            final var tmpApp = Updater.getFileName("jar");
             logger.info("Starting temp application = " + tmpApp);
-            ProcessUtils.executeCommand("java -jar " + updateDir.resolve(tmpApp).toAbsolutePath().toString(), updateDir);
+            ProcessUtils.executeCommand("java -jar " + updateDir.resolve(tmpApp).toAbsolutePath().toString(),
+                    updateDir);
         }
     }
 
@@ -158,6 +159,8 @@ public class UpdaterService {
     }
 
     private void forceStopApplication(Long millis) {
+        Quarkus.asyncExit();
+        logger.info("Quarkus.asyncExit() called");
         new Thread(new Runnable() {
             @Override
             public void run() {

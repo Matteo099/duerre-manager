@@ -1,0 +1,16 @@
+[Unit]
+Description=Duerre Manager Service
+After=network.target mongod.service
+Requires=mongod.service
+
+[Service]
+Type=simple
+WorkingDirectory=/home/server/duerre-manager
+ExecStart=/bin/java -jar /home/server/duerre-manager/duerre-manager-runner.jar
+Restart=no
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=duerre-manager
+
+[Install]
+WantedBy=multi-user.target

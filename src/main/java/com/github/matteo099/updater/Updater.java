@@ -24,7 +24,10 @@ public class Updater {
 
     public static final String UPDATE_DIRECTORY = "tmp";
     public static final String BACKUP_DIRECTORY = "backup";
+    public static final String APP_NAME = "duerre-manager-runner";
     public static final int QUARKUS_PORT = 8079;
+    public static final int MAX_TRY_NUMBER = 10;
+    public static final int MS_SLEEP_BETWEEN_TRIES = 1000;
 
     private static String fileName;
     private static boolean backupDone = false;
@@ -41,19 +44,28 @@ public class Updater {
     }
 
     /**
-     * 1. Check for running quakus application (listen for app on port 8080)
+     * 1. Check for running quakus application (listen for app on port QUARKUS_PORT)
      * excluding myself
      * 2. copy the temp file in the main directory, overwrite the files
      * 3. start the other app
      * 4. stop this app
      */
     public static void start() {
+        int tryNumber = 0;
         try {
             // Step 1: Check for running Quarkus application (excluding myself)
-            if (isQuarkusRunning()) {
-                LoggerUtils.instance.info("Another quarkus application is running, stopping it!");
+            while (isQuarkusRunning()) {
+                if (tryNumber >= MAX_TRY_NUMBER)
+                    throw new Exception("Maximum try to stop quarkus app reached (" + MAX_TRY_NUMBER + ")");
+                LoggerUtils.instance
+                        .info("Another quarkus application is running, try stopping it! (try number " + tryNumber + "/"
+                                + MAX_TRY_NUMBER + ")");
                 // stop the quarkus running process
                 stopRunningQuarkusApp();
+                tryNumber++;
+                LoggerUtils.instance
+                        .info("Sleeping " + MS_SLEEP_BETWEEN_TRIES + " ms before proceeding");
+                Thread.sleep(MS_SLEEP_BETWEEN_TRIES);
             }
 
             // Step 2: Create a backup and copy the temp files to the main directory
@@ -68,6 +80,7 @@ public class Updater {
                 if (backupDone)
                     restoreBackup();
                 startOldApp();
+                LoggerUtils.instance.info("Unable to perform upgrade of application. MANUAL UPDATE REQUIRED!");
             } catch (Exception e2) {
                 LoggerUtils.instance.exception(e2);
                 LoggerUtils.instance.info("Unable to start application. MANUAL TROUBLESHOOTING REQUIRED!");
@@ -97,8 +110,9 @@ public class Updater {
         ProcessBuilder killProcessBuilder = null;
 
         if (ProcessUtils.isWindows()) {
-            // Attempt to find and kill the process using port 8080 on Windows
-            ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe", "/c", "netstat -aon | find \"8080\"");
+            // Attempt to find and kill the process using port QUARKUS_PORT on Windows
+            ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe", "/c",
+                    "netstat -aon | find \"" + QUARKUS_PORT + "\"");
             Process process = processBuilder.start();
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;
@@ -107,7 +121,8 @@ public class Updater {
                         String[] parts = line.trim().split("\\s+");
                         if (parts.length >= 5) {
                             String pid = parts[4];
-                            LoggerUtils.instance.info("Stopping application on port 8080 with pid=" + pid);
+                            LoggerUtils.instance
+                                    .info("Stopping application on port " + QUARKUS_PORT + " with pid=" + pid);
                             // Kill the process
                             killProcessBuilder = new ProcessBuilder("taskkill", "/F", "/PID", pid);
                         }
@@ -115,8 +130,8 @@ public class Updater {
                 }
             }
         } else {
-            // Attempt to find and kill the process using port 8080
-            ProcessBuilder processBuilder = new ProcessBuilder("lsof", "-ti", ":8080");
+            // Attempt to find and kill the process using port QUARKUS_PORT
+            ProcessBuilder processBuilder = new ProcessBuilder("lsof", "-ti", ":" + QUARKUS_PORT);
             Process process = processBuilder.start();
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String pid = reader.readLine();
@@ -134,7 +149,8 @@ public class Updater {
             LoggerUtils.instance.info("Stopping app, ret code=" + retCode);
         } else {
             LoggerUtils.instance
-                    .info("Unable to stop application... no app found on port 8080; maybe is already dead!");
+                    .info("Unable to stop application... no app found on port " + QUARKUS_PORT
+                            + "; maybe is already dead!");
         }
     }
 
@@ -326,5 +342,9 @@ public class Updater {
         } catch (IOException e) {
             LoggerUtils.instance.exception(e);
         }
+    }
+
+    public static String getFileName(String extension) {
+        return APP_NAME + "." + extension;
     }
 }
