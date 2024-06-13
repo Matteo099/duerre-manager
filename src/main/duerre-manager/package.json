@@ -18,6 +18,7 @@
     "apigenurl": "npx openapicmd typegen http://localhost:8079/q/openapi?format=json > ./src/plugins/http/openapi.d.ts"
   },
   "dependencies": {
+    "@amcharts/amcharts5": "^5.9.12",
     "@vee-validate/yup": "^4.12.6",
     "axios": "^1.6.8",
     "konva": "^9.3.6",
