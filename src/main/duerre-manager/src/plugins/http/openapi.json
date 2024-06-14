@@ -355,6 +355,93 @@
         }
       }
     },
+    "/api/v1/metric-controller/cpu" : {
+      "get" : {
+        "tags" : [ "Metric Resource" ],
+        "operationId" : "getCPU",
+        "responses" : {
+          "200" : {
+            "description" : "Return cpu usage (0 - 100)",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Metric"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Unable to compute CPU usage",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorWrapper"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/metric-controller/hdd" : {
+      "get" : {
+        "tags" : [ "Metric Resource" ],
+        "operationId" : "getHDD",
+        "responses" : {
+          "200" : {
+            "description" : "Return hdd usage (0 - 100)",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Metric"
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Unable to compute HDD usage",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorWrapper"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/metric-controller/ram" : {
+      "get" : {
+        "tags" : [ "Metric Resource" ],
+        "operationId" : "getRAM",
+        "responses" : {
+          "200" : {
+            "description" : "Return ram usage (0 - 100)",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Metric"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Unable to compute RAM usage",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorWrapper"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/order-controller/change-order-status/{id}/{status}" : {
       "put" : {
         "tags" : [ "Order Resource" ],
@@ -1034,6 +1121,22 @@
         "type" : "object",
         "properties" : {
           "message" : { }
+        }
+      },
+      "Metric" : {
+        "type" : "object",
+        "properties" : {
+          "max" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "usage" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "description" : {
+            "type" : "string"
+          }
         }
       },
       "ObjectId" : {

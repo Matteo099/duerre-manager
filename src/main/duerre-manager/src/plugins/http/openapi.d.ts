@@ -130,6 +130,11 @@ declare namespace Components {
         export interface MessageWrapper {
             message?: any;
         }
+        export interface Metric {
+            max?: number; // double
+            usage?: number; // double
+            description?: string;
+        }
         export interface ObjectId {
             timestamp?: number; // int32
             counter?: number; // int32
@@ -289,6 +294,12 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorWrapper;
         }
     }
+    namespace GetCPU {
+        namespace Responses {
+            export type $200 = Components.Schemas.Metric;
+            export type $500 = Components.Schemas.ErrorWrapper;
+        }
+    }
     namespace GetDie {
         namespace Parameters {
             export type Id = string;
@@ -302,6 +313,12 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorWrapper;
         }
     }
+    namespace GetHDD {
+        namespace Responses {
+            export type $200 = Components.Schemas.Metric[];
+            export type $500 = Components.Schemas.ErrorWrapper;
+        }
+    }
     namespace GetOrder {
         namespace Parameters {
             export type Id = string;
@@ -312,6 +329,12 @@ declare namespace Paths {
         namespace Responses {
             export type $200 = Components.Schemas.Order;
             export type $404 = Components.Schemas.ErrorWrapper;
+            export type $500 = Components.Schemas.ErrorWrapper;
+        }
+    }
+    namespace GetRAM {
+        namespace Responses {
+            export type $200 = Components.Schemas.Metric;
             export type $500 = Components.Schemas.ErrorWrapper;
         }
     }
@@ -450,6 +473,30 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetSearches.Responses.$200>
+  /**
+   * getCPU
+   */
+  'getCPU'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetCPU.Responses.$200>
+  /**
+   * getHDD
+   */
+  'getHDD'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetHDD.Responses.$200>
+  /**
+   * getRAM
+   */
+  'getRAM'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetRAM.Responses.$200>
   /**
    * changeOrderStatus
    */
@@ -630,6 +677,36 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetSearches.Responses.$200>
+  }
+  ['/api/v1/metric-controller/cpu']: {
+    /**
+     * getCPU
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetCPU.Responses.$200>
+  }
+  ['/api/v1/metric-controller/hdd']: {
+    /**
+     * getHDD
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetHDD.Responses.$200>
+  }
+  ['/api/v1/metric-controller/ram']: {
+    /**
+     * getRAM
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetRAM.Responses.$200>
   }
   ['/api/v1/order-controller/change-order-status/{id}/{status}']: {
     /**
