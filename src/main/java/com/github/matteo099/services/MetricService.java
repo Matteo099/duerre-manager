@@ -58,7 +58,7 @@ public class MetricService {
             // System.out.printf("usable %.3f GB\n", size);
             // System.out.printf("total %.3f GB\n", tot);
             // System.out.printf("free %.3f GB\n", free);
-            list.add(Metric.builder().usage(size).description("").build());
+            list.add(Metric.builder().usage(size).max(tot).description(path.toString()).build());
         }
 
         return list;

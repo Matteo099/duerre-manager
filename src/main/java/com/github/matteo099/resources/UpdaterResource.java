@@ -62,9 +62,11 @@ public class UpdaterResource {
             @APIResponse(responseCode = "500", description = "Unable to check for updates", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorWrapper.class)))
     })
     public Response checkForUpdates() {
-        logger.info("checkForUpdates");
+        logger.info("Check for updates...");
         try {
             var updateAvailable = updaterService.updateAvailable();
+            logger.info(updateAvailable.isAvailable() ? "Update available! (" + updateAvailable.getVersion() + ")"
+                    : "Up to date!");
             return Response.ok().entity(updateAvailable).build();
         } catch (Exception e) {
             e.printStackTrace();
@@ -90,7 +92,6 @@ public class UpdaterResource {
         }
     }
 
-    
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/ack-error")
@@ -109,7 +110,9 @@ public class UpdaterResource {
     @Path("/sse")
     @RestStreamElementType(MediaType.APPLICATION_JSON)
     // @APIResponses({
-    //     @APIResponse(responseCode = "200", description = "Check if update is available", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Boolean.class))),
+    // @APIResponse(responseCode = "200", description = "Check if update is
+    // available", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema
+    // = @Schema(implementation = Boolean.class))),
     // })
     public Multi<UpdateStatus> updateProgress() {
         try {

@@ -71,12 +71,31 @@ function setupChart() {
     'bullet',
     am5xy.AxisBullet.new(root, {
       sprite: am5radar.ClockHand.new(root, {
-        radius: am5.percent(99)
+        pinRadius: am5.percent(20),
+        radius: am5.percent(99),
+        bottomWidth: 20
       })
     })
   )
 
+  let label = chart.radarContainer.children.push(
+    am5.Label.new(root, {
+      fill: am5.color(0xffffff),
+      centerX: am5.percent(50),
+      textAlign: 'center',
+      centerY: am5.percent(50),
+      fontSize: '3em'
+    })
+  )
+  bullet.get('sprite').on('rotation', () => {
+    let value = axisDataItem.get('value') ?? 0
+    let text = Math.round(value).toString()
+    label.set('text', text)
+  })
+
   xAxis.createAxisRange(axisDataItem)
+  
+  updateChart();
 
   axisDataItem.get('grid')?.set('visible', false)
   chart.appear(1000, 100)

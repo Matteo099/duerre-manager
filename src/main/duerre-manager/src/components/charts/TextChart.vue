@@ -8,11 +8,11 @@
 </template>
 
 <script setup lang="ts">
-interface PercentageProps {
+interface TextChartProps {
   value: string
   unit?: string
 }
 
-const value = defineProps<PercentageProps>()
+const value = defineProps<TextChartProps>()
 
 </script>

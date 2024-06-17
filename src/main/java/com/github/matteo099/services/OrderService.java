@@ -1,9 +1,14 @@
 package com.github.matteo099.services;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
 
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
 import com.github.matteo099.exceptions.DieAlreadyExists;
@@ -11,6 +16,11 @@ import com.github.matteo099.model.entities.Customer;
 import com.github.matteo099.model.entities.Order;
 import com.github.matteo099.model.entities.OrderStatus;
 import com.github.matteo099.model.interfaces.IOrder;
+import com.github.matteo099.model.projections.OrderAggregationResult;
+import com.mongodb.client.model.Accumulators;
+import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Sorts;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -74,5 +84,49 @@ public class OrderService {
 
     public boolean deleteOrder(ObjectId id) {
         return Order.deleteById(id);
+    }
+
+    public List<OrderAggregationResult> getDistribution() {
+        Bson groupStage = Aggregates.group("$status", Accumulators.sum("count", 1));
+        List<Bson> pipeline = Arrays.asList(groupStage);
+        var aggregation = Order.mongoCollection().aggregate(pipeline, OrderAggregationResult.class);
+        return StreamSupport.stream(aggregation.spliterator(), false).toList();
+    }
+
+    /**
+     * Compute the top n order more requested (same dieName) in a range date
+     * interval
+     * 
+     * @param n
+     * @param from
+     * @param to
+     * @return
+     */
+    public List<OrderAggregationResult> getTop(int n, Date from, Date to) {
+        List<Bson> pipeline = new LinkedList<>();
+        
+        // fiter by date interval
+        if (from != null || to != null) {
+            var allFilters = new LinkedList<Bson>();
+            if(from != null) allFilters.add(Filters.gte("creationDate", from));
+            if(to != null) allFilters.add(Filters.lte("creationDate", to));
+            Bson filterStage = Aggregates.match(Filters.and(allFilters));
+            pipeline.add(filterStage);
+        }
+
+        // group by dieName and count the occourences
+        Bson groupStage = Aggregates.group("$dieName", Accumulators.sum("count", 1));
+        pipeline.add(groupStage);
+
+        // sort by count
+        Bson sortStage = Aggregates.sort(Sorts.descending("count"));
+        pipeline.add(sortStage);
+
+        // get first n results
+        Bson limitStage = Aggregates.limit(n);
+        pipeline.add(limitStage);
+
+        var aggregation = Order.mongoCollection().aggregate(pipeline, OrderAggregationResult.class);
+        return StreamSupport.stream(aggregation.spliterator(), false).toList();
     }
 }
