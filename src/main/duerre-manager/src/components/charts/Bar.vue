@@ -4,12 +4,11 @@
 
 <script setup lang="ts">
 import * as am5 from '@amcharts/amcharts5'
-import * as am5percent from '@amcharts/amcharts5/percent'
-import * as am5xy from '@amcharts/amcharts5/xy'
 import am5themes_Animated from '@amcharts/amcharts5/themes/Animated'
+import * as am5xy from '@amcharts/amcharts5/xy'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 interface GaugeProps {
-  value: { id: string; count: number }[]
+  value: { id?: string; count?: number }[]
 }
 
 const value = defineProps<GaugeProps>()
@@ -103,6 +102,41 @@ function setupChart() {
 
   series.columns.template.adapters.add('stroke', function (stroke, target) {
     return chart.get('colors')?.getIndex(series.columns.indexOf(target))
+  })
+
+  // Create modal for a "no data" note
+  let modal = am5.Modal.new(root, {
+    content: 'Nessun dato disponibile'
+  })
+
+  series.events.on('datavalidated', function (ev) {
+    let series = ev.target
+    if (ev.target.data.length < 1) {
+      // Generate placeholder data
+      let categoryField = 'id'
+      let valueField = 'count'
+      let placeholder = []
+      for (let i = 0; i < 3; i++) {
+        let item: any = {}
+        item[categoryField] = i.toString()
+        item[valueField] = i+1
+        placeholder.push(item)
+      }
+      xAxis.data.setAll(placeholder)
+      series.data.setAll(placeholder)
+
+      // Disable ticks/labels
+      // series.columns.template.set('forceHidden', true)
+
+      // Show modal
+      modal.open()
+    } else {
+      // Re-enable ticks/labels
+      // series.columns.template.set('forceHidden', false)
+
+      // Hide modal
+      modal.close()
+    }
   })
 
   updateChart()

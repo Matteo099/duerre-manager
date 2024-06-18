@@ -176,6 +176,10 @@ declare namespace Components {
             duration?: number; // int64
             orderId?: string;
         }
+        export interface OrderAggregationResult {
+            id?: string;
+            count?: number; // int32
+        }
         export interface OrderDao {
             dieName?: string;
             customer?: string;
@@ -332,6 +336,12 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorWrapper;
         }
     }
+    namespace GetOrderDistribution {
+        namespace Responses {
+            export type $200 = Components.Schemas.OrderAggregationResult[];
+            export type $500 = Components.Schemas.ErrorWrapper;
+        }
+    }
     namespace GetRAM {
         namespace Responses {
             export type $200 = Components.Schemas.Metric;
@@ -347,6 +357,12 @@ declare namespace Paths {
         }
         namespace Responses {
             export type $200 = Components.Schemas.DieSearch[];
+            export type $500 = Components.Schemas.ErrorWrapper;
+        }
+    }
+    namespace GetTopOrders {
+        namespace Responses {
+            export type $200 = Components.Schemas.OrderAggregationResult[];
             export type $500 = Components.Schemas.ErrorWrapper;
         }
     }
@@ -490,6 +506,14 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetHDD.Responses.$200>
   /**
+   * getOrderDistribution
+   */
+  'getOrderDistribution'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetOrderDistribution.Responses.$200>
+  /**
    * getRAM
    */
   'getRAM'(
@@ -497,6 +521,14 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetRAM.Responses.$200>
+  /**
+   * getTopOrders
+   */
+  'getTopOrders'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetTopOrders.Responses.$200>
   /**
    * changeOrderStatus
    */
@@ -698,6 +730,16 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetHDD.Responses.$200>
   }
+  ['/api/v1/metric-controller/order-distribution']: {
+    /**
+     * getOrderDistribution
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetOrderDistribution.Responses.$200>
+  }
   ['/api/v1/metric-controller/ram']: {
     /**
      * getRAM
@@ -707,6 +749,16 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetRAM.Responses.$200>
+  }
+  ['/api/v1/metric-controller/top-orders']: {
+    /**
+     * getTopOrders
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetTopOrders.Responses.$200>
   }
   ['/api/v1/order-controller/change-order-status/{id}/{status}']: {
     /**

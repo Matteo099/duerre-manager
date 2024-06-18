@@ -270,11 +270,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorWrapper'
-  /api/v1/metric-controller/orders:
+  /api/v1/metric-controller/order-distribution:
     get:
       tags:
       - Metric Resource
-      operationId: getOrders
+      operationId: getOrderDistribution
       responses:
         "200":
           description: Return orders distribution

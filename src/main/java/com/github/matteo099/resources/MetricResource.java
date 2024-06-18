@@ -91,12 +91,12 @@ public class MetricResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/orders")
+    @Path("/order-distribution")
     @APIResponses({
             @APIResponse(responseCode = "200", description = "Return orders distribution", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(type = SchemaType.ARRAY, implementation = OrderAggregationResult.class))),
             @APIResponse(responseCode = "500", description = "Unable to compute orders distribution", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorWrapper.class)))
     })
-    public Response getOrders() {
+    public Response getOrderDistribution() {
         try {
             logger.info("Computing order distribution");
             return Response.ok()
