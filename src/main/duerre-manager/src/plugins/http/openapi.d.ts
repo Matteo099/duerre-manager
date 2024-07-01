@@ -53,6 +53,10 @@ declare namespace Components {
              */
             LocalDateTime /* date-time */;
         }
+        export interface DieAggregationResult {
+            id?: string;
+            count?: number; // int32
+        }
         export interface DieDao {
             name?: string;
             dieData?: DieShapeExport;
@@ -317,6 +321,18 @@ declare namespace Paths {
             export type $500 = Components.Schemas.ErrorWrapper;
         }
     }
+    namespace GetDieDistributionByColor {
+        namespace Responses {
+            export type $200 = Components.Schemas.DieAggregationResult[];
+            export type $500 = Components.Schemas.ErrorWrapper;
+        }
+    }
+    namespace GetDieDistributionByMaterial {
+        namespace Responses {
+            export type $200 = Components.Schemas.DieAggregationResult[];
+            export type $500 = Components.Schemas.ErrorWrapper;
+        }
+    }
     namespace GetHDD {
         namespace Responses {
             export type $200 = Components.Schemas.Metric[];
@@ -363,6 +379,18 @@ declare namespace Paths {
     namespace GetTopOrders {
         namespace Responses {
             export type $200 = Components.Schemas.OrderAggregationResult[];
+            export type $500 = Components.Schemas.ErrorWrapper;
+        }
+    }
+    namespace GetTotalDiesCount {
+        namespace Responses {
+            export type $200 = number; // int64
+            export type $500 = Components.Schemas.ErrorWrapper;
+        }
+    }
+    namespace GetTotalOrdersCount {
+        namespace Responses {
+            export type $200 = number; // int64
             export type $500 = Components.Schemas.ErrorWrapper;
         }
     }
@@ -498,6 +526,30 @@ export interface OperationMethods {
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetCPU.Responses.$200>
   /**
+   * getDieDistributionByColor
+   */
+  'getDieDistributionByColor'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetDieDistributionByColor.Responses.$200>
+  /**
+   * getTotalDiesCount
+   */
+  'getTotalDiesCount'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetTotalDiesCount.Responses.$200>
+  /**
+   * getDieDistributionByMaterial
+   */
+  'getDieDistributionByMaterial'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetDieDistributionByMaterial.Responses.$200>
+  /**
    * getHDD
    */
   'getHDD'(
@@ -505,6 +557,14 @@ export interface OperationMethods {
     data?: any,
     config?: AxiosRequestConfig  
   ): OperationResponse<Paths.GetHDD.Responses.$200>
+  /**
+   * getTotalOrdersCount
+   */
+  'getTotalOrdersCount'(
+    parameters?: Parameters<UnknownParamsObject> | null,
+    data?: any,
+    config?: AxiosRequestConfig  
+  ): OperationResponse<Paths.GetTotalOrdersCount.Responses.$200>
   /**
    * getOrderDistribution
    */
@@ -720,6 +780,36 @@ export interface PathsDictionary {
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetCPU.Responses.$200>
   }
+  ['/api/v1/metric-controller/die-color-distribution']: {
+    /**
+     * getDieDistributionByColor
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetDieDistributionByColor.Responses.$200>
+  }
+  ['/api/v1/metric-controller/die-count']: {
+    /**
+     * getTotalDiesCount
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetTotalDiesCount.Responses.$200>
+  }
+  ['/api/v1/metric-controller/die-material-distribution']: {
+    /**
+     * getDieDistributionByMaterial
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetDieDistributionByMaterial.Responses.$200>
+  }
   ['/api/v1/metric-controller/hdd']: {
     /**
      * getHDD
@@ -729,6 +819,16 @@ export interface PathsDictionary {
       data?: any,
       config?: AxiosRequestConfig  
     ): OperationResponse<Paths.GetHDD.Responses.$200>
+  }
+  ['/api/v1/metric-controller/order-count']: {
+    /**
+     * getTotalOrdersCount
+     */
+    'get'(
+      parameters?: Parameters<UnknownParamsObject> | null,
+      data?: any,
+      config?: AxiosRequestConfig  
+    ): OperationResponse<Paths.GetTotalOrdersCount.Responses.$200>
   }
   ['/api/v1/metric-controller/order-distribution']: {
     /**

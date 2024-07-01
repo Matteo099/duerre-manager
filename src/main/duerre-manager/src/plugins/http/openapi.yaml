@@ -250,6 +250,65 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorWrapper'
+  /api/v1/metric-controller/die-color-distribution:
+    get:
+      tags:
+      - Metric Resource
+      operationId: getDieDistributionByColor
+      responses:
+        "200":
+          description: Return die distribution by color
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DieAggregationResult'
+        "500":
+          description: Unable to compute die distribution by color
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWrapper'
+  /api/v1/metric-controller/die-count:
+    get:
+      tags:
+      - Metric Resource
+      operationId: getTotalDiesCount
+      responses:
+        "200":
+          description: Return the count of the dies
+          content:
+            application/json:
+              schema:
+                format: int64
+                type: integer
+        "500":
+          description: Unable to compute the count of the dies
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWrapper'
+  /api/v1/metric-controller/die-material-distribution:
+    get:
+      tags:
+      - Metric Resource
+      operationId: getDieDistributionByMaterial
+      responses:
+        "200":
+          description: Return die distribution by material
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DieAggregationResult'
+        "500":
+          description: Unable to compute die distribution by material
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWrapper'
   /api/v1/metric-controller/hdd:
     get:
       tags:
@@ -266,6 +325,25 @@ paths:
                   $ref: '#/components/schemas/Metric'
         "500":
           description: Unable to compute HDD usage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWrapper'
+  /api/v1/metric-controller/order-count:
+    get:
+      tags:
+      - Metric Resource
+      operationId: getTotalOrdersCount
+      responses:
+        "200":
+          description: Return the count of the orders
+          content:
+            application/json:
+              schema:
+                format: int64
+                type: integer
+        "500":
+          description: Unable to compute the count of the orders
           content:
             application/json:
               schema:
@@ -625,6 +703,14 @@ components:
           type: number
         creationDate:
           $ref: '#/components/schemas/LocalDateTime'
+    DieAggregationResult:
+      type: object
+      properties:
+        id:
+          type: string
+        count:
+          format: int32
+          type: integer
     DieDao:
       type: object
       properties:

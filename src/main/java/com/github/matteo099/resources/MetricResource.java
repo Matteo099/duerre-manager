@@ -8,8 +8,10 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.jboss.logging.Logger;
 
 import com.github.matteo099.model.Metric;
+import com.github.matteo099.model.projections.DieAggregationResult;
 import com.github.matteo099.model.projections.OrderAggregationResult;
 import com.github.matteo099.model.wrappers.ErrorWrapper;
+import com.github.matteo099.services.DieService;
 import com.github.matteo099.services.MetricService;
 import com.github.matteo099.services.OrderService;
 
@@ -31,6 +33,9 @@ public class MetricResource {
 
     @Inject
     OrderService orderService;
+
+    @Inject
+    DieService dieService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -91,6 +96,25 @@ public class MetricResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/order-count")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Return the count of the orders", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Long.class))),
+            @APIResponse(responseCode = "500", description = "Unable to compute the count of the orders", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorWrapper.class)))
+    })
+    public Response getTotalOrdersCount() {
+        try {
+            logger.info("Computing the count of the orders");
+            return Response.ok()
+                    .entity(orderService.getCount())
+                    .build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.serverError().entity(ErrorWrapper.of(e)).build();
+        }
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/order-distribution")
     @APIResponses({
             @APIResponse(responseCode = "200", description = "Return orders distribution", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(type = SchemaType.ARRAY, implementation = OrderAggregationResult.class))),
@@ -121,6 +145,63 @@ public class MetricResource {
             logger.infof("Computing the top %d orders", n);
             return Response.ok()
                     .entity(orderService.getTop(n, null, null))
+                    .build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.serverError().entity(ErrorWrapper.of(e)).build();
+        }
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/die-count")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Return the count of the dies", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Long.class))),
+            @APIResponse(responseCode = "500", description = "Unable to compute the count of the dies", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorWrapper.class)))
+    })
+    public Response getTotalDiesCount() {
+        try {
+            logger.info("Computing the count of the dies");
+            return Response.ok()
+                    .entity(dieService.getCount())
+                    .build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.serverError().entity(ErrorWrapper.of(e)).build();
+        }
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/die-material-distribution")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Return die distribution by material", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(type = SchemaType.ARRAY, implementation = DieAggregationResult.class))),
+            @APIResponse(responseCode = "500", description = "Unable to compute die distribution by material", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorWrapper.class)))
+    })
+    public Response getDieDistributionByMaterial() {
+        try {
+            logger.info("Computing die distribution by material");
+            return Response.ok()
+                    .entity(dieService.getMaterialDistribution())
+                    .build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.serverError().entity(ErrorWrapper.of(e)).build();
+        }
+    }
+    
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/die-color-distribution")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Return die distribution by color", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(type = SchemaType.ARRAY, implementation = DieAggregationResult.class))),
+            @APIResponse(responseCode = "500", description = "Unable to compute die distribution by color", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ErrorWrapper.class)))
+    })
+    public Response getDieDistributionByColor() {
+        try {
+            logger.info("Computing die distribution by color");
+            return Response.ok()
+                    .entity(dieService.getTypeDistribution())
                     .build();
         } catch (Exception e) {
             e.printStackTrace();

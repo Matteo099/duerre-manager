@@ -129,4 +129,8 @@ public class OrderService {
         var aggregation = Order.mongoCollection().aggregate(pipeline, OrderAggregationResult.class);
         return StreamSupport.stream(aggregation.spliterator(), false).toList();
     }
+
+    public Long getCount() {
+        return Order.count();
+    }
 }

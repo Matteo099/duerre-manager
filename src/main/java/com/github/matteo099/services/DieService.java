@@ -2,11 +2,13 @@ package com.github.matteo099.services;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
@@ -22,11 +24,15 @@ import com.github.matteo099.model.entities.Die;
 import com.github.matteo099.model.entities.DieSearch;
 import com.github.matteo099.model.entities.DieType;
 import com.github.matteo099.model.entities.MaterialType;
+import com.github.matteo099.model.entities.Order;
 import com.github.matteo099.model.interfaces.IDie;
 import com.github.matteo099.model.interfaces.IDieSearch;
 import com.github.matteo099.model.projections.CompleteDieSearchResult;
+import com.github.matteo099.model.projections.DieAggregationResult;
 import com.github.matteo099.model.projections.IDieSearchResult;
 import com.github.matteo099.opencv.DieMatcher;
+import com.mongodb.client.model.Accumulators;
+import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 
 import io.quarkus.panache.common.Page;
@@ -210,5 +216,24 @@ public class DieService {
                     .build();
         }
 
+    }
+
+    public Long getCount() {
+        return Die.count();
+    }
+
+    public List<DieAggregationResult> getMaterialDistribution() {
+        return getDistribution("material");
+    }
+
+    public List<DieAggregationResult> getTypeDistribution() {
+        return getDistribution("dieType");
+    }
+
+    private List<DieAggregationResult> getDistribution(String field) {
+        Bson groupStage = Aggregates.group("$" + field, Accumulators.sum("count", 1));
+        List<Bson> pipeline = Arrays.asList(groupStage);
+        var aggregation = Order.mongoCollection().aggregate(pipeline, DieAggregationResult.class);
+        return StreamSupport.stream(aggregation.spliterator(), false).toList();
     }
 }
